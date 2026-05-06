@@ -95,7 +95,7 @@ class NavButton(Static):
     """
 
     def __init__(self, key: str, label: str, action: str) -> None:
-        super().__init__(f"[bold {UI_FG}]{key}[/] {label}")
+        super().__init__(f"[bold {UI_FG}]{key}[/]{label[1:]}")
         self._action = action
 
     def on_click(self) -> None:
