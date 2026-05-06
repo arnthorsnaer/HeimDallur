@@ -139,11 +139,8 @@ class InternetPanel(Widget):
         height: auto;
         background: {UI_BG2};
         border: solid {UI_BDR};
-        border-title-color: {UI_FG};
-        border-title-style: bold;
         padding: 0 1;
     }}
-    #inet-status-big {{ height: 1; text-style: bold; }}
     #inet-duration   {{ height: 1; }}
     #inet-summary    {{ height: 1; }}
     #inet-detail     {{ height: auto; display: none; padding-top: 1; }}
@@ -161,7 +158,6 @@ class InternetPanel(Widget):
         self._prev_status: ProbeStatus | None = None
 
     def compose(self) -> ComposeResult:
-        yield Label("", id="inet-status-big")
         yield Label("", id="inet-duration")
         yield Label("", id="inet-summary")
         with Vertical(id="inet-detail"):
@@ -207,10 +203,8 @@ class InternetPanel(Widget):
             self._status_word = sw
             self._status_color = c
 
-        icon = "✗" if ont.status == ProbeStatus.UNREACHABLE else "●"
-        self.query_one("#inet-status-big", Label).update(
-            f"[bold {c}]{icon} {sw.upper()}[/]"
-        )
+        self.styles.border = ("solid", c)
+        self.border_title = f"[bold {c}]INTERNET · {sw.upper()}[/]"
 
         if self._status_since:
             elapsed = time.time() - self._status_since
@@ -260,11 +254,8 @@ class RouterPanel(Widget):
         height: auto;
         background: {UI_BG2};
         border: solid {UI_BDR};
-        border-title-color: {UI_FG};
-        border-title-style: bold;
         padding: 0 1;
     }}
-    #rtr-status-big {{ height: 1; text-style: bold; }}
     #rtr-duration   {{ height: 1; }}
     #rtr-summary    {{ height: 1; }}
     #rtr-detail     {{ height: auto; display: none; padding-top: 1; }}
@@ -283,7 +274,6 @@ class RouterPanel(Widget):
         self._lat_hist: list[float] = []
 
     def compose(self) -> ComposeResult:
-        yield Label("", id="rtr-status-big")
         yield Label("", id="rtr-duration")
         yield Label("", id="rtr-summary")
         with Vertical(id="rtr-detail"):
@@ -329,10 +319,8 @@ class RouterPanel(Widget):
             self._status_word = sw
             self._status_color = c
 
-        icon = "✗" if rtr.status == ProbeStatus.UNREACHABLE else "●"
-        self.query_one("#rtr-status-big", Label).update(
-            f"[bold {c}]{icon} {sw.upper()}[/]"
-        )
+        self.styles.border = ("solid", c)
+        self.border_title = f"[bold {c}]ROUTER · {sw.upper()}[/]"
 
         if self._status_since:
             elapsed = time.time() - self._status_since
