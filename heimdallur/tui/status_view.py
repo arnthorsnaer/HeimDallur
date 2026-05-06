@@ -67,6 +67,12 @@ def _issue_color(issue: str) -> str:
         return S_ERR
     return S_WARN
 
+def _rolling_avg(data: list[float], n: int = 10) -> float | None:
+    if not data:
+        return None
+    window = data[-n:]
+    return sum(window) / len(window)
+
 
 # ── Nav button (touch + keyboard) ──────────────────────────────
 class NavButton(Static):
@@ -129,32 +135,62 @@ class HeaderBar(Widget):
 class InternetPanel(Widget):
     DEFAULT_CSS = f"""
     InternetPanel {{
-        width: 1fr; height: 6;
+        width: 1fr;
+        height: auto;
         background: {UI_BG2};
         border: solid {UI_BDR};
         border-title-color: {UI_FG};
         border-title-style: bold;
         padding: 0 1;
-        layout: horizontal;
     }}
-    #inet-left  {{ width: 22; content-align: left top; }}
-    #inet-right {{ width: 1fr; content-align: left top; }}
-    InternetPanel .lbl {{ color: {UI_DIM}; height: 1; }}
-    InternetPanel .val {{ height: 1; }}
-    InternetPanel Sparkline {{ height: 2; margin-top: 1; }}
+    #inet-status-big {{ height: 1; text-style: bold; }}
+    #inet-duration   {{ height: 1; }}
+    #inet-summary    {{ height: 1; }}
+    #inet-detail     {{ height: auto; display: none; padding-top: 1; }}
+    #inet-lat-hdr    {{ height: 1; color: {UI_DIM}; }}
+    InternetPanel Sparkline {{ height: 3; }}
+    #inet-speed-full {{ height: 1; margin-top: 1; }}
     """
 
+    def __init__(self) -> None:
+        super().__init__()
+        self._expanded = False
+        self._status_since: float = 0.0
+        self._status_word: str = "—"
+        self._status_color: str = S_UNK
+        self._prev_status: ProbeStatus | None = None
+
     def compose(self) -> ComposeResult:
-        with Vertical(id="inet-left"):
-            yield Label("", id="inet-status", classes="val")
-            yield Label("", id="inet-ext",    classes="lbl")
-            yield Label("", id="inet-speed",  classes="val")
-        with Vertical(id="inet-right"):
-            yield Label("", id="inet-lat-lbl", classes="lbl")
+        yield Label("", id="inet-status-big")
+        yield Label("", id="inet-duration")
+        yield Label("", id="inet-summary")
+        with Vertical(id="inet-detail"):
+            yield Label("", id="inet-lat-hdr")
             yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-lat-spark")
+            yield Label("", id="inet-speed-full")
 
     def on_mount(self) -> None:
         self.border_title = "INTERNET"
+        self.border_subtitle = f"[{UI_DIM}]i ▾[/]"
+        self.set_interval(1, self._tick)
+
+    def toggle(self) -> None:
+        self._expanded = not self._expanded
+        self.query_one("#inet-detail").display = self._expanded
+        arrow = "▴" if self._expanded else "▾"
+        self.border_subtitle = f"[{UI_DIM}]i {arrow}[/]"
+
+    def on_click(self) -> None:
+        self.toggle()
+
+    def _tick(self) -> None:
+        if not self._status_since:
+            return
+        elapsed = time.time() - self._status_since
+        self.query_one("#inet-duration", Label).update(
+            f"[{self._status_color}]{self._status_word}[/]"
+            f" [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
+        )
 
     def update(self, state: NetworkState, config: NetworkConfig,
                ont_lat: list[float], ont_loss: list[float],
@@ -163,53 +199,120 @@ class InternetPanel(Widget):
         if not ont:
             return
         c = _sc(ont.status)
-        self.query_one("#inet-status", Label).update(
-            f"[{UI_DIM}]Status:[/]  [{c}]{_status_word(ont.status)}[/]"
+        sw = _status_word(ont.status)
+
+        if ont.status != self._prev_status:
+            self._prev_status = ont.status
+            self._status_since = time.time()
+            self._status_word = sw
+            self._status_color = c
+
+        icon = "✗" if ont.status == ProbeStatus.UNREACHABLE else "●"
+        self.query_one("#inet-status-big", Label).update(
+            f"[bold {c}]{icon} {sw.upper()}[/]"
         )
-        self.query_one("#inet-ext", Label).update(f"[{UI_DIM}]Probe: {config.ont_check_host}[/]")
+
+        if self._status_since:
+            elapsed = time.time() - self._status_since
+            self.query_one("#inet-duration", Label).update(
+                f"[{c}]{sw}[/] [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
+            )
+
+        avg_lat = _rolling_avg(ont_lat)
+        avg_str = (
+            f"[{UI_DIM}]Avg[/] [{c}]{avg_lat:.1f}ms[/]"
+            if avg_lat is not None else f"[{S_UNK}]Avg —[/]"
+        )
         if speed and speed.ok:
-            self.query_one("#inet-speed", Label).update(
-                f"[{S_OK}]{speed.download_mbps:.0f}[/][{UI_DIM}] Mbps[/]"
-                f"  [{UI_DIM}]ping {speed.ping_ms:.0f}ms[/]"
+            spd_str = (
+                f"  [{UI_DIM}]·  ↓[/] [{S_OK}]{speed.download_mbps:.0f}[/]"
+                f"[{UI_DIM}] Mbps[/]"
             )
         else:
-            self.query_one("#inet-speed", Label).update(f"[{UI_DIM}]Speed test pending…[/]")
-        cur = f"[{c}]{ont_lat[-1]:.1f}ms[/]" if ont_lat else f"[{S_UNK}]—[/]"
-        self.query_one("#inet-lat-lbl", Label).update(f"[{UI_DIM}]Latency[/]  {cur}")
+            spd_str = f"  [{UI_DIM}]·  speed pending[/]"
+        self.query_one("#inet-summary", Label).update(avg_str + spd_str)
+
+        cur_lat_str = f"{ont_lat[-1]:.1f}ms" if ont_lat else "—"
+        avg_lat_str = f"{avg_lat:.1f}ms" if avg_lat is not None else "—"
+        self.query_one("#inet-lat-hdr", Label).update(
+            f"[{UI_DIM}]Latency  current [/][{c}]{cur_lat_str}[/]"
+            f"[{UI_DIM}]  ·  avg {avg_lat_str}[/]"
+        )
         if ont_lat:
             self.query_one("#inet-lat-spark", Sparkline).data = ont_lat
+
+        if speed and speed.ok:
+            self.query_one("#inet-speed-full", Label).update(
+                f"[{UI_DIM}]↓[/] [{S_OK}]{speed.download_mbps:.0f} Mbps[/]"
+                f"  [{UI_DIM}]ping {speed.ping_ms:.0f}ms  ·  probe {config.ont_check_host}[/]"
+            )
+        else:
+            self.query_one("#inet-speed-full", Label).update(
+                f"[{UI_DIM}]Speed test pending  ·  probe {config.ont_check_host}[/]"
+            )
 
 
 # ── Router panel ───────────────────────────────────────────────
 class RouterPanel(Widget):
     DEFAULT_CSS = f"""
     RouterPanel {{
-        width: 1fr; height: 6;
+        width: 1fr;
+        height: auto;
         background: {UI_BG2};
         border: solid {UI_BDR};
         border-title-color: {UI_FG};
         border-title-style: bold;
         padding: 0 1;
-        layout: horizontal;
     }}
-    #rtr-left  {{ width: 22; content-align: left top; }}
-    #rtr-right {{ width: 1fr; content-align: left top; }}
-    RouterPanel .lbl {{ color: {UI_DIM}; height: 1; }}
-    RouterPanel .val {{ height: 1; }}
-    RouterPanel Sparkline {{ height: 2; margin-top: 1; }}
+    #rtr-status-big {{ height: 1; text-style: bold; }}
+    #rtr-duration   {{ height: 1; }}
+    #rtr-summary    {{ height: 1; }}
+    #rtr-detail     {{ height: auto; display: none; padding-top: 1; }}
+    #rtr-cpu-hdr    {{ height: 1; color: {UI_DIM}; }}
+    RouterPanel Sparkline {{ height: 3; }}
+    #rtr-stats-full {{ height: 1; margin-top: 1; }}
     """
 
+    def __init__(self) -> None:
+        super().__init__()
+        self._expanded = False
+        self._status_since: float = 0.0
+        self._status_word: str = "—"
+        self._status_color: str = S_UNK
+        self._prev_status: ProbeStatus | None = None
+        self._lat_hist: list[float] = []
+
     def compose(self) -> ComposeResult:
-        with Vertical(id="rtr-left"):
-            yield Label("", id="rtr-status",  classes="val")
-            yield Label("", id="rtr-lan",     classes="lbl")
-            yield Label("", id="rtr-uptime",  classes="lbl")
-        with Vertical(id="rtr-right"):
-            yield Label("", id="rtr-cpu-lbl", classes="lbl")
+        yield Label("", id="rtr-status-big")
+        yield Label("", id="rtr-duration")
+        yield Label("", id="rtr-summary")
+        with Vertical(id="rtr-detail"):
+            yield Label("", id="rtr-cpu-hdr")
             yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="rtr-cpu-spark")
+            yield Label("", id="rtr-stats-full")
 
     def on_mount(self) -> None:
         self.border_title = "ROUTER"
+        self.border_subtitle = f"[{UI_DIM}]r ▾[/]"
+        self.set_interval(1, self._tick)
+
+    def toggle(self) -> None:
+        self._expanded = not self._expanded
+        self.query_one("#rtr-detail").display = self._expanded
+        arrow = "▴" if self._expanded else "▾"
+        self.border_subtitle = f"[{UI_DIM}]r {arrow}[/]"
+
+    def on_click(self) -> None:
+        self.toggle()
+
+    def _tick(self) -> None:
+        if not self._status_since:
+            return
+        elapsed = time.time() - self._status_since
+        self.query_one("#rtr-duration", Label).update(
+            f"[{self._status_color}]{self._status_word}[/]"
+            f" [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
+        )
 
     def update(self, state: NetworkState, config: NetworkConfig,
                rtr_cpu: list[float], rtr_mem: list[float],
@@ -218,20 +321,65 @@ class RouterPanel(Widget):
         if not rtr:
             return
         c = _sc(rtr.status)
-        self.query_one("#rtr-status", Label).update(
-            f"[{UI_DIM}]Status:[/]  [{c}]{_status_word(rtr.status)}[/]"
+        sw = _status_word(rtr.status)
+
+        if rtr.status != self._prev_status:
+            self._prev_status = rtr.status
+            self._status_since = time.time()
+            self._status_word = sw
+            self._status_color = c
+
+        icon = "✗" if rtr.status == ProbeStatus.UNREACHABLE else "●"
+        self.query_one("#rtr-status-big", Label).update(
+            f"[bold {c}]{icon} {sw.upper()}[/]"
         )
-        self.query_one("#rtr-lan", Label).update(f"[{UI_DIM}]LAN: {config.router_ip}[/]")
-        if stats:
-            self.query_one("#rtr-uptime", Label).update(
-                f"[{UI_DIM}]Up:  {_fmt_uptime(stats.uptime_seconds)}[/]"
+
+        if self._status_since:
+            elapsed = time.time() - self._status_since
+            self.query_one("#rtr-duration", Label).update(
+                f"[{c}]{sw}[/] [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
             )
-            cpu_c = S_OK if stats.cpu_pct < 50 else (S_WARN if stats.cpu_pct < 80 else S_ERR)
-            self.query_one("#rtr-cpu-lbl", Label).update(
-                f"[{UI_DIM}]CPU[/]  [{cpu_c}]{stats.cpu_pct:.0f}%[/]"
-            )
+
+        if rtr.response_ms is not None:
+            self._lat_hist.append(rtr.response_ms)
+            if len(self._lat_hist) > 20:
+                self._lat_hist = self._lat_hist[-20:]
+
+        avg_lat = _rolling_avg(self._lat_hist)
+        avg_cpu = _rolling_avg(rtr_cpu)
+
+        lat_str = (
+            f"[{UI_DIM}]Avg latency[/] [{c}]{avg_lat:.1f}ms[/]"
+            if avg_lat is not None else f"[{S_UNK}]Avg latency —[/]"
+        )
+        if avg_cpu is not None:
+            cpu_c = S_OK if avg_cpu < 50 else (S_WARN if avg_cpu < 80 else S_ERR)
+            cpu_str = f"  [{UI_DIM}]·  CPU avg[/] [{cpu_c}]{avg_cpu:.0f}%[/]"
+        else:
+            cpu_str = ""
+        self.query_one("#rtr-summary", Label).update(lat_str + cpu_str)
+
+        cur_cpu_str = f"{rtr_cpu[-1]:.0f}%" if rtr_cpu else "—"
+        avg_cpu_str = f"{avg_cpu:.0f}%" if avg_cpu is not None else "—"
+        cpu_c2 = S_OK if (avg_cpu or 0) < 50 else (S_WARN if (avg_cpu or 0) < 80 else S_ERR)
+        self.query_one("#rtr-cpu-hdr", Label).update(
+            f"[{UI_DIM}]CPU  current [/][{cpu_c2}]{cur_cpu_str}[/]"
+            f"[{UI_DIM}]  ·  avg {avg_cpu_str}[/]"
+        )
         if rtr_cpu:
             self.query_one("#rtr-cpu-spark", Sparkline).data = rtr_cpu
+
+        if stats:
+            mem_c = S_OK if stats.memory_pct < 60 else (S_WARN if stats.memory_pct < 85 else S_ERR)
+            self.query_one("#rtr-stats-full", Label).update(
+                f"[{UI_DIM}]LAN {config.router_ip}  ·  Mem [/]"
+                f"[{mem_c}]{stats.memory_pct:.0f}%[/]"
+                f"  [{UI_DIM}]·  Up {_fmt_uptime(stats.uptime_seconds)}[/]"
+            )
+        else:
+            self.query_one("#rtr-stats-full", Label).update(
+                f"[{UI_DIM}]LAN {config.router_ip}[/]"
+            )
 
 
 # ── Group row ──────────────────────────────────────────────────
@@ -463,17 +611,19 @@ class StatusScreen(Screen):
     StatusScreen  {{ background: {UI_BG}; color: {UI_FG}; layout: vertical; }}
     #body         {{ height: 1fr; padding: 0 1; layout: vertical; }}
     StatusPanel   {{ margin-bottom: 1; }}
-    #inet-rtr-row {{ height: 6; layout: horizontal; margin-bottom: 1; }}
+    #inet-rtr-row {{ height: auto; layout: horizontal; margin-bottom: 1; }}
     InternetPanel {{ margin-right: 1; }}
     #groups-row   {{ height: 1fr; layout: horizontal; }}
     #panel-wifi   {{ margin-right: 1; }}
     """
 
     BINDINGS = [
-        ("h",     "switch_to_history", "History"),
-        ("d",     "switch_to_devices", "Devices"),
-        ("space", "toggle_status",     "Toggle Status"),
-        ("q",     "app.quit",          "Quit"),
+        ("h",     "switch_to_history",  "History"),
+        ("d",     "switch_to_devices",  "Devices"),
+        ("space", "toggle_status",      "Toggle Status"),
+        ("i",     "toggle_internet",    "Toggle Internet"),
+        ("r",     "toggle_router",      "Toggle Router"),
+        ("q",     "app.quit",           "Quit"),
     ]
 
     def __init__(self, config: NetworkConfig, start_time: float) -> None:
@@ -507,6 +657,12 @@ class StatusScreen(Screen):
 
     def action_toggle_status(self) -> None:
         self.query_one(StatusPanel).toggle()
+
+    def action_toggle_internet(self) -> None:
+        self.query_one(InternetPanel).toggle()
+
+    def action_toggle_router(self) -> None:
+        self.query_one(RouterPanel).toggle()
 
     def on_nav_button_pressed(self, msg: NavButton.Pressed) -> None:
         if msg.action == "history":
