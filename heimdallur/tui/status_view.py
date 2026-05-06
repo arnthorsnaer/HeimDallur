@@ -326,10 +326,14 @@ class InternetPanel(Widget):
             )
             self.query_one("#inet-summary", Label).update(avg_str + spd_str)
 
-        if not self._expanded or iq is None:
+        if iq is None:
             return
 
-        # ── Expanded: Raw IP section ────────────────────────────
+        # ── Detail rows ─────────────────────────────────────────
+        # Always rendered when iq data is available so toggling open
+        # shows current data immediately. Visibility is CSS-controlled.
+
+        # ── Raw IP section ──────────────────────────────────────
         ip_lines: list[str] = []
         for r in iq.raw_ip:
             rc  = _sc(r.status)
@@ -349,7 +353,7 @@ class InternetPanel(Widget):
             )
         self.query_one("#inet-ip-rows", Label).update("\n".join(ip_lines))
 
-        # ── Expanded: DNS section ───────────────────────────────
+        # ── DNS section ─────────────────────────────────────────
         dns_lines: list[str] = []
         for r in iq.dns:
             rc   = S_OK if r.success else S_ERR
@@ -374,18 +378,20 @@ class InternetPanel(Widget):
                 )
         self.query_one("#inet-dns-rows", Label).update("\n".join(dns_lines))
 
-        # ── Expanded: HTTP section ──────────────────────────────
+        # ── HTTP section ─────────────────────────────────────────
         self.query_one("#inet-http-meta", Label).update(
             f"[{UI_DIM}]{'':28}{'tcp':>8}{'tls':>8}{'ttfb':>8}{'total':>8}[/]"
         )
+
+        def _col(v: float | None) -> str:
+            return f"[{UI_FG}]{v:>5.0f}ms[/]" if v is not None else f"[{UI_DIM}]{'—':>6}[/]"
+
         http_lines: list[str] = []
         for r in iq.http:
             rc   = S_OK if r.success else S_ERR
             icon = "●" if r.success else "✗"
             sc_s = (f"[{rc}]{r.status_code}[/]" if r.status_code is not None
                     else f"[{S_ERR}]err[/]")
-            def _col(v: float | None) -> str:
-                return f"[{UI_FG}]{v:>5.0f}ms[/]" if v is not None else f"[{UI_DIM}]{'—':>6}[/]"
             http_lines.append(
                 f"[{rc}]{icon}[/] [{UI_FG}]{r.label:<11}[/]"
                 f" [{UI_DIM}]{r.short_path:<16}[/] {sc_s:<14}"
@@ -393,7 +399,7 @@ class InternetPanel(Widget):
             )
         self.query_one("#inet-http-rows", Label).update("\n".join(http_lines))
 
-        # ── Expanded: latency sparkline for primary IP target ───
+        # ── Latency sparkline for primary IP target ─────────────
         primary_hist = snapshot.inet_ip_lat.get("1.1.1.1", ont_lat)
         if primary_hist:
             avg_s = f"{_rolling_avg(primary_hist):.0f}ms" if _rolling_avg(primary_hist) else "—"
