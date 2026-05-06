@@ -54,6 +54,7 @@ async def _capture(svg_path: Path, keys: list[str]) -> None:
 
 
 def _svg_to_png(svg_path: Path, png_path: Path) -> None:
+    # Prefer rsvg-convert (librsvg2-bin) for highest fidelity; fall back to cairosvg.
     try:
         subprocess.run(
             ["rsvg-convert", "--dpi-x=144", "--dpi-y=144",
@@ -61,11 +62,24 @@ def _svg_to_png(svg_path: Path, png_path: Path) -> None:
             check=True, capture_output=True,
         )
         print(f"  PNG → {png_path.name}")
+        return
     except FileNotFoundError:
+        pass
+
+    try:
+        import cairosvg
+        cairosvg.svg2png(
+            url=str(svg_path),
+            write_to=str(png_path),
+            scale=2,
+        )
+        print(f"  PNG → {png_path.name}  (via cairosvg)")
+    except ImportError:
         sys.exit(
-            "rsvg-convert not found.\n"
+            "No SVG→PNG converter found.\n"
             "  Ubuntu/Debian: sudo apt-get install librsvg2-bin\n"
-            "  macOS:         brew install librsvg"
+            "  macOS:         brew install librsvg\n"
+            "  Any platform:  pip install cairosvg"
         )
 
 

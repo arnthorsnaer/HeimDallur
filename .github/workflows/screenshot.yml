@@ -3,6 +3,11 @@ name: UI Screenshots
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - "heimdallur/tui/**"
+      - "heimdallur/mock/**"
+      - "scripts/screenshot.py"
+      - "scripts/capture_all.py"
 
 permissions:
   contents: write        # push screenshot commits to PR branch
@@ -28,7 +33,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install package
-        run: pip install -e .
+        run: pip install -e . cairosvg
 
       - name: Generate all screenshots
         run: python scripts/capture_all.py --output-dir docs/screenshots
