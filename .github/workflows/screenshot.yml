@@ -89,12 +89,7 @@ jobs:
               "---",
               "## UI Screenshots",
               "",
-              "<details>",
-              "<summary>Click to expand all states</summary>",
-              "",
               rows,
-              "",
-              "</details>",
               "",
               `<sub>Auto-generated from mock data — updated on every push.</sub>`,
             ].join("\n");
