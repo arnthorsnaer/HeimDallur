@@ -3,18 +3,41 @@ name: UI Screenshots
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - "heimdallur/tui/**"
-      - "heimdallur/mock/**"
-      - "scripts/screenshot.py"
-      - "scripts/capture_all.py"
 
 permissions:
   contents: write        # push screenshot commits to PR branch
   pull-requests: write   # update PR description
 
 jobs:
+  check-ui-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      ui_changed: ${{ steps.check.outputs.ui_changed }}
+    steps:
+      - name: Check for UI file changes
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 100,
+            });
+            const patterns = [
+              /^heimdallur\/tui\//,
+              /^heimdallur\/mock\//,
+              /^scripts\/screenshot\.py$/,
+              /^scripts\/capture_all\.py$/,
+            ];
+            const changed = files.some(f => patterns.some(p => p.test(f.filename)));
+            core.setOutput('ui_changed', changed ? 'true' : 'false');
+            core.info(`UI files changed: ${changed}`);
+
   screenshots:
+    needs: check-ui-changes
+    if: needs.check-ui-changes.outputs.ui_changed == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -109,3 +132,42 @@ jobs:
             });
 
             core.info(`PR #${prNum} updated with ${captures.length} screenshots.`);
+
+  note-no-screenshots:
+    needs: check-ui-changes
+    if: needs.check-ui-changes.outputs.ui_changed == 'false'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Note no UI changes in PR description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner  = context.repo.owner;
+            const repo   = context.repo.repo;
+            const prNum  = context.issue.number;
+
+            const section = [
+              "",
+              "---",
+              "## UI Screenshots",
+              "",
+              "_No changes to TUI or mock files in this PR — screenshots not generated._",
+              "",
+            ].join("\n");
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner, repo, pull_number: prNum,
+            });
+
+            const marker = "\n---\n## UI Screenshots";
+            let body = pr.body ?? "";
+            body = body.includes(marker)
+              ? body.slice(0, body.indexOf(marker)) + section
+              : body + section;
+
+            await github.rest.pulls.update({
+              owner, repo, pull_number: prNum, body,
+            });
+
+            core.info(`PR #${prNum} updated with no-screenshots note.`);
