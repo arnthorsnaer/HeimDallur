@@ -8,6 +8,7 @@ from textual.screen import Screen
 from textual.widget import Widget
 from textual.widgets import Label, Sparkline, Static
 
+from heimdallur.version import __version__
 from heimdallur.core.topology import (
     Device, Group, NetworkConfig, NetworkState, ProbeStatus,
     GatewayEnrichment, RouterStats, SpeedResult,
@@ -186,7 +187,7 @@ class HeaderBar(Widget):
     def _tick(self) -> None:
         from datetime import datetime
         self.query_one("#hdr-right", Label).update(
-            f"v0.1.0   UP {_fmt_uptime(time.time() - self._start_time)}"
+            f"v{__version__}   UP {_fmt_uptime(time.time() - self._start_time)}"
             f"   {datetime.now().strftime('%H:%M:%S')}"
         )
 
