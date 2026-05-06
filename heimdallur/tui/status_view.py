@@ -41,7 +41,7 @@ def _sc(status: ProbeStatus | None) -> str:
 def _status_word(status: ProbeStatus | None) -> str:
     if status is None: return "—"
     return {ProbeStatus.HEALTHY: "Online", ProbeStatus.DEGRADED: "Degraded",
-            ProbeStatus.UNREACHABLE: "OFFLINE", ProbeStatus.UNKNOWN: "—"}[status]
+            ProbeStatus.UNREACHABLE: "Offline", ProbeStatus.UNKNOWN: "—"}[status]
 
 def _ms(v: float | None) -> str:
     return f"{v:.0f}ms" if v is not None else "—"
@@ -59,7 +59,11 @@ def _fmt_uptime(seconds: float) -> str:
     if h >= 24:
         d, h = divmod(h, 24)
         return f"{d}d {h}h {m:02d}m"
-    return f"{h}h {m:02d}m {s:02d}s"
+    if h:
+        return f"{h}h {m:02d}m {s:02d}s"
+    if m:
+        return f"{m}m {s:02d}s"
+    return f"{s}s"
 
 def _issue_color(issue: str) -> str:
     low = issue.lower()
