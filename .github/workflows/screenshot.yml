@@ -1,0 +1,93 @@
+name: UI Screenshot
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write        # push screenshot commit to PR branch
+  pull-requests: write   # update PR description
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          # Use a PAT or the default GITHUB_TOKEN.  The token needs
+          # "contents: write" to push back to the PR branch.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install system dependencies
+        run: sudo apt-get install -y librsvg2-bin
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: pip install -e .
+
+      - name: Generate screenshot
+        run: python scripts/screenshot.py docs/screenshot.png
+        env:
+          NETWATCH_MOCK: "1"
+
+      - name: Commit screenshot to PR branch
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add docs/screenshot.png
+          # Only commit when the image actually changed
+          if git diff --staged --quiet; then
+            echo "Screenshot unchanged, skipping commit."
+          else
+            git commit -m "chore: update UI screenshot [skip ci]"
+            git push
+          fi
+
+      - name: Update PR description with screenshot
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner  = context.repo.owner;
+            const repo   = context.repo.repo;
+            const prNum  = context.issue.number;
+            const branch = context.payload.pull_request.head.ref;
+
+            const imgUrl = [
+              "https://raw.githubusercontent.com",
+              owner, repo, branch,
+              "docs/screenshot.png"
+            ].join("/");
+
+            const section = [
+              "",
+              "---",
+              "## UI Preview",
+              `![Heimdallur status screen](${imgUrl})`,
+              `<sub>Auto-generated from mock data — updated on every push.</sub>`,
+            ].join("\n");
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner, repo, pull_number: prNum,
+            });
+
+            // Replace an existing section or append a new one
+            const marker = "\n---\n## UI Preview";
+            let body = pr.body ?? "";
+            if (body.includes(marker)) {
+              body = body.slice(0, body.indexOf(marker)) + section;
+            } else {
+              body = body + section;
+            }
+
+            await github.rest.pulls.update({
+              owner, repo, pull_number: prNum, body,
+            });
+
+            core.info(`PR #${prNum} description updated with screenshot.`);
