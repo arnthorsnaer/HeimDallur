@@ -81,10 +81,37 @@ class HeimdallurApp(App):
 
     async def on_mount(self) -> None:
         from heimdallur.tui.status_view import StatusScreen
+        from heimdallur.mock.network import MockProber
         await self._store.open()
         await self.push_screen(StatusScreen(self._config, self._start_time))
+        if isinstance(self._prober, MockProber):
+            self._seed_mock_history()
         self._probe_loop()
         self._speed_loop()
+
+    def _seed_mock_history(self) -> None:
+        import random
+
+        def _walk(start: float, lo: float, hi: float, step: float) -> list[float]:
+            v, out = start, []
+            for _ in range(_HIST):
+                v = max(lo, min(hi, v + random.uniform(-step, step)))
+                out.append(v)
+            return out
+
+        ont_ip = self._config.ont_check_host
+        rtr_ip = self._config.router_ip
+
+        for v in _walk(28.0, 12.0, 65.0, 7.0):
+            self._lat[ont_ip].append(v)
+            self._loss[ont_ip].append(0.0)
+        for v in _walk(1.5, 0.4, 5.0, 0.6):
+            self._lat[rtr_ip].append(v)
+            self._loss[rtr_ip].append(0.0)
+        for v in _walk(12.0, 3.0, 32.0, 4.0):
+            self._cpu.append(v)
+        for v in _walk(38.0, 24.0, 58.0, 3.0):
+            self._mem.append(v)
 
     async def on_unmount(self) -> None:
         await self._store.close()
