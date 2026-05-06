@@ -140,7 +140,7 @@ class InternetPanel(Widget):
     DEFAULT_CSS = f"""
     InternetPanel {{
         width: 1fr;
-        height: 1fr;
+        height: auto;
         background: {UI_BG2};
         border: solid {UI_BDR};
         padding: 0 1;
@@ -262,11 +262,12 @@ class HomeNetworkPanel(Widget):
     }}
     #hn-duration   {{ height: 1; }}
     #hn-summary    {{ height: 1; }}
-    #hn-detail     {{ height: 1fr; display: none; padding-top: 1; }}
+    #hn-detail     {{ height: auto; display: none; padding-top: 1; }}
     #hn-cpu-hdr    {{ height: 1; color: {UI_DIM}; }}
     HomeNetworkPanel Sparkline {{ height: 3; }}
     #hn-stats-full {{ height: 1; margin-top: 1; }}
-    #hn-wifi-hdr   {{ height: 1; color: {UI_DIM}; margin-top: 1; text-style: bold; }}
+    #hn-groups     {{ height: 1fr; padding-top: 1; }}
+    #hn-wifi-hdr   {{ height: 1; color: {UI_DIM}; text-style: bold; }}
     #hn-lan-hdr    {{ height: 1; color: {UI_DIM}; margin-top: 1; text-style: bold; }}
     """
 
@@ -285,10 +286,11 @@ class HomeNetworkPanel(Widget):
     def compose(self) -> ComposeResult:
         yield Label("", id="hn-duration")
         yield Label("", id="hn-summary")
-        with VerticalScroll(id="hn-detail"):
+        with Vertical(id="hn-detail"):
             yield Label("", id="hn-cpu-hdr")
             yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="hn-cpu-spark")
             yield Label("", id="hn-stats-full")
+        with VerticalScroll(id="hn-groups"):
             if self._wifi_groups:
                 yield Label("WI-FI", id="hn-wifi-hdr")
                 for group in self._wifi_groups:
@@ -519,42 +521,6 @@ class GroupRow(Widget):
         )
 
 
-# ── Groups panel (wifi or lan) ─────────────────────────────────
-class GroupsPanel(Widget):
-    DEFAULT_CSS = f"""
-    GroupsPanel {{
-        width: 1fr;
-        height: 1fr;
-        background: {UI_BG2};
-        border: solid {UI_BDR};
-        border-title-color: {UI_FG};
-        border-title-style: bold;
-        padding: 0 1;
-    }}
-    GroupsPanel VerticalScroll {{ height: 1fr; }}
-    """
-
-    def __init__(self, title: str, groups: list[Group], config: NetworkConfig) -> None:
-        safe = title.lower().replace(" ", "").replace("-", "")
-        super().__init__(id=f"panel-{safe}")
-        self._title = title
-        self._groups = groups
-        self._config = config
-
-    def compose(self) -> ComposeResult:
-        with VerticalScroll():
-            for group in self._groups:
-                devices = self._config.devices_in_group(group.id)
-                yield GroupRow(group, devices)
-
-    def on_mount(self) -> None:
-        self.border_title = self._title
-
-    def update(self, state: NetworkState, gw_enrichment: dict[str, GatewayEnrichment]) -> None:
-        for group in self._groups:
-            enr = gw_enrichment.get(group.gateway_ip) if group.gateway_ip else None
-            self.query_one(f"#grp-{group.id}", GroupRow).update(state, enr)
-
 
 # ── Footer ─────────────────────────────────────────────────────
 class FooterBar(Widget):
@@ -666,11 +632,10 @@ class StatusPanel(Widget):
 # ── Status screen ──────────────────────────────────────────────
 class StatusScreen(Screen):
     CSS = f"""
-    StatusScreen    {{ background: {UI_BG}; color: {UI_FG}; layout: vertical; }}
-    #body           {{ height: 1fr; padding: 0 1; layout: vertical; }}
-    StatusPanel     {{ margin-bottom: 1; }}
-    #inet-home-row  {{ height: 1fr; layout: horizontal; }}
-    InternetPanel   {{ margin-right: 1; }}
+    StatusScreen  {{ background: {UI_BG}; color: {UI_FG}; layout: vertical; }}
+    #body         {{ height: 1fr; padding: 0 1; layout: vertical; }}
+    StatusPanel   {{ margin-bottom: 1; }}
+    InternetPanel {{ margin-bottom: 1; }}
     """
 
     BINDINGS = [
@@ -691,9 +656,8 @@ class StatusScreen(Screen):
         yield HeaderBar(self._start_time)
         with Vertical(id="body"):
             yield StatusPanel()
-            with Horizontal(id="inet-home-row"):
-                yield InternetPanel()
-                yield HomeNetworkPanel(self._config)
+            yield InternetPanel()
+            yield HomeNetworkPanel(self._config)
         yield FooterBar()
 
     def update_state(self, enriched, snapshot) -> None:
