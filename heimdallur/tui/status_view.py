@@ -147,15 +147,13 @@ class InternetPanel(Widget):
     }}
     #inet-duration   {{ height: 1; }}
     #inet-summary    {{ height: 1; }}
-    #inet-detail     {{ height: auto; display: none; padding-top: 1; }}
-    #inet-lat-hdr    {{ height: 1; color: {UI_DIM}; }}
+    #inet-lat-hdr    {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
     InternetPanel Sparkline {{ height: 3; }}
     #inet-speed-full {{ height: 1; margin-top: 1; }}
     """
 
     def __init__(self) -> None:
         super().__init__()
-        self._expanded = False
         self._status_since: float = 0.0
         self._status_word: str = "—"
         self._status_color: str = S_UNK
@@ -164,24 +162,13 @@ class InternetPanel(Widget):
     def compose(self) -> ComposeResult:
         yield Label("", id="inet-duration")
         yield Label("", id="inet-summary")
-        with Vertical(id="inet-detail"):
-            yield Label("", id="inet-lat-hdr")
-            yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-lat-spark")
-            yield Label("", id="inet-speed-full")
+        yield Label("", id="inet-lat-hdr")
+        yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-lat-spark")
+        yield Label("", id="inet-speed-full")
 
     def on_mount(self) -> None:
         self.border_title = "INTERNET"
-        self.border_subtitle = f"[{UI_DIM}]i ▾[/]"
         self.set_interval(1, self._tick)
-
-    def toggle(self) -> None:
-        self._expanded = not self._expanded
-        self.query_one("#inet-detail").display = self._expanded
-        arrow = "▴" if self._expanded else "▾"
-        self.border_subtitle = f"[{UI_DIM}]i {arrow}[/]"
-
-    def on_click(self) -> None:
-        self.toggle()
 
     def _tick(self) -> None:
         if not self._status_since:
@@ -262,19 +249,19 @@ class HomeNetworkPanel(Widget):
     }}
     #hn-duration   {{ height: 1; }}
     #hn-summary    {{ height: 1; }}
-    #hn-detail     {{ height: auto; display: none; padding-top: 1; }}
-    #hn-cpu-hdr    {{ height: 1; color: {UI_DIM}; }}
+    #hn-cpu-hdr    {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
     HomeNetworkPanel Sparkline {{ height: 3; }}
     #hn-stats-full {{ height: 1; margin-top: 1; }}
-    #hn-groups     {{ height: 1fr; padding-top: 1; }}
+    #hn-groups     {{ height: 1fr; margin-top: 1; layout: horizontal; }}
+    #hn-wifi-col   {{ width: 1fr; margin-right: 1; }}
+    #hn-lan-col    {{ width: 1fr; }}
     #hn-wifi-hdr   {{ height: 1; color: {UI_DIM}; text-style: bold; }}
-    #hn-lan-hdr    {{ height: 1; color: {UI_DIM}; margin-top: 1; text-style: bold; }}
+    #hn-lan-hdr    {{ height: 1; color: {UI_DIM}; text-style: bold; }}
     """
 
     def __init__(self, config: NetworkConfig) -> None:
         super().__init__()
         self._config = config
-        self._expanded = False
         self._status_since: float = 0.0
         self._status_word: str = "—"
         self._status_color: str = S_UNK
@@ -286,17 +273,16 @@ class HomeNetworkPanel(Widget):
     def compose(self) -> ComposeResult:
         yield Label("", id="hn-duration")
         yield Label("", id="hn-summary")
-        with Vertical(id="hn-detail"):
-            yield Label("", id="hn-cpu-hdr")
-            yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="hn-cpu-spark")
-            yield Label("", id="hn-stats-full")
-        with VerticalScroll(id="hn-groups"):
-            if self._wifi_groups:
+        yield Label("", id="hn-cpu-hdr")
+        yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="hn-cpu-spark")
+        yield Label("", id="hn-stats-full")
+        with Horizontal(id="hn-groups"):
+            with VerticalScroll(id="hn-wifi-col"):
                 yield Label("WI-FI", id="hn-wifi-hdr")
                 for group in self._wifi_groups:
                     devices = self._config.devices_in_group(group.id)
                     yield GroupRow(group, devices)
-            if self._lan_groups:
+            with VerticalScroll(id="hn-lan-col"):
                 yield Label("LAN", id="hn-lan-hdr")
                 for group in self._lan_groups:
                     devices = self._config.devices_in_group(group.id)
@@ -304,17 +290,7 @@ class HomeNetworkPanel(Widget):
 
     def on_mount(self) -> None:
         self.border_title = "HOME NETWORK"
-        self.border_subtitle = f"[{UI_DIM}]n ▾[/]"
         self.set_interval(1, self._tick)
-
-    def toggle(self) -> None:
-        self._expanded = not self._expanded
-        self.query_one("#hn-detail").display = self._expanded
-        arrow = "▴" if self._expanded else "▾"
-        self.border_subtitle = f"[{UI_DIM}]n {arrow}[/]"
-
-    def on_click(self) -> None:
-        self.toggle()
 
     def _tick(self) -> None:
         if not self._status_since:
@@ -639,12 +615,10 @@ class StatusScreen(Screen):
     """
 
     BINDINGS = [
-        ("h",     "switch_to_history",   "History"),
-        ("d",     "switch_to_devices",   "Devices"),
-        ("space", "toggle_status",       "Toggle Status"),
-        ("i",     "toggle_internet",     "Toggle Internet"),
-        ("n",     "toggle_home_network", "Toggle Home Network"),
-        ("q",     "app.quit",            "Quit"),
+        ("h",     "switch_to_history", "History"),
+        ("d",     "switch_to_devices", "Devices"),
+        ("space", "toggle_status",     "Toggle Status"),
+        ("q",     "app.quit",          "Quit"),
     ]
 
     def __init__(self, config: NetworkConfig, start_time: float) -> None:
@@ -673,12 +647,6 @@ class StatusScreen(Screen):
 
     def action_toggle_status(self) -> None:
         self.query_one(StatusPanel).toggle()
-
-    def action_toggle_internet(self) -> None:
-        self.query_one(InternetPanel).toggle()
-
-    def action_toggle_home_network(self) -> None:
-        self.query_one(HomeNetworkPanel).toggle()
 
     def on_nav_button_pressed(self, msg: NavButton.Pressed) -> None:
         if msg.action == "history":
