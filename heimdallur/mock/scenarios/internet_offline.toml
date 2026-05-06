@@ -1,0 +1,4 @@
+# Internet probe unreachable → OFFLINE / red.
+# Router and LAN remain healthy (ISP/WAN problem, not local).
+[failures]
+"ont" = "down"

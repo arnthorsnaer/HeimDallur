@@ -1,0 +1,4 @@
+# Router unreachable → OFFLINE / red.
+# All gateways and devices cascade to UNKNOWN (router_offline cause).
+[failures]
+"router" = "down"

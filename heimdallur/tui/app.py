@@ -56,7 +56,12 @@ class HeimdallurApp(App):
 
         if os.getenv("NETWATCH_MOCK"):
             from heimdallur.mock.network import MockProber
-            self._prober = MockProber(self._config)
+            from pathlib import Path as _Path
+            _scenario = os.getenv("NETWATCH_MOCK_SCENARIO")
+            self._prober = MockProber(
+                self._config,
+                scenario_path=_Path(_scenario) if _scenario else None,
+            )
         else:
             from heimdallur.core.prober import Prober
             self._prober = Prober(self._config)
