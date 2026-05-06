@@ -251,7 +251,6 @@ class HomeNetworkPanel(Widget):
     #hn-summary    {{ height: 1; }}
     #hn-cpu-hdr    {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
     HomeNetworkPanel Sparkline {{ height: 3; }}
-    #hn-stats-full {{ height: 1; margin-top: 1; }}
     #hn-groups     {{ height: 1fr; margin-top: 1; layout: horizontal; }}
     #hn-wifi-col   {{ width: 1fr; margin-right: 1; }}
     #hn-lan-col    {{ width: 1fr; }}
@@ -275,15 +274,14 @@ class HomeNetworkPanel(Widget):
         yield Label("", id="hn-summary")
         yield Label("", id="hn-cpu-hdr")
         yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="hn-cpu-spark")
-        yield Label("", id="hn-stats-full")
         with Horizontal(id="hn-groups"):
             with VerticalScroll(id="hn-wifi-col"):
-                yield Label("WI-FI", id="hn-wifi-hdr")
+                yield Label("", id="hn-wifi-hdr")
                 for group in self._wifi_groups:
                     devices = self._config.devices_in_group(group.id)
                     yield GroupRow(group, devices)
             with VerticalScroll(id="hn-lan-col"):
-                yield Label("LAN", id="hn-lan-hdr")
+                yield Label("", id="hn-lan-hdr")
                 for group in self._lan_groups:
                     devices = self._config.devices_in_group(group.id)
                     yield GroupRow(group, devices)
@@ -376,16 +374,30 @@ class HomeNetworkPanel(Widget):
         wifi_ok = _groups_ok(self._wifi_groups)
         lan_ok  = _groups_ok(self._lan_groups)
 
-        lat_str = (
-            f"[{UI_DIM}]Router[/] [{rtr_c}]{avg_lat:.1f}ms[/]"
-            if avg_lat is not None else f"[{S_UNK}]Router —[/]"
-        )
         wifi_c = S_OK if wifi_ok == len(self._wifi_groups) else (S_WARN if wifi_ok > 0 else S_ERR)
         lan_c  = S_OK if lan_ok  == len(self._lan_groups)  else (S_WARN if lan_ok  > 0 else S_ERR)
+
+        # Router summary line: IP · latency · mem · uptime
+        lat_part = (
+            f"[{UI_DIM}]Latency[/] [{rtr_c}]{avg_lat:.1f}ms[/]"
+            if avg_lat is not None else f"[{S_UNK}]Latency —[/]"
+        )
+        if stats:
+            mem_c = S_OK if stats.memory_pct < 60 else (S_WARN if stats.memory_pct < 85 else S_ERR)
+            mem_part  = f"  [{UI_DIM}]·  Mem[/] [{mem_c}]{stats.memory_pct:.0f}%[/]"
+            up_part   = f"  [{UI_DIM}]·  Up[/] [{UI_DIM}]{_fmt_uptime(stats.uptime_seconds)}[/]"
+        else:
+            mem_part = up_part = ""
         self.query_one("#hn-summary", Label).update(
-            lat_str
-            + f"  [{UI_DIM}]·  WiFi[/] [{wifi_c}]{wifi_ok}/{len(self._wifi_groups)}[/]"
-            + f"  [{UI_DIM}]LAN[/] [{lan_c}]{lan_ok}/{len(self._lan_groups)}[/]"
+            f"[{UI_DIM}]Router ({config.router_ip})[/]  {lat_part}{mem_part}{up_part}"
+        )
+
+        # Section headers with counts
+        self.query_one("#hn-wifi-hdr", Label).update(
+            f"[{UI_DIM}]WI-FI[/] [{wifi_c}]{wifi_ok}/{len(self._wifi_groups)}[/]"
+        )
+        self.query_one("#hn-lan-hdr", Label).update(
+            f"[{UI_DIM}]LAN[/] [{lan_c}]{lan_ok}/{len(self._lan_groups)}[/]"
         )
 
         # Detail: router CPU sparkline
@@ -399,18 +411,6 @@ class HomeNetworkPanel(Widget):
         )
         if rtr_cpu:
             self.query_one("#hn-cpu-spark", Sparkline).data = rtr_cpu
-
-        if stats:
-            mem_c = S_OK if stats.memory_pct < 60 else (S_WARN if stats.memory_pct < 85 else S_ERR)
-            self.query_one("#hn-stats-full", Label).update(
-                f"[{UI_DIM}]LAN {config.router_ip}  ·  Mem [/]"
-                f"[{mem_c}]{stats.memory_pct:.0f}%[/]"
-                f"  [{UI_DIM}]·  Up {_fmt_uptime(stats.uptime_seconds)}[/]"
-            )
-        else:
-            self.query_one("#hn-stats-full", Label).update(
-                f"[{UI_DIM}]LAN {config.router_ip}[/]"
-            )
 
         # Update embedded group rows
         for group in self._config.groups:
