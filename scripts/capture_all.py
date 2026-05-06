@@ -42,8 +42,10 @@ CAPTURES: list[dict] = [
     {"slug": "06-status-multiple-issues",   "title": "Status — multiple issues (AP + degraded + flapping)",
      "scenario": "multiple_issues.toml"},
     # Expanded panels
-    {"slug": "07-inet-panel-expanded",      "title": "Internet panel expanded",
+    {"slug": "07-inet-panel-expanded",      "title": "Internet panel expanded — all healthy",
      "scenario": "all_healthy.toml",  "keys": ["i"]},
+    {"slug": "07b-inet-panel-partial",      "title": "Internet panel expanded — partial failure",
+     "scenario": "internet_partial.toml", "keys": ["i"]},
     {"slug": "08-rtr-panel-expanded",       "title": "Router panel expanded",
      "scenario": "all_healthy.toml",  "keys": ["r"]},
     # Other screens

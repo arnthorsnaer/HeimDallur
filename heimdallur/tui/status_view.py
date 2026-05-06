@@ -11,6 +11,7 @@ from textual.widgets import Label, Sparkline, Static
 from heimdallur.core.topology import (
     Device, Group, NetworkConfig, NetworkState, ProbeStatus,
     GatewayEnrichment, RouterStats, SpeedResult,
+    InternetQuality, RawIpResult, DnsResult, HttpResult,
 )
 
 # ── Colour palette ─────────────────────────────────────────────
@@ -76,6 +77,61 @@ def _rolling_avg(data: list[float], n: int = 10) -> float | None:
         return None
     window = data[-n:]
     return sum(window) / len(window)
+
+
+def _jitter(data: list[float]) -> float | None:
+    if len(data) < 2:
+        return None
+    mean = sum(data) / len(data)
+    variance = sum((x - mean) ** 2 for x in data) / len(data)
+    return variance ** 0.5
+
+
+def _p95(data: list[float]) -> float | None:
+    if not data:
+        return None
+    s = sorted(data)
+    idx = max(0, int(len(s) * 0.95) - 1)
+    return s[idx]
+
+
+def _loss_pct(loss_flags: list[float]) -> float:
+    if not loss_flags:
+        return 0.0
+    return sum(loss_flags) / len(loss_flags) * 100.0
+
+
+def _iq_derived_status(iq: InternetQuality) -> ProbeStatus:
+    """Derive overall internet status from all three check categories."""
+    ok = (
+        sum(1 for r in iq.raw_ip if r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED))
+        + sum(1 for r in iq.dns  if r.success)
+        + sum(1 for r in iq.http if r.success)
+    )
+    total = len(iq.raw_ip) + len(iq.dns) + len(iq.http)
+    if total == 0:
+        return ProbeStatus.UNKNOWN
+    degraded_ip = sum(1 for r in iq.raw_ip if r.status == ProbeStatus.DEGRADED)
+    ratio = ok / total
+    if ratio == 1.0 and degraded_ip == 0:
+        return ProbeStatus.HEALTHY
+    if ratio >= 4 / 9:
+        return ProbeStatus.DEGRADED
+    return ProbeStatus.UNREACHABLE
+
+
+def _check_counts(iq: InternetQuality) -> tuple[int, int, int, int, int, int]:
+    """Return (ip_ok, ip_total, dns_ok, dns_total, http_ok, http_total)."""
+    ip_ok   = sum(1 for r in iq.raw_ip if r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED))
+    dns_ok  = sum(1 for r in iq.dns    if r.success)
+    http_ok = sum(1 for r in iq.http   if r.success)
+    return ip_ok, len(iq.raw_ip), dns_ok, len(iq.dns), http_ok, len(iq.http)
+
+
+def _count_label(ok: int, total: int) -> str:
+    c = S_OK if ok == total else (S_WARN if ok > 0 else S_ERR)
+    icon = "●" if ok == total else ("~" if ok > 0 else "✗")
+    return f"[{c}]{icon} {ok}/{total}[/]"
 
 
 # ── Nav button (touch + keyboard) ──────────────────────────────
@@ -145,11 +201,20 @@ class InternetPanel(Widget):
         border: solid {UI_BDR};
         padding: 0 1;
     }}
-    #inet-duration   {{ height: 1; }}
+    #inet-header     {{ height: 1; layout: horizontal; }}
+    #inet-duration   {{ width: 1fr; height: 1; }}
+    #inet-hint       {{ width: 9; height: 1; content-align: right middle; color: {UI_DIM}; }}
     #inet-summary    {{ height: 1; }}
-    #inet-lat-hdr    {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
+    #inet-detail     {{ height: auto; display: none; padding-top: 1; }}
+    #inet-ip-hdr     {{ height: 1; color: {UI_DIM}; text-style: bold; margin-bottom: 0; }}
+    #inet-ip-rows    {{ height: auto; }}
+    #inet-dns-hdr    {{ height: 1; color: {UI_DIM}; text-style: bold; padding-top: 1; }}
+    #inet-dns-rows   {{ height: auto; }}
+    #inet-http-hdr   {{ height: 1; color: {UI_DIM}; text-style: bold; padding-top: 1; }}
+    #inet-http-meta  {{ height: 1; color: {UI_DIM}; }}
+    #inet-http-rows  {{ height: auto; }}
+    #inet-spark-hdr  {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
     InternetPanel Sparkline {{ height: 3; }}
-    #inet-speed-full {{ height: 1; margin-top: 1; }}
     """
 
     def __init__(self) -> None:
@@ -158,17 +223,40 @@ class InternetPanel(Widget):
         self._status_word: str = "—"
         self._status_color: str = S_UNK
         self._prev_status: ProbeStatus | None = None
+        self._expanded: bool = False
 
     def compose(self) -> ComposeResult:
-        yield Label("", id="inet-duration")
+        with Horizontal(id="inet-header"):
+            yield Label("", id="inet-duration")
+            yield Label("", id="inet-hint")
         yield Label("", id="inet-summary")
-        yield Label("", id="inet-lat-hdr")
-        yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-lat-spark")
-        yield Label("", id="inet-speed-full")
+        with Vertical(id="inet-detail"):
+            yield Label("RAW IP REACHABILITY", id="inet-ip-hdr")
+            yield Label("", id="inet-ip-rows")
+            yield Label("DNS RESOLUTION", id="inet-dns-hdr")
+            yield Label("", id="inet-dns-rows")
+            yield Label("HTTP/HTTPS QUALITY", id="inet-http-hdr")
+            yield Label("", id="inet-http-meta")
+            yield Label("", id="inet-http-rows")
+            yield Label("", id="inet-spark-hdr")
+            yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-lat-spark")
 
     def on_mount(self) -> None:
         self.border_title = "INTERNET"
         self.set_interval(1, self._tick)
+        self._refresh_hint()
+
+    def on_click(self) -> None:
+        self._toggle()
+
+    def _toggle(self) -> None:
+        self._expanded = not self._expanded
+        self.query_one("#inet-detail", Vertical).display = self._expanded
+        self._refresh_hint()
+
+    def _refresh_hint(self) -> None:
+        arrow = "▴" if self._expanded else "▾"
+        self.query_one("#inet-hint", Label).update(f"[{UI_DIM}][i] {arrow}[/]")
 
     def _tick(self) -> None:
         if not self._status_since:
@@ -181,17 +269,24 @@ class InternetPanel(Widget):
 
     def update(self, state: NetworkState, config: NetworkConfig,
                ont_lat: list[float], ont_loss: list[float],
-               speed: SpeedResult | None) -> None:
-        ont = state.ont_result
-        if not ont:
-            return
-        c = _sc(ont.status)
-        sw = _status_word(ont.status)
+               speed: SpeedResult | None,
+               iq: InternetQuality | None,
+               snapshot) -> None:
 
-        if ont.status != self._prev_status:
-            self._prev_status = ont.status
+        # Derive displayed status: prefer IQ aggregate when available
+        if iq is not None:
+            derived = _iq_derived_status(iq)
+        else:
+            ont = state.ont_result
+            derived = ont.status if ont else ProbeStatus.UNKNOWN
+
+        c  = _sc(derived)
+        sw = _status_word(derived)
+
+        if derived != self._prev_status:
+            self._prev_status = derived
             self._status_since = time.time()
-            self._status_word = sw
+            self._status_word  = sw
             self._status_color = c
 
         self.styles.border = ("solid", c)
@@ -203,38 +298,115 @@ class InternetPanel(Widget):
                 f"[{c}]{sw}[/] [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
             )
 
-        avg_lat = _rolling_avg(ont_lat)
-        avg_str = (
-            f"[{UI_DIM}]Avg[/] [{c}]{avg_lat:.1f}ms[/]"
-            if avg_lat is not None else f"[{S_UNK}]Avg —[/]"
-        )
-        if speed and speed.ok:
+        # ── Collapsed summary line ──────────────────────────────
+        if iq is not None:
+            ip_ok, ip_tot, dns_ok, dns_tot, http_ok, http_tot = _check_counts(iq)
+            avg_rtt = _rolling_avg(
+                [r.rtt_ms for r in iq.raw_ip if r.rtt_ms is not None]
+            )
+            rtt_str = (f"  [{UI_DIM}]·  avg[/] [{c}]{avg_rtt:.0f}ms[/]"
+                       if avg_rtt is not None else "")
             spd_str = (
-                f"  [{UI_DIM}]·  ↓[/] [{S_OK}]{speed.download_mbps:.0f}[/]"
-                f"[{UI_DIM}] Mbps[/]"
+                f"  [{UI_DIM}]·  ↓[/] [{S_OK}]{speed.download_mbps:.0f} Mbps[/]"
+                if speed and speed.ok else ""
+            )
+            self.query_one("#inet-summary", Label).update(
+                f"[{UI_DIM}]IP[/] {_count_label(ip_ok, ip_tot)}"
+                f"  [{UI_DIM}]DNS[/] {_count_label(dns_ok, dns_tot)}"
+                f"  [{UI_DIM}]HTTP[/] {_count_label(http_ok, http_tot)}"
+                + rtt_str + spd_str
             )
         else:
-            spd_str = f"  [{UI_DIM}]·  speed pending[/]"
-        self.query_one("#inet-summary", Label).update(avg_str + spd_str)
+            avg_lat = _rolling_avg(ont_lat)
+            avg_str = (f"[{UI_DIM}]Avg[/] [{c}]{avg_lat:.1f}ms[/]"
+                       if avg_lat is not None else f"[{S_UNK}]Avg —[/]")
+            spd_str = (
+                f"  [{UI_DIM}]·  ↓[/] [{S_OK}]{speed.download_mbps:.0f} Mbps[/]"
+                if speed and speed.ok else f"  [{UI_DIM}]·  speed pending[/]"
+            )
+            self.query_one("#inet-summary", Label).update(avg_str + spd_str)
 
-        cur_lat_str = f"{ont_lat[-1]:.1f}ms" if ont_lat else "—"
-        avg_lat_str = f"{avg_lat:.1f}ms" if avg_lat is not None else "—"
-        self.query_one("#inet-lat-hdr", Label).update(
-            f"[{UI_DIM}]Latency  current [/][{c}]{cur_lat_str}[/]"
-            f"[{UI_DIM}]  ·  avg {avg_lat_str}[/]"
+        if iq is None:
+            return
+
+        # ── Detail rows ─────────────────────────────────────────
+        # Always rendered when iq data is available so toggling open
+        # shows current data immediately. Visibility is CSS-controlled.
+
+        # ── Raw IP section ──────────────────────────────────────
+        ip_lines: list[str] = []
+        for r in iq.raw_ip:
+            rc  = _sc(r.status)
+            icon = "●" if r.status == ProbeStatus.HEALTHY else ("~" if r.status == ProbeStatus.DEGRADED else "✗")
+            rtt_s = f"[{rc}]{r.rtt_ms:.0f}ms[/]" if r.rtt_ms is not None else f"[{S_ERR}]timeout[/]"
+            hist  = snapshot.inet_ip_lat.get(r.target, [])
+            loss_h = snapshot.inet_ip_loss.get(r.target, [])
+            j  = _jitter(hist)
+            p  = _p95(hist)
+            lp = _loss_pct(loss_h)
+            j_s  = f"[{UI_DIM}]±{j:.1f}ms[/]"   if j  is not None else f"[{UI_DIM}]jitter —[/]"
+            p_s  = f"[{UI_DIM}]P95 {p:.0f}ms[/]" if p  is not None else f"[{UI_DIM}]P95 —[/]"
+            lp_s = f"[{S_ERR}]{lp:.0f}% loss[/]" if lp > 0 else f"[{UI_DIM}]0% loss[/]"
+            ip_lines.append(
+                f"[{rc}]{icon}[/] [{UI_FG}]{r.target:<9}[/] [{UI_DIM}]{r.label:<11}[/]"
+                f" {rtt_s:<18} {j_s:<22} {lp_s:<20} {p_s}"
+            )
+        self.query_one("#inet-ip-rows", Label).update("\n".join(ip_lines))
+
+        # ── DNS section ─────────────────────────────────────────
+        dns_lines: list[str] = []
+        for r in iq.dns:
+            rc   = S_OK if r.success else S_ERR
+            icon = "●" if r.success else "✗"
+            hist = snapshot.inet_dns_lat.get(r.hostname, [])
+            loss_h = snapshot.inet_dns_loss.get(r.hostname, [])
+            avg_ms = _rolling_avg(hist)
+            lp = _loss_pct(loss_h)
+            if r.success:
+                ms_s  = f"[{rc}]{r.lookup_ms:.0f}ms[/]" if r.lookup_ms is not None else "—"
+                avg_s = f"[{UI_DIM}]avg {avg_ms:.0f}ms[/]" if avg_ms is not None else ""
+                ip_s  = f"[{UI_DIM}]→ {r.resolved_ip}[/]" if r.resolved_ip else ""
+                lp_s  = f"[{S_ERR}]{lp:.0f}% fail[/]" if lp > 0 else f"[{UI_DIM}]0% fail[/]"
+                dns_lines.append(
+                    f"[{rc}]{icon}[/] [{UI_FG}]{r.hostname:<18}[/] {ip_s:<30} {ms_s:<14} {avg_s:<22} {lp_s}"
+                )
+            else:
+                fail_s = f"[{UI_DIM}]{lp:.0f}% fail[/]" if lp > 0 else f"[{S_ERR}]FAILED[/]"
+                dns_lines.append(
+                    f"[{rc}]{icon}[/] [{UI_FG}]{r.hostname:<18}[/] [{S_ERR}]lookup failed[/]"
+                    f"{'':30} {fail_s}"
+                )
+        self.query_one("#inet-dns-rows", Label).update("\n".join(dns_lines))
+
+        # ── HTTP section ─────────────────────────────────────────
+        self.query_one("#inet-http-meta", Label).update(
+            f"[{UI_DIM}]{'':28}{'tcp':>8}{'tls':>8}{'ttfb':>8}{'total':>8}[/]"
         )
-        if ont_lat:
-            self.query_one("#inet-lat-spark", Sparkline).data = ont_lat
 
-        if speed and speed.ok:
-            self.query_one("#inet-speed-full", Label).update(
-                f"[{UI_DIM}]↓[/] [{S_OK}]{speed.download_mbps:.0f} Mbps[/]"
-                f"  [{UI_DIM}]ping {speed.ping_ms:.0f}ms  ·  probe {config.ont_check_host}[/]"
+        def _col(v: float | None) -> str:
+            return f"[{UI_FG}]{v:>5.0f}ms[/]" if v is not None else f"[{UI_DIM}]{'—':>6}[/]"
+
+        http_lines: list[str] = []
+        for r in iq.http:
+            rc   = S_OK if r.success else S_ERR
+            icon = "●" if r.success else "✗"
+            sc_s = (f"[{rc}]{r.status_code}[/]" if r.status_code is not None
+                    else f"[{S_ERR}]err[/]")
+            http_lines.append(
+                f"[{rc}]{icon}[/] [{UI_FG}]{r.label:<11}[/]"
+                f" [{UI_DIM}]{r.short_path:<16}[/] {sc_s:<14}"
+                f" {_col(r.tcp_ms)} {_col(r.tls_ms)} {_col(r.ttfb_ms)} {_col(r.total_ms)}"
             )
-        else:
-            self.query_one("#inet-speed-full", Label).update(
-                f"[{UI_DIM}]Speed test pending  ·  probe {config.ont_check_host}[/]"
+        self.query_one("#inet-http-rows", Label).update("\n".join(http_lines))
+
+        # ── Latency sparkline for primary IP target ─────────────
+        primary_hist = snapshot.inet_ip_lat.get("1.1.1.1", ont_lat)
+        if primary_hist:
+            avg_s = f"{_rolling_avg(primary_hist):.0f}ms" if _rolling_avg(primary_hist) else "—"
+            self.query_one("#inet-spark-hdr", Label).update(
+                f"[{UI_DIM}]Latency 1.1.1.1  avg {avg_s}[/]"
             )
+            self.query_one("#inet-lat-spark", Sparkline).data = primary_hist
 
 
 # ── Home Network panel ─────────────────────────────────────────
@@ -625,10 +797,11 @@ class StatusScreen(Screen):
     """
 
     BINDINGS = [
-        ("h",     "switch_to_history", "History"),
-        ("d",     "switch_to_devices", "Devices"),
-        ("space", "toggle_status",     "Toggle Status"),
-        ("q",     "app.quit",          "Quit"),
+        ("h",     "switch_to_history",  "History"),
+        ("d",     "switch_to_devices",  "Devices"),
+        ("space", "toggle_status",      "Toggle Status"),
+        ("i",     "toggle_internet",    "Toggle Internet"),
+        ("q",     "app.quit",           "Quit"),
     ]
 
     def __init__(self, config: NetworkConfig, start_time: float) -> None:
@@ -648,7 +821,10 @@ class StatusScreen(Screen):
         s = enriched.network
         c = self._config
         self.query_one(StatusPanel).update(s, c)
-        self.query_one(InternetPanel).update(s, c, snapshot.ont_lat, snapshot.ont_loss, enriched.speed_result)
+        self.query_one(InternetPanel).update(
+            s, c, snapshot.ont_lat, snapshot.ont_loss,
+            enriched.speed_result, enriched.internet_quality, snapshot,
+        )
         self.query_one(HomeNetworkPanel).update(
             s, c, snapshot.rtr_cpu, snapshot.rtr_mem,
             enriched.router_stats, enriched.gw_enrichment,
@@ -657,6 +833,9 @@ class StatusScreen(Screen):
 
     def action_toggle_status(self) -> None:
         self.query_one(StatusPanel).toggle()
+
+    def action_toggle_internet(self) -> None:
+        self.query_one(InternetPanel)._toggle()
 
     def on_nav_button_pressed(self, msg: NavButton.Pressed) -> None:
         if msg.action == "history":

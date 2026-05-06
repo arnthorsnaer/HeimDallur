@@ -1,0 +1,15 @@
+# Partial internet degradation — cross-layer failure example:
+#   Quad9 path unreachable  (IP + DNS both fail — consistent root cause)
+#   Google path degraded    (elevated latency on IP probe)
+#   Microsoft HTTP endpoint unreachable (independent of the Quad9 path)
+#
+# Cloudflare + Google DNS remain healthy so the site is not fully offline.
+# The local ONT/WAN probe is fine — this is an upstream routing / peering issue.
+
+[failures]
+
+[inet]
+"9.9.9.9"         = "down"   # Quad9 anycast unreachable
+"quad9.net"        = "down"   # Quad9 resolver DNS fails (same root cause)
+"8.8.8.8"         = "slow"   # Google path has elevated latency
+"microsoft_http"   = "down"   # Microsoft connectivity endpoint unreachable

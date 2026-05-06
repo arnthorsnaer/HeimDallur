@@ -65,6 +65,48 @@ class SpeedResult:
 
 
 @dataclass
+class RawIpResult:
+    """Single ICMP probe to a well-known public IP."""
+    target: str
+    label: str
+    status: ProbeStatus
+    rtt_ms: Optional[float]
+
+
+@dataclass
+class DnsResult:
+    """DNS lookup result for a well-known hostname."""
+    hostname: str
+    label: str
+    success: bool
+    lookup_ms: Optional[float]
+    resolved_ip: Optional[str]
+
+
+@dataclass
+class HttpResult:
+    """HTTP/HTTPS request quality metrics for a stable public endpoint."""
+    url: str
+    label: str
+    short_path: str
+    success: bool
+    status_code: Optional[int]
+    tcp_ms: Optional[float]
+    tls_ms: Optional[float]
+    ttfb_ms: Optional[float]
+    total_ms: Optional[float]
+
+
+@dataclass
+class InternetQuality:
+    """Aggregated result of a full multi-target internet quality probe run."""
+    timestamp: float
+    raw_ip: list[RawIpResult]
+    dns: list[DnsResult]
+    http: list[HttpResult]
+
+
+@dataclass
 class NetworkConfig:
     ont_check_host: str
     router_ip: str
