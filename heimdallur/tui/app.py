@@ -75,6 +75,7 @@ class HeimdallurApp(App):
         self._mem:  deque = deque([0.0, 0.0], maxlen=_HIST)
         self._dl:   deque = deque(maxlen=_HIST)
         self._speed_result: SpeedResult | None = None
+        self._last_enriched: EnrichedState | None = None
 
     def compose(self) -> ComposeResult:
         return iter([])
@@ -195,7 +196,8 @@ class HeimdallurApp(App):
     def on_probe_complete(self, message: ProbeComplete) -> None:
         from heimdallur.tui.status_view import StatusScreen
         from heimdallur.tui.devices_view import DevicesScreen
+        self._last_enriched = message.enriched
         if isinstance(self.screen, StatusScreen):
             self.screen.update_state(message.enriched, message.snapshot)
         elif isinstance(self.screen, DevicesScreen):
-            self.screen.update_state(message.enriched.network)
+            self.screen.update_state(message.enriched.network, message.enriched.gw_enrichment)
