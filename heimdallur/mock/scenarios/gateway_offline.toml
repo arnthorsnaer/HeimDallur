@@ -1,0 +1,4 @@
+# Basement AP (192.168.1.45) offline → 9 devices suppressed (UNKNOWN).
+# Internet and router remain healthy.
+[failures]
+"192.168.1.45" = "down"

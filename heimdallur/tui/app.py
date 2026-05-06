@@ -51,12 +51,19 @@ class HeimdallurApp(App):
     def __init__(self) -> None:
         super().__init__()
         self._config: NetworkConfig = load_config()
-        self._store = Store()
+        from pathlib import Path as _Path
+        _db = os.getenv("NETWATCH_SCREENSHOT_DB")
+        self._store = Store(_Path(_db)) if _db else Store()
         self._start_time = time.time()
 
         if os.getenv("NETWATCH_MOCK"):
             from heimdallur.mock.network import MockProber
-            self._prober = MockProber(self._config)
+            from pathlib import Path as _Path
+            _scenario = os.getenv("NETWATCH_MOCK_SCENARIO")
+            self._prober = MockProber(
+                self._config,
+                scenario_path=_Path(_scenario) if _scenario else None,
+            )
         else:
             from heimdallur.core.prober import Prober
             self._prober = Prober(self._config)
@@ -78,6 +85,9 @@ class HeimdallurApp(App):
         await self.push_screen(StatusScreen(self._config, self._start_time))
         self._probe_loop()
         self._speed_loop()
+
+    async def on_unmount(self) -> None:
+        await self._store.close()
 
     def _accumulate(self, state: NetworkState, enriched: EnrichedState) -> HistorySnapshot:
         def _upd(ip: str, r) -> None:

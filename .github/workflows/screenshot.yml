@@ -1,0 +1,116 @@
+name: UI Screenshots
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "heimdallur/tui/**"
+      - "heimdallur/mock/**"
+      - "scripts/screenshot.py"
+      - "scripts/capture_all.py"
+
+permissions:
+  contents: write        # push screenshot commits to PR branch
+  pull-requests: write   # update PR description
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install system dependencies
+        run: sudo apt-get install -y librsvg2-bin
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: pip install -e . cairosvg
+
+      - name: Generate all screenshots
+        run: python scripts/capture_all.py --output-dir docs/screenshots
+        env:
+          NETWATCH_MOCK: "1"
+
+      - name: Commit screenshots to PR branch
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add docs/screenshots/
+          if git diff --staged --quiet; then
+            echo "Screenshots unchanged, skipping commit."
+          else
+            git commit -m "chore: update UI screenshots [skip ci]"
+            git push
+          fi
+
+      - name: Update PR description with screenshot gallery
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner  = context.repo.owner;
+            const repo   = context.repo.repo;
+            const prNum  = context.issue.number;
+            const branch = context.payload.pull_request.head.ref;
+
+            const base = [
+              "https://raw.githubusercontent.com",
+              owner, repo, branch, "docs/screenshots"
+            ].join("/");
+
+            // Must match the slugs defined in scripts/capture_all.py
+            const captures = [
+              { slug: "01-status-healthy",           title: "All healthy" },
+              { slug: "02-status-internet-degraded", title: "Internet degraded" },
+              { slug: "03-status-internet-offline",  title: "Internet offline" },
+              { slug: "04-status-router-offline",    title: "Router offline" },
+              { slug: "05-status-gateway-offline",   title: "AP offline" },
+              { slug: "06-status-multiple-issues",   title: "Multiple issues" },
+              { slug: "07-inet-panel-expanded",      title: "Internet panel expanded" },
+              { slug: "08-rtr-panel-expanded",       title: "Router panel expanded" },
+              { slug: "09-history-screen",           title: "History screen" },
+              { slug: "10-devices-screen",           title: "Devices screen" },
+            ];
+
+            const rows = captures.map(c =>
+              `| **${c.title}** |\n| ![${c.title}](${base}/${c.slug}.png) |`
+            ).join("\n");
+
+            const section = [
+              "",
+              "---",
+              "## UI Screenshots",
+              "",
+              "<details>",
+              "<summary>Click to expand all states</summary>",
+              "",
+              rows,
+              "",
+              "</details>",
+              "",
+              `<sub>Auto-generated from mock data — updated on every push.</sub>`,
+            ].join("\n");
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner, repo, pull_number: prNum,
+            });
+
+            const marker = "\n---\n## UI Screenshots";
+            let body = pr.body ?? "";
+            body = body.includes(marker)
+              ? body.slice(0, body.indexOf(marker)) + section
+              : body + section;
+
+            await github.rest.pulls.update({
+              owner, repo, pull_number: prNum, body,
+            });
+
+            core.info(`PR #${prNum} updated with ${captures.length} screenshots.`);

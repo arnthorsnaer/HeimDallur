@@ -1,0 +1,3 @@
+# Internet probe returns high latency (75–180 ms) → DEGRADED / amber.
+[failures]
+"ont" = "slow"
