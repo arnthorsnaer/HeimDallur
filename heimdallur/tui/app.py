@@ -13,7 +13,7 @@ from heimdallur.config.loader import load_config
 from heimdallur.core.store import Store
 from heimdallur.core.topology import (
     NetworkConfig, NetworkState, Group,
-    RouterStats, GatewayEnrichment, SpeedResult,
+    RouterStats, GatewayEnrichment, SpeedResult, InternetQuality,
 )
 
 _HIST = 40
@@ -25,6 +25,7 @@ class EnrichedState:
     router_stats: RouterStats | None
     gw_enrichment: dict[str, GatewayEnrichment]   # gateway_ip -> enrichment
     speed_result: SpeedResult | None
+    internet_quality: InternetQuality | None
 
 
 @dataclass
@@ -36,6 +37,14 @@ class HistorySnapshot:
     gw_lat:   dict[str, list[float]]   # gateway_ip -> latency history
     gw_loss:  dict[str, list[float]]
     dl_hist:  list[float]
+    # Per-target internet quality histories
+    inet_ip_lat:     dict[str, list[float]]   # target IP -> rtt history
+    inet_ip_loss:    dict[str, list[float]]   # target IP -> loss flags (0/1)
+    inet_dns_lat:    dict[str, list[float]]   # hostname  -> lookup time history
+    inet_dns_loss:   dict[str, list[float]]   # hostname  -> failure flags (0/1)
+    inet_http_ttfb:  dict[str, list[float]]   # url       -> TTFB history
+    inet_http_total: dict[str, list[float]]   # url       -> total time history
+    inet_http_loss:  dict[str, list[float]]   # url       -> failure flags (0/1)
 
 
 class ProbeComplete(Message):
@@ -68,12 +77,23 @@ class HeimdallurApp(App):
             from heimdallur.core.prober import Prober
             self._prober = Prober(self._config)
 
+        from heimdallur.core.internet_probe import InternetProber
+        self._inet_prober = InternetProber()
+
         # Rolling history — init loss with zeros so sparkline starts green not red
         self._lat:  dict[str, deque] = defaultdict(lambda: deque(maxlen=_HIST))
         self._loss: dict[str, deque] = defaultdict(lambda: deque([0.0, 0.0], maxlen=_HIST))
         self._cpu:  deque = deque([0.0, 0.0], maxlen=_HIST)
         self._mem:  deque = deque([0.0, 0.0], maxlen=_HIST)
         self._dl:   deque = deque(maxlen=_HIST)
+        # Internet quality per-target rolling history
+        self._inet_ip_lat:     dict[str, deque] = defaultdict(lambda: deque(maxlen=_HIST))
+        self._inet_ip_loss:    dict[str, deque] = defaultdict(lambda: deque([0.0, 0.0], maxlen=_HIST))
+        self._inet_dns_lat:    dict[str, deque] = defaultdict(lambda: deque(maxlen=_HIST))
+        self._inet_dns_loss:   dict[str, deque] = defaultdict(lambda: deque([0.0, 0.0], maxlen=_HIST))
+        self._inet_http_ttfb:  dict[str, deque] = defaultdict(lambda: deque(maxlen=_HIST))
+        self._inet_http_total: dict[str, deque] = defaultdict(lambda: deque(maxlen=_HIST))
+        self._inet_http_loss:  dict[str, deque] = defaultdict(lambda: deque([0.0, 0.0], maxlen=_HIST))
         self._speed_result: SpeedResult | None = None
         self._last_enriched: EnrichedState | None = None
 
@@ -92,6 +112,7 @@ class HeimdallurApp(App):
 
     def _seed_mock_history(self) -> None:
         import random
+        from heimdallur.core.internet_probe import IP_TARGETS, DNS_TARGETS, HTTP_TARGETS
 
         def _walk(start: float, lo: float, hi: float, step: float) -> list[float]:
             v, out = start, []
@@ -113,6 +134,22 @@ class HeimdallurApp(App):
             self._cpu.append(v)
         for v in _walk(38.0, 24.0, 58.0, 3.0):
             self._mem.append(v)
+
+        bases_ip = {"1.1.1.1": (12.0, 28.0, 4.0), "8.8.8.8": (15.0, 35.0, 5.0), "9.9.9.9": (11.0, 26.0, 4.0)}
+        for target, _ in IP_TARGETS:
+            lo, hi, step = bases_ip.get(target, (18.0, 45.0, 6.0))
+            for v in _walk((lo + hi) / 2, lo, hi, step):
+                self._inet_ip_lat[target].append(v)
+                self._inet_ip_loss[target].append(0.0)
+        for hostname, _ in DNS_TARGETS:
+            for v in _walk(8.0, 2.0, 20.0, 3.0):
+                self._inet_dns_lat[hostname].append(v)
+                self._inet_dns_loss[hostname].append(0.0)
+        for url, _, _, _ in HTTP_TARGETS:
+            for v in _walk(45.0, 20.0, 90.0, 10.0):
+                self._inet_http_ttfb[url].append(v)
+                self._inet_http_total[url].append(v + random.uniform(5.0, 20.0))
+                self._inet_http_loss[url].append(0.0)
 
     async def on_unmount(self) -> None:
         await self._store.close()
@@ -140,8 +177,33 @@ class HeimdallurApp(App):
         if enriched.speed_result and enriched.speed_result.ok:
             self._dl.append(enriched.speed_result.download_mbps)
 
+        if enriched.internet_quality:
+            iq = enriched.internet_quality
+            for r in iq.raw_ip:
+                if r.rtt_ms is not None:
+                    self._inet_ip_lat[r.target].append(r.rtt_ms)
+                    self._inet_ip_loss[r.target].append(0.0)
+                else:
+                    self._inet_ip_loss[r.target].append(1.0)
+            for r in iq.dns:
+                if r.success and r.lookup_ms is not None:
+                    self._inet_dns_lat[r.hostname].append(r.lookup_ms)
+                    self._inet_dns_loss[r.hostname].append(0.0)
+                else:
+                    self._inet_dns_loss[r.hostname].append(1.0)
+            for r in iq.http:
+                if r.success and r.ttfb_ms is not None:
+                    self._inet_http_ttfb[r.url].append(r.ttfb_ms)
+                    self._inet_http_loss[r.url].append(0.0)
+                else:
+                    self._inet_http_loss[r.url].append(1.0)
+                if r.total_ms is not None:
+                    self._inet_http_total[r.url].append(r.total_ms)
+
         ont_ip = state.ont_result.ip if state.ont_result else self._config.ont_check_host
         gw_ips = [g.gateway_ip for g in self._config.groups if g.gateway_ip]
+
+        from heimdallur.core.internet_probe import IP_TARGETS, DNS_TARGETS, HTTP_TARGETS
         return HistorySnapshot(
             ont_lat=list(self._lat.get(ont_ip, [])),
             ont_loss=list(self._loss.get(ont_ip, [])),
@@ -150,18 +212,34 @@ class HeimdallurApp(App):
             gw_lat={ip: list(self._lat.get(ip, [])) for ip in gw_ips},
             gw_loss={ip: list(self._loss.get(ip, [])) for ip in gw_ips},
             dl_hist=list(self._dl),
+            inet_ip_lat={t: list(self._inet_ip_lat.get(t, [])) for t, _ in IP_TARGETS},
+            inet_ip_loss={t: list(self._inet_ip_loss.get(t, [])) for t, _ in IP_TARGETS},
+            inet_dns_lat={h: list(self._inet_dns_lat.get(h, [])) for h, _ in DNS_TARGETS},
+            inet_dns_loss={h: list(self._inet_dns_loss.get(h, [])) for h, _ in DNS_TARGETS},
+            inet_http_ttfb={u: list(self._inet_http_ttfb.get(u, [])) for u, _, _, _ in HTTP_TARGETS},
+            inet_http_total={u: list(self._inet_http_total.get(u, [])) for u, _, _, _ in HTTP_TARGETS},
+            inet_http_loss={u: list(self._inet_http_loss.get(u, [])) for u, _, _, _ in HTTP_TARGETS},
         )
 
     @work(exclusive=True, group="probe")
     async def _probe_loop(self) -> None:
         while True:
-            state = await self._prober.probe_all()
+            from heimdallur.mock.network import MockProber
+
+            if isinstance(self._prober, MockProber):
+                state = await self._prober.probe_all()
+                iq = self._prober.mock_internet_quality()
+            else:
+                state, iq = await asyncio.gather(
+                    self._prober.probe_all(),
+                    self._inet_prober.probe_all(),
+                )
+
             await self._store.record_state(state, self._config)
 
             router_stats: RouterStats | None = None
             gw_enrichment: dict[str, GatewayEnrichment] = {}
 
-            from heimdallur.mock.network import MockProber
             if isinstance(self._prober, MockProber):
                 router_stats = self._prober.mock_router_stats()
                 for g in self._config.groups:
@@ -174,6 +252,7 @@ class HeimdallurApp(App):
                 router_stats=router_stats,
                 gw_enrichment=gw_enrichment,
                 speed_result=self._speed_result,
+                internet_quality=iq,
             )
             snapshot = self._accumulate(state, enriched)
             self.post_message(ProbeComplete(enriched, snapshot))

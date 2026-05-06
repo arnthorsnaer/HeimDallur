@@ -7,7 +7,9 @@ from pathlib import Path
 from heimdallur.core.topology import (
     NetworkConfig, NetworkState, ProbeResult, ProbeStatus,
     Group, RouterStats, GatewayEnrichment, SpeedResult,
+    InternetQuality, RawIpResult, DnsResult, HttpResult,
 )
+from heimdallur.core.internet_probe import IP_TARGETS, DNS_TARGETS, HTTP_TARGETS
 
 _SCENARIO_PATH = Path(__file__).parent / "scenario.toml"
 
@@ -82,6 +84,82 @@ class MockNetwork:
             ok=True,
         )
 
+    def mock_internet_quality(self) -> InternetQuality:
+        mode = self._failures.get("ont")
+        ts = time.time()
+
+        def _raw_ip(target: str, label: str) -> RawIpResult:
+            if mode == "down":
+                return RawIpResult(target=target, label=label,
+                                   status=ProbeStatus.UNREACHABLE, rtt_ms=None)
+            if mode == "slow":
+                ms = random.uniform(90.0, 200.0)
+                return RawIpResult(target=target, label=label,
+                                   status=ProbeStatus.DEGRADED if ms < 100 else ProbeStatus.UNREACHABLE,
+                                   rtt_ms=ms)
+            if mode == "intermittent":
+                if random.random() < 0.35:
+                    return RawIpResult(target=target, label=label,
+                                       status=ProbeStatus.UNREACHABLE, rtt_ms=None)
+            bases = {"1.1.1.1": (12.0, 28.0), "8.8.8.8": (15.0, 35.0), "9.9.9.9": (11.0, 26.0)}
+            lo, hi = bases.get(target, (18.0, 45.0))
+            ms = random.uniform(lo, hi)
+            return RawIpResult(target=target, label=label,
+                               status=ProbeStatus.HEALTHY, rtt_ms=ms)
+
+        def _dns(hostname: str, label: str) -> DnsResult:
+            if mode == "down":
+                return DnsResult(hostname=hostname, label=label,
+                                 success=False, lookup_ms=None, resolved_ip=None)
+            if mode == "slow":
+                ms = random.uniform(60.0, 140.0)
+                return DnsResult(hostname=hostname, label=label,
+                                 success=True, lookup_ms=ms, resolved_ip="1.2.3.4")
+            if mode == "intermittent" and random.random() < 0.25:
+                return DnsResult(hostname=hostname, label=label,
+                                 success=False, lookup_ms=None, resolved_ip=None)
+            ips = {
+                "cloudflare.com": "104.16.133.229",
+                "google.com":     "142.251.1.100",
+                "quad9.net":      "9.9.9.9",
+            }
+            ms = random.uniform(2.0, 18.0)
+            return DnsResult(hostname=hostname, label=label,
+                             success=True, lookup_ms=ms,
+                             resolved_ip=ips.get(hostname, "1.2.3.4"))
+
+        def _http(url: str, label: str, short_path: str, expected: int) -> HttpResult:
+            if mode == "down":
+                return HttpResult(url=url, label=label, short_path=short_path,
+                                  success=False, status_code=None,
+                                  tcp_ms=None, tls_ms=None, ttfb_ms=None, total_ms=None)
+            if mode == "slow":
+                tcp  = random.uniform(80.0, 160.0)
+                tls  = random.uniform(60.0, 120.0)
+                ttfb = tcp + tls + random.uniform(50.0, 150.0)
+                total = ttfb + random.uniform(20.0, 80.0)
+                return HttpResult(url=url, label=label, short_path=short_path,
+                                  success=True, status_code=expected,
+                                  tcp_ms=tcp, tls_ms=tls, ttfb_ms=ttfb, total_ms=total)
+            if mode == "intermittent" and random.random() < 0.20:
+                return HttpResult(url=url, label=label, short_path=short_path,
+                                  success=False, status_code=None,
+                                  tcp_ms=None, tls_ms=None, ttfb_ms=None, total_ms=None)
+            tcp  = random.uniform(8.0, 22.0)
+            tls  = random.uniform(12.0, 30.0)
+            ttfb = tcp + tls + random.uniform(10.0, 40.0)
+            total = ttfb + random.uniform(5.0, 25.0)
+            return HttpResult(url=url, label=label, short_path=short_path,
+                              success=True, status_code=expected,
+                              tcp_ms=tcp, tls_ms=tls, ttfb_ms=ttfb, total_ms=total)
+
+        return InternetQuality(
+            timestamp=ts,
+            raw_ip=[_raw_ip(t, l)        for t, l       in IP_TARGETS],
+            dns=   [_dns(h, l)           for h, l       in DNS_TARGETS],
+            http=  [_http(u, l, p, s)    for u, l, p, s in HTTP_TARGETS],
+        )
+
 
 class MockProber:
     def __init__(self, config: NetworkConfig, scenario_path: Path | None = None):
@@ -96,6 +174,9 @@ class MockProber:
 
     def mock_speed_result(self) -> SpeedResult:
         return self._net.mock_speed_result()
+
+    def mock_internet_quality(self) -> InternetQuality:
+        return self._net.mock_internet_quality()
 
     async def probe_all(self) -> NetworkState:
         ts = time.time()
