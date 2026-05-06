@@ -1,0 +1,251 @@
+[network]
+ont_check_host              = "8.8.8.8"
+router_ip                   = "192.168.1.1"
+probe_interval_seconds      = 30
+speed_test_interval_seconds = 300
+
+# ── Device Groups ──────────────────────────────────────────────
+# type = "wifi"  → gateway_ip is a WiFi AP (probed; signal/clients shown)
+# type = "lan"   → gateway_ip is a managed switch (probed) or "" (unmanaged, not probed)
+# If gateway_ip = "" the group only cascades on router failure.
+
+[[groups]]
+id            = "wifi-garage"
+name          = "WiFi Garage"
+type          = "wifi"
+gateway_ip    = "192.168.1.95"
+gateway_name  = "Garage AP"
+gateway_model = "U6 Lite"
+channel       = 11
+band          = "2.4GHz"
+
+[[groups]]
+id            = "wifi-main"
+name          = "WiFi Living Room"
+type          = "wifi"
+gateway_ip    = "192.168.1.44"
+gateway_name  = "Main AP"
+gateway_model = "U6 Pro"
+channel       = 36
+band          = "5GHz"
+
+[[groups]]
+id            = "wifi-upper"
+name          = "WiFi Upper Floor"
+type          = "wifi"
+gateway_ip    = "192.168.1.43"
+gateway_name  = "Upper AP"
+gateway_model = "U6 Pro"
+channel       = 44
+band          = "5GHz"
+
+[[groups]]
+id            = "wifi-lower"
+name          = "WiFi Basement"
+type          = "wifi"
+gateway_ip    = "192.168.1.45"
+gateway_name  = "Lower AP"
+gateway_model = "U6 Lite"
+channel       = 6
+band          = "2.4GHz"
+
+[[groups]]
+id           = "lan-studio"
+name         = "LAN Studio"
+type         = "lan"
+gateway_ip   = ""          # unmanaged switch — cascade only on router failure
+gateway_name = ""
+
+[[groups]]
+id           = "lan-theater"
+name         = "LAN Home Theater"
+type         = "lan"
+gateway_ip   = ""
+gateway_name = ""
+
+[[groups]]
+id           = "lan-router"
+name         = "LAN Router"
+type         = "lan"
+gateway_ip   = ""          # directly on router — cascade only on router failure
+gateway_name = ""
+
+# ── Garage WiFi devices (4) ────────────────────────────────────
+[[devices]]
+name  = "Rafmagnsmaelir 1-fasa"
+ip    = "192.168.1.100"
+group = "wifi-garage"
+type  = "sensor"
+
+[[devices]]
+name  = "Rafmagnsmaelir 3-fasa"
+ip    = "192.168.1.101"
+group = "wifi-garage"
+type  = "sensor"
+
+[[devices]]
+name  = "Bílskúrshurð"
+ip    = "192.168.1.102"
+group = "wifi-garage"
+type  = "smart_switch"
+
+[[devices]]
+name  = "Bílskúrsljós"
+ip    = "192.168.1.103"
+group = "wifi-garage"
+type  = "light"
+
+# ── Living Room WiFi devices (11) ──────────────────────────────
+[[devices]]
+name  = "Inngangur ljós"
+ip    = "192.168.1.110"
+group = "wifi-main"
+type  = "light"
+
+[[devices]]
+name  = "Gestasnyrtingur ljós"
+ip    = "192.168.1.111"
+group = "wifi-main"
+type  = "light"
+
+[[devices]]
+name  = "Eldhús efri ljós"
+ip    = "192.168.1.112"
+group = "wifi-main"
+type  = "light"
+
+[[devices]]
+name  = "Eldhús neðri ljós"
+ip    = "192.168.1.113"
+group = "wifi-main"
+type  = "light"
+
+[[devices]]
+name  = "Stofa ljós 1"
+ip    = "192.168.1.114"
+group = "wifi-main"
+type  = "light"
+
+[[devices]]
+name  = "Stofa ljós 2"
+ip    = "192.168.1.115"
+group = "wifi-main"
+type  = "light"
+
+[[devices]]
+name  = "Stofa ljós 3"
+ip    = "192.168.1.116"
+group = "wifi-main"
+type  = "light"
+
+[[devices]]
+name  = "Kjallaragang ljós"
+ip    = "192.168.1.117"
+group = "wifi-main"
+type  = "light"
+
+[[devices]]
+name  = "Útiljós framhlið"
+ip    = "192.168.1.118"
+group = "wifi-main"
+type  = "light"
+
+[[devices]]
+name  = "Plöntuljós"
+ip    = "192.168.1.119"
+group = "wifi-main"
+type  = "light"
+
+[[devices]]
+name  = "Kaffivél"
+ip    = "192.168.1.219"
+group = "wifi-main"
+type  = "smart_plug"
+
+# ── Upper Floor WiFi devices (2 — rest moved to LAN Studio) ────
+[[devices]]
+name  = "Baðherbergi LED"
+ip    = "192.168.1.130"
+group = "wifi-upper"
+type  = "light"
+
+[[devices]]
+name  = "Gólfahitun"
+ip    = "192.168.1.131"
+group = "wifi-upper"
+type  = "sensor"
+
+# ── LAN Studio devices ─────────────────────────────────────────
+# These are wired — move others here as needed
+[[devices]]
+name  = "Stúdíóbúnaður"
+ip    = "192.168.1.132"
+group = "lan-studio"
+type  = "generic"
+
+[[devices]]
+name  = "Home Assistant"
+ip    = "192.168.1.64"
+group = "lan-studio"
+type  = "server"
+
+[[devices]]
+name  = "Unifi Controller"
+ip    = "192.168.1.151"
+group = "lan-router"
+type  = "server"
+
+# ── Basement WiFi devices (9) ──────────────────────────────────
+[[devices]]
+name  = "Svefnherbergi ljós 1"
+ip    = "192.168.1.140"
+group = "wifi-lower"
+type  = "light"
+
+[[devices]]
+name  = "Svefnherbergi ljós 2"
+ip    = "192.168.1.141"
+group = "wifi-lower"
+type  = "light"
+
+[[devices]]
+name  = "Baðherbergi ljós"
+ip    = "192.168.1.142"
+group = "wifi-lower"
+type  = "light"
+
+[[devices]]
+name  = "Kvikmyndaherbergi"
+ip    = "192.168.1.143"
+group = "wifi-lower"
+type  = "light"
+
+[[devices]]
+name  = "Þvottavél blásari"
+ip    = "192.168.1.144"
+group = "wifi-lower"
+type  = "smart_switch"
+
+[[devices]]
+name  = "Þvottaherbergi ljós"
+ip    = "192.168.1.145"
+group = "wifi-lower"
+type  = "light"
+
+[[devices]]
+name  = "Geymsla ljós"
+ip    = "192.168.1.146"
+group = "wifi-lower"
+type  = "light"
+
+[[devices]]
+name  = "Garðljós"
+ip    = "192.168.1.214"
+group = "wifi-lower"
+type  = "light"
+
+[[devices]]
+name  = "Garðtenglar"
+ip    = "192.168.1.148"
+group = "wifi-lower"
+type  = "smart_plug"

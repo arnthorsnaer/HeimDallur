@@ -1,0 +1,140 @@
+from __future__ import annotations
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Optional
+import time
+
+
+class ProbeStatus(Enum):
+    HEALTHY     = "healthy"
+    DEGRADED    = "degraded"
+    UNREACHABLE = "unreachable"
+    UNKNOWN     = "unknown"
+
+
+@dataclass
+class ProbeResult:
+    ip: str
+    status: ProbeStatus
+    response_ms: Optional[float]
+    timestamp: float = field(default_factory=time.time)
+    cause: Optional[str] = None
+
+
+@dataclass
+class Group:
+    """A device group with an optional probed gateway (AP or managed switch)."""
+    id: str
+    name: str
+    type: str           # "wifi" | "lan"
+    gateway_ip: str     # empty string = no probed gateway (unmanaged switch / direct router)
+    gateway_name: str = ""
+    gateway_model: str = ""
+    channel: int = 0
+    band: str = ""
+
+
+@dataclass
+class Device:
+    name: str
+    ip: str
+    group_id: str
+    device_type: str = "generic"
+
+
+@dataclass
+class RouterStats:
+    cpu_pct: float
+    memory_pct: float
+    uptime_seconds: float
+
+
+@dataclass
+class GatewayEnrichment:
+    gateway_ip: str
+    signal_dbm: Optional[int]    # WiFi only
+    client_count: Optional[int]  # WiFi only
+
+
+@dataclass
+class SpeedResult:
+    timestamp: float
+    download_mbps: float
+    ping_ms: float
+    ok: bool
+
+
+@dataclass
+class NetworkConfig:
+    ont_check_host: str
+    router_ip: str
+    probe_interval_seconds: int
+    speed_test_interval_seconds: int
+    groups: list[Group]
+    devices: list[Device]
+
+    def group_by_id(self) -> dict[str, Group]:
+        return {g.id: g for g in self.groups}
+
+    def devices_in_group(self, group_id: str) -> list[Device]:
+        return [d for d in self.devices if d.group_id == group_id]
+
+
+@dataclass
+class NetworkState:
+    timestamp: float
+    ont_result: Optional[ProbeResult]
+    router_result: Optional[ProbeResult]
+    gateway_results: dict[str, ProbeResult]   # gateway_ip -> result (only probed gateways)
+    device_results: dict[str, ProbeResult]
+
+    def gateway_up(self, group: Group) -> bool:
+        """True if the group's gateway is reachable (or has no gateway to probe)."""
+        if not group.gateway_ip:
+            return True
+        r = self.gateway_results.get(group.gateway_ip)
+        return r is None or r.status != ProbeStatus.UNREACHABLE
+
+    def problems(self, config: NetworkConfig) -> list[str]:
+        issues = []
+        if self.ont_result and self.ont_result.status == ProbeStatus.UNREACHABLE:
+            issues.append("WAN offline — full network unreachable")
+            return issues
+        if self.router_result and self.router_result.status == ProbeStatus.UNREACHABLE:
+            issues.append("Router offline — all downstream devices affected")
+            return issues
+        grp = config.group_by_id()
+        for group in config.groups:
+            if group.gateway_ip:
+                r = self.gateway_results.get(group.gateway_ip)
+                if r and r.status == ProbeStatus.UNREACHABLE:
+                    n = len(config.devices_in_group(group.id))
+                    issues.append(f"{group.name} gateway offline — {n} devices affected")
+        for device in config.devices:
+            g = grp.get(device.group_id)
+            if g and not self.gateway_up(g):
+                continue  # suppressed by gateway cascade
+            r = self.device_results.get(device.ip)
+            if r and r.status == ProbeStatus.UNREACHABLE:
+                issues.append(f"{device.ip}  {device.name}")
+        return issues
+
+    def summary(self, config: NetworkConfig) -> tuple[int, int, int]:
+        probed_gw = {g.gateway_ip for g in config.groups if g.gateway_ip}
+        total = len(probed_gw) + len(config.devices)
+        ok = bad = 0
+        for ip in probed_gw:
+            r = self.gateway_results.get(ip)
+            if r:
+                if r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED):
+                    ok += 1
+                elif r.status == ProbeStatus.UNREACHABLE:
+                    bad += 1
+        for d in config.devices:
+            r = self.device_results.get(d.ip)
+            if r:
+                if r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED):
+                    ok += 1
+                elif r.status == ProbeStatus.UNREACHABLE:
+                    bad += 1
+        return total, ok, bad
