@@ -6,18 +6,19 @@ A terminal-based network health monitor designed to run on a Raspberry Pi with a
 
 Heimdallur gives you a persistent, at-a-glance view of your entire home network — ideal for households with many smart home devices where quickly understanding the current state of the network matters.
 
-![Heimdallur status screen](screenshot.svg)
+![Heimdallur status screen — all healthy](docs/screenshots/01-status-healthy.png)
 
 ## What it does
 
-- **Internet health** — latency trending and speed test results (Cloudflare)
-- **Router overview** — status, uptime, CPU load
-- **Device groups** — organises all monitored devices into groups (WiFi access points, wired LAN segments), showing signal strength and online/offline counts per group
+- **Internet health** — IP, DNS, and HTTP reachability checks against multiple targets; latency trending and speed test results (Cloudflare)
+- **Home network panel** — router latency, memory usage, and uptime; device groups (WI-FI access points and LAN segments) with per-AP signal strength and online/offline counts
 - **Status panel** — single-line summary that expands to list every active fault
 - **History screen** — 24h uptime bars per network segment
 - **Device list** — full device inventory with live latency and status per device
 
 Faults cascade correctly: if an access point goes offline, its downstream devices are shown as affected rather than individually failed, keeping the signal-to-noise ratio low.
+
+![Heimdallur status screen — multiple issues detected](docs/screenshots/06-status-multiple-issues.png)
 
 ## Intended use
 
