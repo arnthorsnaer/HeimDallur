@@ -28,13 +28,21 @@ class MockNetwork:
             with open(path, "rb") as f:
                 data = tomllib.load(f)
             self._failures: dict[str, str] = data.get("failures", {})
+            # [inet] section: per-target overrides for internet quality probes.
+            # Keys: IP address, hostname, or "<label>_http" for HTTP targets.
+            self._inet_failures: dict[str, str] = data.get("inet", {})
         else:
             self._failures = {}
+            self._inet_failures = {}
         self._intermittent: dict[str, bool] = {}
         self._start_time = time.time()
 
     def _mode(self, ip: str, alias: str | None = None) -> str | None:
         return self._failures.get(ip) or (self._failures.get(alias) if alias else None)
+
+    def _inet_mode(self, key: str) -> str | None:
+        """Per-target [inet] override, falling back to global ont mode."""
+        return self._inet_failures.get(key) or self._failures.get("ont")
 
     async def probe_ip(self, ip: str, alias: str | None = None) -> ProbeResult:
         await asyncio.sleep(random.uniform(0.001, 0.004))
@@ -85,10 +93,10 @@ class MockNetwork:
         )
 
     def mock_internet_quality(self) -> InternetQuality:
-        mode = self._failures.get("ont")
         ts = time.time()
 
         def _raw_ip(target: str, label: str) -> RawIpResult:
+            mode = self._inet_mode(target)
             if mode == "down":
                 return RawIpResult(target=target, label=label,
                                    status=ProbeStatus.UNREACHABLE, rtt_ms=None)
@@ -97,38 +105,43 @@ class MockNetwork:
                 return RawIpResult(target=target, label=label,
                                    status=ProbeStatus.DEGRADED if ms < 100 else ProbeStatus.UNREACHABLE,
                                    rtt_ms=ms)
-            if mode == "intermittent":
-                if random.random() < 0.35:
-                    return RawIpResult(target=target, label=label,
-                                       status=ProbeStatus.UNREACHABLE, rtt_ms=None)
+            if mode == "intermittent" and random.random() < 0.35:
+                return RawIpResult(target=target, label=label,
+                                   status=ProbeStatus.UNREACHABLE, rtt_ms=None)
             bases = {"1.1.1.1": (12.0, 28.0), "8.8.8.8": (15.0, 35.0), "9.9.9.9": (11.0, 26.0)}
             lo, hi = bases.get(target, (18.0, 45.0))
             ms = random.uniform(lo, hi)
             return RawIpResult(target=target, label=label,
                                status=ProbeStatus.HEALTHY, rtt_ms=ms)
 
+        _DNS_IPS = {
+            "cloudflare.com": "104.16.133.229",
+            "google.com":     "142.251.1.100",
+            "quad9.net":      "9.9.9.9",
+        }
+
         def _dns(hostname: str, label: str) -> DnsResult:
+            mode = self._inet_mode(hostname)
             if mode == "down":
                 return DnsResult(hostname=hostname, label=label,
                                  success=False, lookup_ms=None, resolved_ip=None)
             if mode == "slow":
                 ms = random.uniform(60.0, 140.0)
                 return DnsResult(hostname=hostname, label=label,
-                                 success=True, lookup_ms=ms, resolved_ip="1.2.3.4")
+                                 success=True, lookup_ms=ms,
+                                 resolved_ip=_DNS_IPS.get(hostname, "1.2.3.4"))
             if mode == "intermittent" and random.random() < 0.25:
                 return DnsResult(hostname=hostname, label=label,
                                  success=False, lookup_ms=None, resolved_ip=None)
-            ips = {
-                "cloudflare.com": "104.16.133.229",
-                "google.com":     "142.251.1.100",
-                "quad9.net":      "9.9.9.9",
-            }
             ms = random.uniform(2.0, 18.0)
             return DnsResult(hostname=hostname, label=label,
                              success=True, lookup_ms=ms,
-                             resolved_ip=ips.get(hostname, "1.2.3.4"))
+                             resolved_ip=_DNS_IPS.get(hostname, "1.2.3.4"))
 
         def _http(url: str, label: str, short_path: str, expected: int) -> HttpResult:
+            # HTTP targets keyed by "<label>_http" (lowercase), e.g. "microsoft_http"
+            http_key = label.lower().replace(" ", "_") + "_http"
+            mode = self._inet_mode(http_key)
             if mode == "down":
                 return HttpResult(url=url, label=label, short_path=short_path,
                                   success=False, status_code=None,
