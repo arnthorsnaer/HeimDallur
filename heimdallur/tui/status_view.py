@@ -252,7 +252,7 @@ class HomeNetworkPanel(Widget):
     #hn-cpu-hdr    {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
     HomeNetworkPanel Sparkline {{ height: 3; }}
     #hn-groups     {{ height: 1fr; margin-top: 1; layout: horizontal; }}
-    #hn-wifi-col   {{ width: 1fr; margin-right: 1; }}
+    #hn-wifi-col   {{ width: 1fr; margin-right: 4; }}
     #hn-lan-col    {{ width: 1fr; }}
     #hn-wifi-hdr   {{ height: 1; color: {UI_DIM}; text-style: bold; }}
     #hn-lan-hdr    {{ height: 1; color: {UI_DIM}; text-style: bold; }}
