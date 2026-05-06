@@ -464,7 +464,22 @@ class GroupRow(Widget):
         elif has_gw:
             c, icon = S_OK, "●"
         else:
-            c, icon = UI_DIM, "○"
+            # No gateway — derive indicator from device statuses
+            dev_statuses = [
+                state.device_results.get(d.ip) for d in self._devices
+            ]
+            known = [r for r in dev_statuses if r is not None]
+            if not known:
+                c, icon = UI_DIM, "○"
+            else:
+                n_ok  = sum(1 for r in known if r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED))
+                n_err = sum(1 for r in known if r.status == ProbeStatus.UNREACHABLE)
+                if n_ok == len(known):
+                    c, icon = S_OK, "●"
+                elif n_err == len(known):
+                    c, icon = S_ERR, "✗"
+                else:
+                    c, icon = S_WARN, "~"
 
         self.query_one(f"#grp-icon-{gid}", Label).update(f"[{c}]{icon}[/]")
 
