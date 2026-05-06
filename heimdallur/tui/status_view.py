@@ -458,17 +458,12 @@ class GroupRow(Widget):
         gw_offline = gw_result is not None and gw_result.status == ProbeStatus.UNREACHABLE
 
         if gw_offline:
+            # Gateway explicitly unreachable — authoritative failure signal
             c, icon = S_ERR, "✗"
-        elif gw_result and gw_result.status == ProbeStatus.DEGRADED:
-            c, icon = S_WARN, "~"
-        elif has_gw:
-            c, icon = S_OK, "●"
         else:
-            # No gateway — derive indicator from device statuses
-            dev_statuses = [
-                state.device_results.get(d.ip) for d in self._devices
-            ]
-            known = [r for r in dev_statuses if r is not None]
+            # Derive indicator from device aggregate for both WiFi and LAN groups
+            dev_results = [state.device_results.get(d.ip) for d in self._devices]
+            known = [r for r in dev_results if r is not None]
             if not known:
                 c, icon = UI_DIM, "○"
             else:
