@@ -79,10 +79,12 @@ class HistoryScreen(Screen):
         padding: 1 2;
         height: 1fr;
     }}
+    #hist-axis-row {{
+        margin-bottom: 1;
+    }}
     .hist-time-axis {{
         color: {GRAY};
-        height: 1;
-        margin-bottom: 1;
+        width: 1fr;
     }}
     .hist-row {{
         height: 1;
@@ -122,9 +124,10 @@ class HistoryScreen(Screen):
             yield Label(datetime.now().strftime("%H:%M"), id="hist-time")
 
         with Vertical(id="hist-body"):
-            # 10-char spacer + 6 chars per 3h slot (= 2 chars/bucket × 3 buckets)
-            yield Label("          00    03    06    09    12    15    18    21    24",
-                        classes="hist-time-axis")
+            with Horizontal(classes="hist-row", id="hist-axis-row"):
+                yield Label("", classes="hist-row-label")
+                yield Label("00    03    06    09    12    15    18    21    24",
+                            classes="hist-time-axis")
 
             rows = [
                 ("WAN",    _mock_history("wan")),
