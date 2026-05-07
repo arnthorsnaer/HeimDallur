@@ -13,6 +13,7 @@ Heimdallur gives you a persistent, at-a-glance view of your entire home network 
 - **Internet health** — IP, DNS, and HTTP reachability checks against multiple targets; latency trending and speed test results (Cloudflare)
 - **Home network panel** — router latency, memory usage, and uptime; device groups (WI-FI access points and LAN segments) with per-AP signal strength and online/offline counts
 - **Status panel** — single-line summary that expands to list every active fault
+- **Incident reports** — emails the home network admin when internet or home network connectivity is restored after an outage; sent via Gmail with a 16-character app password
 - **History screen** — 24h uptime bars per network segment
 - **Device list** — full device inventory with live latency and status per device
 
@@ -48,6 +49,25 @@ make dev
 ## Configuration
 
 All devices and groups are defined in `heimdallur/config/network.toml`. Edit this file to match your network topology — groups, access points, and devices.
+
+## Notifications
+
+When an outage ends — internet or home network going from offline back to online — Heimdallur can automatically email an incident report to the home network admin. Add the following to `network.toml`:
+
+```toml
+[contacts]
+home_network_admin_email = "you@example.com"   # who receives the report
+
+[notification_email_gmail]
+sender_email = "heimdallur.alerts@gmail.com"   # Gmail address to send from
+app_password = "xxxx xxxx xxxx xxxx"           # 16-char Gmail app password
+```
+
+To generate a Gmail app password: **Google Account → Security → 2-Step Verification → App passwords**.
+
+The footer shows whether notifications are configured — `✉ you@example.com` when active, `✉  no email configured` when not. Emails fire on recovery, not during the outage, so a full internet outage will still trigger a report once connectivity is restored.
+
+![Heimdallur — email notifications configured](docs/screenshots/01b-status-email-configured.png)
 
 ## Deploying to a Raspberry Pi
 
@@ -89,7 +109,7 @@ To trigger an immediate update without waiting for the timer:
 sudo systemctl start heimdallur-update
 ```
 
-The footer shows the running version as `v0.3.0+20260507.d40c034` — date and git hash — so you can identify the exact commit at a glance and match it against the GitHub commit list without running any commands.
+The footer shows the running version as `v0.4.0+20260507.d40c034` — date and git hash — so you can identify the exact commit at a glance and match it against the GitHub commit list without running any commands.
 
 ---
 
