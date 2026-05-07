@@ -175,7 +175,7 @@ class HeaderBar(Widget):
         layout: horizontal; padding: 0 2;
     }}
     #hdr-left    {{ width: 1fr; content-align: left middle; color: {UI_FG}; text-style: bold; }}
-    #hdr-version {{ width: 1fr; content-align: center middle; color: #3d4450; }}
+    #hdr-version {{ width: 1fr; content-align: center middle; color: #52596b; }}
     #hdr-right   {{ width: 1fr; content-align: right middle; color: {UI_DIM}; }}
     """
 
