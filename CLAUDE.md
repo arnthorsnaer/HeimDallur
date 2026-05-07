@@ -71,7 +71,7 @@ Offline states cascade: router offline → all gateways and devices shown as `UN
 
 | File | Purpose |
 |---|---|
-| `heimdallur/config/devices.toml` | Network topology — groups, APs, devices. Edit to match your network. |
+| `heimdallur/config/network.toml` | Network topology — groups, APs, devices. Edit to match your network. |
 | `heimdallur/core/topology.py` | All data models: `ProbeResult`, `NetworkState`, `RouterStats`, `SpeedResult`, `NetworkConfig` |
 | `heimdallur/tui/status_view.py` | All status-screen widgets. Colour palette and semantic status colours defined at the top. |
 | `heimdallur/tui/app.py` | App entry point, probe/speed loops, history accumulation |
