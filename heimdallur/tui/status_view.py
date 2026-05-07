@@ -903,7 +903,7 @@ class GroupRow(Widget):
 
         count_c = S_OK if online == total else (S_WARN if online > 0 else S_ERR)
         self.query_one(f"#grp-count-{gid}", Label).update(
-            f"[{count_c}]{online}[/][{UI_DIM}]/{total}[/]"
+            f"[{count_c}]{online}/{total}[/]"
         )
 
 
