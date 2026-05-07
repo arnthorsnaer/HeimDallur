@@ -135,6 +135,16 @@ class HeimdallurApp(App):
         for v in _walk(38.0, 24.0, 58.0, 3.0):
             self._mem.append(v)
 
+        # Seed a realistic speed result so screenshots show real data immediately
+        for v in _walk(310.0, 180.0, 480.0, 40.0):
+            self._dl.append(v)
+        self._speed_result = SpeedResult(
+            timestamp=time.time() - random.uniform(60.0, 240.0),
+            download_mbps=_walk(310.0, 280.0, 380.0, 20.0)[-1],
+            ping_ms=_walk(14.0, 8.0, 35.0, 4.0)[-1],
+            ok=True,
+        )
+
         bases_ip = {"1.1.1.1": (12.0, 28.0, 4.0), "8.8.8.8": (15.0, 35.0, 5.0), "9.9.9.9": (11.0, 26.0, 4.0)}
         for target, _ in IP_TARGETS:
             lo, hi, step = bases_ip.get(target, (18.0, 45.0, 6.0))

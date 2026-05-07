@@ -98,7 +98,7 @@ jobs:
               { slug: "05-status-gateway-offline",   title: "AP offline" },
               { slug: "06-status-multiple-issues",   title: "Multiple issues" },
               { slug: "07-inet-panel-expanded",      title: "Internet panel expanded" },
-              { slug: "08-rtr-panel-expanded",       title: "Router panel expanded" },
+              { slug: "08-net-panel-expanded",         title: "Home network panel expanded" },
               { slug: "09-history-screen",           title: "History screen" },
               { slug: "10-devices-screen",           title: "Devices screen" },
             ];
