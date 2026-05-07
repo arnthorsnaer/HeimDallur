@@ -811,13 +811,20 @@ class StatusPanel(Widget):
 
     def update(self, state: NetworkState, config: NetworkConfig) -> None:
         issues = state.problems(config)
+        admin = config.contacts.network_admin
+        isp   = config.contacts.isp_name
 
         ont_down = state.ont_result and state.ont_result.status == ProbeStatus.UNREACHABLE
         rtr_down = state.router_result and state.router_result.status == ProbeStatus.UNREACHABLE
 
-        if ont_down or rtr_down:
+        contact_hint: str | None = None
+        if ont_down:
             c, icon = S_ERR, "✗"
-            summary = issues[0] if issues else "Critical failure"
+            summary = f"Internet is down · call {admin}"
+            contact_hint = f"→ {admin} will contact {isp} if the outage is on their end"
+        elif rtr_down:
+            c, icon = S_ERR, "✗"
+            summary = f"Home network down · call {admin}"
         elif issues:
             c, icon = S_WARN, "⚠"
             gw  = sum(1 for i in issues if "gateway offline" in i)
@@ -825,7 +832,7 @@ class StatusPanel(Widget):
             parts = []
             if gw:  parts.append(f"{gw} gateway{'s' if gw > 1 else ''} offline")
             if dev: parts.append(f"{dev} device{'s' if dev > 1 else ''} unreachable")
-            summary = " · ".join(parts) if parts else issues[0]
+            summary = (" · ".join(parts) if parts else issues[0]) + f" · let {admin} know"
         else:
             c, icon = S_OK, "●"
             summary = "All systems operational"
@@ -835,6 +842,8 @@ class StatusPanel(Widget):
 
         if issues:
             lines = [f"[{_issue_color(i)}]{i}[/]" for i in issues]
+            if contact_hint:
+                lines.append(f"[{UI_DIM}]{contact_hint}[/]")
         else:
             lines = [f"[{UI_DIM}]No issues detected[/]"]
         self.query_one("#st-detail", Label).update("\n".join(lines))

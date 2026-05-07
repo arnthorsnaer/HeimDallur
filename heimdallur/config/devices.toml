@@ -1,3 +1,7 @@
+[contacts]
+network_admin = "Atti"
+isp_name      = "Hringdu"
+
 [network]
 ont_check_host              = "8.8.8.8"
 router_ip                   = "192.168.1.1"
