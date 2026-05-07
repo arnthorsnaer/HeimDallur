@@ -98,12 +98,8 @@ def _p95(data: list[float]) -> float | None:
 
 def _speed_summary(speed: "SpeedResult | None") -> str:
     if speed and speed.ok:
-        dl_c   = S_OK if speed.download_mbps >= 50 else (S_WARN if speed.download_mbps >= 10 else S_ERR)
-        ping_c = S_OK if speed.ping_ms <= 30        else (S_WARN if speed.ping_ms <= 80        else S_ERR)
-        return (
-            f"  [{UI_DIM}]·  ↓[/] [{dl_c}]{speed.download_mbps:.0f} Mbps[/]"
-            f"  [{UI_DIM}]ping[/] [{ping_c}]{speed.ping_ms:.0f}ms[/]"
-        )
+        dl_c = S_OK if speed.download_mbps >= 50 else (S_WARN if speed.download_mbps >= 10 else S_ERR)
+        return f"  [{UI_DIM}]·  ↓[/] [{dl_c}]{speed.download_mbps:.0f} Mbps[/]"
     return f"  [{UI_DIM}]·  speed —[/]"
 
 
