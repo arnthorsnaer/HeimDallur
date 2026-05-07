@@ -1,0 +1,12 @@
+[Unit]
+Description=Heimdallur auto-update
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/opt/heimdallur/scripts/auto-update.sh
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=heimdallur-update

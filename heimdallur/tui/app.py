@@ -266,6 +266,9 @@ class HeimdallurApp(App):
             )
             snapshot = self._accumulate(state, enriched)
             self.post_message(ProbeComplete(enriched, snapshot))
+            asyncio.get_event_loop().run_in_executor(
+                None, self._write_report, enriched, snapshot
+            )
             await asyncio.sleep(self._config.probe_interval_seconds)
 
     @work(exclusive=True, group="speedtest")
@@ -281,6 +284,13 @@ class HeimdallurApp(App):
             self._speed_result = result
             await self._store.record_speed_test(result)
             await asyncio.sleep(self._config.speed_test_interval_seconds)
+
+    def _write_report(self, enriched: EnrichedState, snapshot: HistorySnapshot) -> None:
+        from heimdallur.core.report import render_markdown, write_report
+        try:
+            write_report(render_markdown(enriched, snapshot, self._config))
+        except Exception:
+            pass
 
     def on_probe_complete(self, message: ProbeComplete) -> None:
         from heimdallur.tui.status_view import StatusScreen

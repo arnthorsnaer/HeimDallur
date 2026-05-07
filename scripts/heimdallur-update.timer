@@ -1,0 +1,11 @@
+[Unit]
+Description=Check for Heimdallur updates hourly
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1h
+RandomizedDelaySec=300
+Persistent=true
+
+[Install]
+WantedBy=timers.target
