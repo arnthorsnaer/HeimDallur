@@ -174,8 +174,9 @@ class HeaderBar(Widget):
         border-bottom: solid {UI_BDR};
         layout: horizontal; padding: 0 2;
     }}
-    #hdr-left  {{ width: 1fr; content-align: left middle; color: {UI_FG}; text-style: bold; }}
-    #hdr-right {{ width: auto; content-align: right middle; color: {UI_DIM}; }}
+    #hdr-left    {{ width: 1fr; content-align: left middle; color: {UI_FG}; text-style: bold; }}
+    #hdr-version {{ width: 1fr; content-align: center middle; color: #3d4450; }}
+    #hdr-right   {{ width: 1fr; content-align: right middle; color: {UI_DIM}; }}
     """
 
     def __init__(self, start_time: float) -> None:
@@ -184,6 +185,7 @@ class HeaderBar(Widget):
 
     def compose(self) -> ComposeResult:
         yield Label("HEIMDALLUR  Network Health Monitor", id="hdr-left")
+        yield Label(f"v{__version__}", id="hdr-version")
         yield Label("", id="hdr-right")
 
     def on_mount(self) -> None:
@@ -193,7 +195,7 @@ class HeaderBar(Widget):
     def _tick(self) -> None:
         from datetime import datetime
         self.query_one("#hdr-right", Label).update(
-            f"v{__version__}   UP {_fmt_uptime(time.time() - self._start_time)}"
+            f"UP {_fmt_uptime(time.time() - self._start_time)}"
             f"   {datetime.now().strftime('%H:%M:%S')}"
         )
 
