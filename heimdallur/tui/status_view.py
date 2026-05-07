@@ -96,6 +96,17 @@ def _p95(data: list[float]) -> float | None:
     return s[idx]
 
 
+def _speed_summary(speed: "SpeedResult | None") -> str:
+    if speed and speed.ok:
+        dl_c   = S_OK if speed.download_mbps >= 50 else (S_WARN if speed.download_mbps >= 10 else S_ERR)
+        ping_c = S_OK if speed.ping_ms <= 30        else (S_WARN if speed.ping_ms <= 80        else S_ERR)
+        return (
+            f"  [{UI_DIM}]·  ↓[/] [{dl_c}]{speed.download_mbps:.0f} Mbps[/]"
+            f"  [{UI_DIM}]ping[/] [{ping_c}]{speed.ping_ms:.0f}ms[/]"
+        )
+    return f"  [{UI_DIM}]·  speed —[/]"
+
+
 def _loss_pct(loss_flags: list[float]) -> float:
     if not loss_flags:
         return 0.0
@@ -214,7 +225,7 @@ class InternetPanel(Widget):
     #inet-http-hdr   {{ height: 1; color: {UI_DIM}; text-style: bold; padding-top: 1; }}
     #inet-http-meta  {{ height: 1; color: {UI_DIM}; }}
     #inet-http-rows  {{ height: auto; }}
-    #inet-spark-hdr  {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
+    #inet-spark-hdr  {{ height: 1; color: {UI_DIM}; text-style: bold; padding-top: 1; }}
     #inet-speed-hdr  {{ height: 1; color: {UI_DIM}; text-style: bold; padding-top: 1; }}
     #inet-speed-row  {{ height: 1; }}
     #inet-speed-spark-hdr {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
@@ -235,11 +246,11 @@ class InternetPanel(Widget):
             yield Label("", id="inet-hint")
         yield Label("", id="inet-summary")
         with Vertical(id="inet-detail"):
-            yield Label("RAW IP REACHABILITY", id="inet-ip-hdr")
+            yield Label("", id="inet-ip-hdr")
             yield Label("", id="inet-ip-rows")
-            yield Label("DNS RESOLUTION", id="inet-dns-hdr")
+            yield Label("", id="inet-dns-hdr")
             yield Label("", id="inet-dns-rows")
-            yield Label("HTTP/HTTPS QUALITY", id="inet-http-hdr")
+            yield Label("", id="inet-http-hdr")
             yield Label("", id="inet-http-meta")
             yield Label("", id="inet-http-rows")
             yield Label("", id="inet-spark-hdr")
@@ -265,7 +276,7 @@ class InternetPanel(Widget):
     def _refresh_hint(self) -> None:
         arrow = "▴" if self._expanded else "▾"
         self.query_one("#inet-hint", Label).update(
-            f"[{UI_FG}]i[/][{UI_DIM}] {arrow}[/]"
+            f"[{UI_FG}]I[/][{UI_DIM}] {arrow}[/]"
         )
 
     def _tick(self) -> None:
@@ -314,12 +325,9 @@ class InternetPanel(Widget):
             avg_rtt = _rolling_avg(
                 [r.rtt_ms for r in iq.raw_ip if r.rtt_ms is not None]
             )
-            rtt_str = (f"  [{UI_DIM}]·  avg[/] [{c}]{avg_rtt:.0f}ms[/]"
+            rtt_str = (f"  [{UI_DIM}]·  RTT avg[/] [{c}]{avg_rtt:.0f}ms[/]"
                        if avg_rtt is not None else "")
-            spd_str = (
-                f"  [{UI_DIM}]·  ↓[/] [{S_OK}]{speed.download_mbps:.0f} Mbps[/]"
-                if speed and speed.ok else ""
-            )
+            spd_str = _speed_summary(speed)
             self.query_one("#inet-summary", Label).update(
                 f"[{UI_DIM}]IP[/] {_count_label(ip_ok, ip_tot)}"
                 f"  [{UI_DIM}]DNS[/] {_count_label(dns_ok, dns_tot)}"
@@ -328,13 +336,11 @@ class InternetPanel(Widget):
             )
         else:
             avg_lat = _rolling_avg(ont_lat)
-            avg_str = (f"[{UI_DIM}]Avg[/] [{c}]{avg_lat:.1f}ms[/]"
-                       if avg_lat is not None else f"[{S_UNK}]Avg —[/]")
-            spd_str = (
-                f"  [{UI_DIM}]·  ↓[/] [{S_OK}]{speed.download_mbps:.0f} Mbps[/]"
-                if speed and speed.ok else f"  [{UI_DIM}]·  speed pending[/]"
+            avg_str = (f"[{UI_DIM}]RTT avg[/] [{c}]{avg_lat:.1f}ms[/]"
+                       if avg_lat is not None else f"[{S_UNK}]RTT —[/]")
+            self.query_one("#inet-summary", Label).update(
+                avg_str + _speed_summary(speed)
             )
-            self.query_one("#inet-summary", Label).update(avg_str + spd_str)
 
         if iq is None:
             return
@@ -342,6 +348,17 @@ class InternetPanel(Widget):
         # ── Detail rows ─────────────────────────────────────────
         # Always rendered when iq data is available so toggling open
         # shows current data immediately. Visibility is CSS-controlled.
+
+        # ── Section headers (mirror collapsed summary counts) ───
+        self.query_one("#inet-ip-hdr",   Label).update(
+            f"[{UI_DIM}]IP[/] {_count_label(ip_ok, ip_tot)}"
+        )
+        self.query_one("#inet-dns-hdr",  Label).update(
+            f"[{UI_DIM}]DNS[/] {_count_label(dns_ok, dns_tot)}"
+        )
+        self.query_one("#inet-http-hdr", Label).update(
+            f"[{UI_DIM}]HTTP[/] {_count_label(http_ok, http_tot)}"
+        )
 
         # ── Raw IP section ──────────────────────────────────────
         ip_lines: list[str] = []
@@ -411,18 +428,19 @@ class InternetPanel(Widget):
 
         # ── Latency sparkline for primary IP target ─────────────
         primary_hist = snapshot.inet_ip_lat.get("1.1.1.1", ont_lat)
+        avg_rtt_spark = _rolling_avg(primary_hist) if primary_hist else None
+        avg_rtt_s = f"{avg_rtt_spark:.0f}ms" if avg_rtt_spark is not None else "—"
+        self.query_one("#inet-spark-hdr", Label).update(
+            f"[{UI_DIM}]LATENCY[/]  [{UI_DIM}]1.1.1.1  RTT avg {avg_rtt_s}[/]"
+        )
         if primary_hist:
-            avg_s = f"{_rolling_avg(primary_hist):.0f}ms" if _rolling_avg(primary_hist) else "—"
-            self.query_one("#inet-spark-hdr", Label).update(
-                f"[{UI_DIM}]Latency 1.1.1.1  avg {avg_s}[/]"
-            )
             self.query_one("#inet-lat-spark", Sparkline).data = primary_hist
 
         # ── Speed test section ───────────────────────────────────
         if speed and speed.ok:
-            age_s = _fmt_uptime(time.time() - speed.timestamp)
-            dl_c = S_OK if speed.download_mbps >= 50 else (S_WARN if speed.download_mbps >= 10 else S_ERR)
-            ping_c = S_OK if speed.ping_ms <= 30 else (S_WARN if speed.ping_ms <= 80 else S_ERR)
+            age_s  = _fmt_uptime(time.time() - speed.timestamp)
+            dl_c   = S_OK if speed.download_mbps >= 50 else (S_WARN if speed.download_mbps >= 10 else S_ERR)
+            ping_c = S_OK if speed.ping_ms <= 30        else (S_WARN if speed.ping_ms <= 80        else S_ERR)
             self.query_one("#inet-speed-row", Label).update(
                 f"[{UI_DIM}]Download[/] [{dl_c}]{speed.download_mbps:.0f} Mbps[/]"
                 f"  [{UI_DIM}]·  Ping[/] [{ping_c}]{speed.ping_ms:.0f}ms[/]"
@@ -430,7 +448,7 @@ class InternetPanel(Widget):
             )
         else:
             self.query_one("#inet-speed-row", Label).update(
-                f"[{UI_DIM}]No result yet — runs every 5 min[/]"
+                f"[{UI_DIM}]Pending — runs every 5 min[/]"
             )
         dl_hist = snapshot.dl_hist
         if dl_hist:
@@ -514,7 +532,7 @@ class HomeNetworkPanel(Widget):
     def _refresh_hint(self) -> None:
         arrow = "▴" if self._expanded else "▾"
         self.query_one("#hn-hint", Label).update(
-            f"[{UI_FG}]n[/][{UI_DIM}] {arrow}[/]"
+            f"[{UI_FG}]N[/][{UI_DIM}] {arrow}[/]"
         )
 
     def _tick(self) -> None:
