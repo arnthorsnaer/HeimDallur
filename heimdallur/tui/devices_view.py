@@ -37,14 +37,6 @@ def _ms(v: float | None) -> str:
     return f"{v:.0f}ms" if v is not None else "—"
 
 
-def _signal_bars(dbm: int) -> str:
-    filled = 4 if dbm >= -55 else 3 if dbm >= -67 else 2 if dbm >= -80 else 1
-    return "".join(
-        f"[{S_OK}]{b}[/]" if i < filled else f"[{UI_BDR}]{b}[/]"
-        for i, b in enumerate("▂▄▆█")
-    )
-
-
 # ── Section header  e.g. "WI-FI  3/4" ──────────────────────────
 class SectionHeader(Widget):
     DEFAULT_CSS = f"""
@@ -133,12 +125,7 @@ class GroupHeaderRow(Widget):
 
         self.query_one(f"#ghdr-icon-{gid}", Label).update(f"[{c}]{icon}[/]")
 
-        if enrichment and enrichment.signal_dbm is not None:
-            bars = _signal_bars(enrichment.signal_dbm)
-            self.query_one(f"#ghdr-sig-{gid}", Label).update(
-                f"[{UI_DIM}]{enrichment.signal_dbm}dBm[/] {bars}"
-            )
-        elif has_gw and gw_result:
+        if has_gw and gw_result:
             self.query_one(f"#ghdr-sig-{gid}", Label).update(
                 f"[{_sc(gw_result.status)}]{_ms(gw_result.response_ms)}[/]"
             )

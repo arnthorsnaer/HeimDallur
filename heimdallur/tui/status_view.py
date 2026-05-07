@@ -48,13 +48,6 @@ def _status_word(status: ProbeStatus | None) -> str:
 def _ms(v: float | None) -> str:
     return f"{v:.0f}ms" if v is not None else "—"
 
-def _signal_bars(dbm: int) -> str:
-    filled = 4 if dbm >= -55 else 3 if dbm >= -67 else 2 if dbm >= -80 else 1
-    return "".join(
-        f"[{S_OK}]{b}[/]" if i < filled else f"[{UI_BDR}]{b}[/]"
-        for i, b in enumerate("▂▄▆█")
-    )
-
 def _fmt_uptime(seconds: float) -> str:
     h, r = divmod(int(seconds), 3600)
     m, s = divmod(r, 60)
@@ -720,13 +713,8 @@ class GroupRow(Widget):
 
         self.query_one(f"#grp-icon-{gid}", Label).update(f"[{c}]{icon}[/]")
 
-        # Signal / latency for gateway
-        if enrichment and enrichment.signal_dbm is not None:
-            bars = _signal_bars(enrichment.signal_dbm)
-            self.query_one(f"#grp-sig-{gid}", Label).update(
-                f"[{UI_DIM}]{enrichment.signal_dbm}dBm[/] {bars}"
-            )
-        elif has_gw and gw_result:
+        # Latency for gateway
+        if has_gw and gw_result:
             self.query_one(f"#grp-sig-{gid}", Label).update(
                 f"[{_sc(gw_result.status)}]{_ms(gw_result.response_ms)}[/]"
             )
