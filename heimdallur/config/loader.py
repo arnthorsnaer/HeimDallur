@@ -1,6 +1,6 @@
 import tomllib
 from pathlib import Path
-from heimdallur.core.topology import Contacts, Device, Group, NetworkConfig
+from heimdallur.core.topology import Contacts, Device, GmailNotificationConfig, Group, NetworkConfig
 
 _DEFAULT_PATH = Path(__file__).parent / "network.toml"
 
@@ -13,7 +13,14 @@ def load_config(path: Path | None = None) -> NetworkConfig:
     ct = data.get("contacts", {})
     contacts = Contacts(
         network_admin=ct.get("network_admin", "network admin"),
+        network_admin_email=ct.get("network_admin_email", ""),
         isp_name=ct.get("isp_name", "ISP"),
+    )
+
+    gm = data.get("notification_email_gmail", {})
+    gmail_notification = GmailNotificationConfig(
+        sender_email=gm.get("sender_email", ""),
+        app_password=gm.get("app_password", ""),
     )
     net = data["network"]
     groups = [
@@ -46,4 +53,5 @@ def load_config(path: Path | None = None) -> NetworkConfig:
         groups=groups,
         devices=devices,
         contacts=contacts,
+        gmail_notification=gmail_notification,
     )

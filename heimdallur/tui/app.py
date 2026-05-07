@@ -80,6 +80,9 @@ class HeimdallurApp(App):
         from heimdallur.core.internet_probe import InternetProber
         self._inet_prober = InternetProber()
 
+        from heimdallur.core.notifier import IncidentNotifier
+        self._notifier = IncidentNotifier(self._config)
+
         # Rolling history — init loss with zeros so sparkline starts green not red
         self._lat:  dict[str, deque] = defaultdict(lambda: deque(maxlen=_HIST))
         self._loss: dict[str, deque] = defaultdict(lambda: deque([0.0, 0.0], maxlen=_HIST))
@@ -268,6 +271,9 @@ class HeimdallurApp(App):
             self.post_message(ProbeComplete(enriched, snapshot))
             asyncio.get_event_loop().run_in_executor(
                 None, self._write_report, enriched, snapshot
+            )
+            asyncio.get_event_loop().run_in_executor(
+                None, self._notifier.check, state
             )
             await asyncio.sleep(self._config.probe_interval_seconds)
 
