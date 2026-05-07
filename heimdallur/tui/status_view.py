@@ -62,7 +62,7 @@ def _fmt_uptime(seconds: float) -> str:
 
 def _issue_color(issue: str) -> str:
     low = issue.lower()
-    if "offline" in low or "unreachable" in low:
+    if any(k in low for k in ("offline", "unreachable", "no ip connectivity", "outage")):
         return S_ERR
     return S_WARN
 
@@ -100,6 +100,36 @@ def _loss_pct(loss_flags: list[float]) -> float:
     if not loss_flags:
         return 0.0
     return sum(loss_flags) / len(loss_flags) * 100.0
+
+
+def _internet_diagnosis(iq: "InternetQuality") -> tuple[str, str]:
+    """Return (color, message) summarising what the IQ data means."""
+    ip_ok    = sum(1 for r in iq.raw_ip if r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED))
+    ip_tot   = len(iq.raw_ip)
+    dns_ok   = sum(1 for r in iq.dns  if r.success)
+    dns_tot  = len(iq.dns)
+    http_ok  = sum(1 for r in iq.http if r.success)
+    http_tot = len(iq.http)
+
+    if ip_tot > 0 and ip_ok == 0:
+        return S_ERR,  "No IP connectivity — likely ISP outage"
+    if ip_ok == ip_tot and dns_tot > 0 and dns_ok == 0:
+        return S_WARN, "All DNS failing — ISP resolver issue — try manual DNS (8.8.8.8)"
+    if 0 < ip_ok < ip_tot:
+        return S_WARN, "Some IP paths degraded — routing or congestion issue"
+    if 0 < dns_ok < dns_tot:
+        return S_WARN, "Some DNS resolvers failing — upstream issue, not your line"
+    if http_tot > 0 and http_ok == 0 and ip_ok == ip_tot and dns_ok == dns_tot:
+        return S_WARN, "All HTTP failing with healthy IP/DNS — possible firewall issue"
+    if 0 < http_ok < http_tot:
+        return S_WARN, "Some HTTP checks failing — likely destination issue, not your connection"
+    return S_OK, "All paths healthy — no action needed"
+
+
+def _latency_qualifier(avg_ms: float) -> tuple[str, str]:
+    if avg_ms < 50:  return S_OK,   "excellent"
+    if avg_ms < 100: return S_WARN, "elevated"
+    return S_ERR, "degraded"
 
 
 def _iq_derived_status(iq: InternetQuality) -> ProbeStatus:
@@ -193,6 +223,32 @@ class HeaderBar(Widget):
         )
 
 
+# ── Section toggle ─────────────────────────────────────────────
+class SectionToggle(Static):
+    """Tiny ≡ tap target that expands/collapses one detail sub-section."""
+
+    class Toggled(Message):
+        def __init__(self, section: str) -> None:
+            super().__init__()
+            self.section = section
+
+    DEFAULT_CSS = f"""
+    SectionToggle {{
+        width: 2; height: 1;
+        color: {UI_DIM};
+    }}
+    SectionToggle:hover {{ color: {UI_FG}; }}
+    """
+
+    def __init__(self, section: str) -> None:
+        super().__init__("≡")
+        self._section = section
+
+    def on_click(self, event) -> None:
+        event.stop()
+        self.post_message(SectionToggle.Toggled(self._section))
+
+
 # ── Internet panel ─────────────────────────────────────────────
 class InternetPanel(Widget):
     DEFAULT_CSS = f"""
@@ -203,22 +259,27 @@ class InternetPanel(Widget):
         border: solid {UI_BDR};
         padding: 0 1;
     }}
-    #inet-header     {{ height: 1; layout: horizontal; }}
-    #inet-duration   {{ width: 1fr; height: 1; }}
-    #inet-hint       {{ width: 9; height: 1; content-align: right middle; color: {UI_DIM}; }}
-    #inet-summary    {{ height: 1; }}
-    #inet-detail     {{ height: auto; display: none; padding-top: 1; }}
-    #inet-ip-hdr     {{ height: 1; color: {UI_DIM}; text-style: bold; }}
-    #inet-ip-rows    {{ height: auto; }}
-    #inet-dns-hdr    {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
-    #inet-dns-rows   {{ height: auto; }}
-    #inet-http-hdr   {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
-    #inet-http-meta  {{ height: 1; color: {UI_DIM}; }}
-    #inet-http-rows  {{ height: auto; }}
-    #inet-spark-hdr  {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
-    #inet-speed-hdr  {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
-    #inet-speed-row  {{ height: 1; }}
-    #inet-speed-spark-hdr {{ height: 1; color: {UI_DIM}; margin-top: 1; }}
+    #inet-header       {{ height: 1; layout: horizontal; }}
+    #inet-duration     {{ width: 1fr; height: 1; }}
+    #inet-hint         {{ width: 9; height: 1; content-align: right middle; color: {UI_DIM}; }}
+    #inet-summary      {{ height: 1; }}
+    #inet-detail       {{ height: auto; display: none; padding-top: 1; }}
+    #inet-diagnosis    {{ height: 1; }}
+    #inet-ip-hdr-row   {{ height: 1; layout: horizontal; margin-top: 1; }}
+    #inet-dns-hdr-row  {{ height: 1; layout: horizontal; margin-top: 1; }}
+    #inet-http-hdr-row {{ height: 1; layout: horizontal; margin-top: 1; }}
+    #inet-ip-hdr       {{ width: auto; margin-right: 2; color: {UI_DIM}; text-style: bold; }}
+    #inet-ip-compact   {{ width: 1fr; height: 1; }}
+    #inet-ip-rows      {{ height: auto; }}
+    #inet-dns-hdr      {{ width: auto; margin-right: 2; color: {UI_DIM}; text-style: bold; }}
+    #inet-dns-compact  {{ width: 1fr; height: 1; }}
+    #inet-dns-rows     {{ height: auto; }}
+    #inet-http-hdr     {{ width: auto; margin-right: 2; color: {UI_DIM}; text-style: bold; }}
+    #inet-http-compact {{ width: 1fr; height: 1; }}
+    #inet-http-rows    {{ height: auto; }}
+    #inet-spark-hdr    {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
+    #inet-speed-hdr    {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
+    #inet-speed-row    {{ height: 1; }}
     InternetPanel Sparkline {{ height: 3; }}
     """
 
@@ -229,6 +290,10 @@ class InternetPanel(Widget):
         self._status_color: str = S_UNK
         self._prev_status: ProbeStatus | None = None
         self._expanded: bool = False
+        self._ip_expanded: bool = False
+        self._dns_expanded: bool = False
+        self._http_expanded: bool = False
+        self._last_detail_args: tuple | None = None
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="inet-header"):
@@ -236,18 +301,26 @@ class InternetPanel(Widget):
             yield Label("", id="inet-hint")
         yield Label("", id="inet-summary")
         with Vertical(id="inet-detail"):
-            yield Label("", id="inet-ip-hdr")
+            yield Label("", id="inet-diagnosis")
+            with Horizontal(id="inet-ip-hdr-row"):
+                yield Label("", id="inet-ip-hdr")
+                yield Label("", id="inet-ip-compact")
+                yield SectionToggle("ip")
             yield Label("", id="inet-ip-rows")
-            yield Label("", id="inet-dns-hdr")
+            with Horizontal(id="inet-dns-hdr-row"):
+                yield Label("", id="inet-dns-hdr")
+                yield Label("", id="inet-dns-compact")
+                yield SectionToggle("dns")
             yield Label("", id="inet-dns-rows")
-            yield Label("", id="inet-http-hdr")
-            yield Label("", id="inet-http-meta")
+            with Horizontal(id="inet-http-hdr-row"):
+                yield Label("", id="inet-http-hdr")
+                yield Label("", id="inet-http-compact")
+                yield SectionToggle("http")
             yield Label("", id="inet-http-rows")
             yield Label("", id="inet-spark-hdr")
             yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-lat-spark")
             yield Label("SPEED TEST", id="inet-speed-hdr")
             yield Label("", id="inet-speed-row")
-            yield Label("", id="inet-speed-spark-hdr")
             yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-speed-spark")
 
     def on_mount(self) -> None:
@@ -260,6 +333,8 @@ class InternetPanel(Widget):
 
     def _toggle(self) -> None:
         self._expanded = not self._expanded
+        if not self._expanded:
+            self._ip_expanded = self._dns_expanded = self._http_expanded = False
         self.query_one("#inet-detail", Vertical).display = self._expanded
         self._refresh_hint()
 
@@ -278,13 +353,22 @@ class InternetPanel(Widget):
             f" [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
         )
 
+    def on_section_toggle_toggled(self, msg: SectionToggle.Toggled) -> None:
+        if msg.section == "ip":
+            self._ip_expanded = not self._ip_expanded
+        elif msg.section == "dns":
+            self._dns_expanded = not self._dns_expanded
+        elif msg.section == "http":
+            self._http_expanded = not self._http_expanded
+        if self._last_detail_args is not None:
+            self._render_detail(*self._last_detail_args)
+
     def update(self, state: NetworkState, config: NetworkConfig,
                ont_lat: list[float], ont_loss: list[float],
                speed: SpeedResult | None,
                iq: InternetQuality | None,
                snapshot) -> None:
 
-        # Derive displayed status: prefer IQ aggregate when available
         if iq is not None:
             derived = _iq_derived_status(iq)
         else:
@@ -335,118 +419,206 @@ class InternetPanel(Widget):
         if iq is None:
             return
 
-        # ── Detail rows ─────────────────────────────────────────
-        # Always rendered when iq data is available so toggling open
-        # shows current data immediately. Visibility is CSS-controlled.
+        self._last_detail_args = (iq, speed, ont_lat, snapshot)
+        self._render_detail(iq, speed, ont_lat, snapshot)
 
-        # ── Section headers (mirror collapsed summary counts) ───
-        self.query_one("#inet-ip-hdr",   Label).update(
+    def _render_detail(self, iq: InternetQuality, speed: SpeedResult | None,
+                       ont_lat: list[float], snapshot) -> None:
+        # ── Diagnosis banner ────────────────────────────────────
+        diag_c, diag_msg = _internet_diagnosis(iq)
+        diag_icon = "✓" if diag_c == S_OK else ("⚠" if diag_c == S_WARN else "✗")
+        self.query_one("#inet-diagnosis", Label).update(
+            f"[{diag_c}]{diag_icon} {diag_msg}[/]"
+        )
+
+        ip_ok, ip_tot, dns_ok, dns_tot, http_ok, http_tot = _check_counts(iq)
+
+        # ── IP section ───────────────────────────────────────────
+        self.query_one("#inet-ip-hdr", Label).update(
             f"[{UI_DIM}]IP[/] {_count_label(ip_ok, ip_tot)}"
         )
-        self.query_one("#inet-dns-hdr",  Label).update(
+        compact_lbl = self.query_one("#inet-ip-compact", Label)
+        rows_lbl    = self.query_one("#inet-ip-rows",    Label)
+
+        if self._ip_expanded:
+            compact_lbl.display = False
+            rows: list[str] = []
+            for r in iq.raw_ip:
+                rc   = _sc(r.status)
+                icon = "●" if r.status == ProbeStatus.HEALTHY else ("~" if r.status == ProbeStatus.DEGRADED else "✗")
+                rtt_s  = f"[{rc}]{r.rtt_ms:.0f}ms[/]" if r.rtt_ms is not None else f"[{S_ERR}]timeout[/]"
+                hist   = snapshot.inet_ip_lat.get(r.target, [])
+                loss_h = snapshot.inet_ip_loss.get(r.target, [])
+                j  = _jitter(hist);  p  = _p95(hist);  lp = _loss_pct(loss_h)
+                j_s  = f"[{UI_DIM}]±{j:.1f}ms[/]"   if j  is not None else f"[{UI_DIM}]±—[/]"
+                p_s  = f"[{UI_DIM}]P95 {p:.0f}ms[/]" if p  is not None else f"[{UI_DIM}]P95 —[/]"
+                lp_s = f"[{S_ERR}]{lp:.0f}% loss[/]" if lp > 0 else f"[{UI_DIM}]0% loss[/]"
+                rows.append(
+                    f"[{rc}]{icon}[/] [{UI_FG}]{r.target:<9}[/] [{UI_DIM}]{r.label:<11}[/]"
+                    f" {rtt_s:<18} {j_s:<20} {lp_s:<18} {p_s}"
+                )
+            rows_lbl.update("\n".join(rows))
+            rows_lbl.display = True
+        else:
+            ok_ip  = [r for r in iq.raw_ip if r.status in (ProbeStatus.HEALTHY, ProbeStatus.UNKNOWN)]
+            bad_ip = [r for r in iq.raw_ip if r.status in (ProbeStatus.DEGRADED, ProbeStatus.UNREACHABLE)]
+            if ok_ip:
+                compact_lbl.update("  ".join(
+                    f"[{S_OK}]●[/] [{UI_FG}]{r.target}[/]" for r in ok_ip
+                ))
+                compact_lbl.display = True
+            else:
+                compact_lbl.display = False
+            if bad_ip:
+                detail_rows: list[str] = []
+                for r in bad_ip:
+                    rc   = _sc(r.status)
+                    icon = "~" if r.status == ProbeStatus.DEGRADED else "✗"
+                    rtt_s  = f"[{rc}]{r.rtt_ms:.0f}ms[/]" if r.rtt_ms is not None else f"[{S_ERR}]timeout[/]"
+                    loss_h = snapshot.inet_ip_loss.get(r.target, [])
+                    lp     = _loss_pct(loss_h)
+                    lp_s   = f"  [{S_ERR}]{lp:.0f}% loss[/]" if lp > 0 else ""
+                    detail_rows.append(
+                        f"[{rc}]{icon}[/] [{UI_FG}]{r.target:<9}[/] [{UI_DIM}]{r.label:<11}[/]"
+                        f" {rtt_s}{lp_s}"
+                    )
+                rows_lbl.update("\n".join(detail_rows))
+                rows_lbl.display = True
+            else:
+                rows_lbl.display = False
+
+        # ── DNS section ──────────────────────────────────────────
+        self.query_one("#inet-dns-hdr", Label).update(
             f"[{UI_DIM}]DNS[/] {_count_label(dns_ok, dns_tot)}"
         )
+        dns_compact = self.query_one("#inet-dns-compact", Label)
+        dns_rows    = self.query_one("#inet-dns-rows",    Label)
+
+        if self._dns_expanded:
+            dns_compact.display = False
+            rows = []
+            for r in iq.dns:
+                rc     = S_OK if r.success else S_ERR
+                icon   = "●" if r.success else "✗"
+                hist   = snapshot.inet_dns_lat.get(r.hostname, [])
+                loss_h = snapshot.inet_dns_loss.get(r.hostname, [])
+                avg_ms = _rolling_avg(hist)
+                lp     = _loss_pct(loss_h)
+                if r.success:
+                    ms_s  = f"[{rc}]{r.lookup_ms:.0f}ms[/]" if r.lookup_ms is not None else "—"
+                    avg_s = f"[{UI_DIM}]avg {avg_ms:.0f}ms[/]" if avg_ms is not None else ""
+                    lp_s  = f"[{S_ERR}]{lp:.0f}% fail[/]" if lp > 0 else f"[{UI_DIM}]0% fail[/]"
+                    rows.append(
+                        f"[{rc}]{icon}[/] [{UI_FG}]{r.hostname:<18}[/] {ms_s:<12} {avg_s:<18} {lp_s}"
+                    )
+                else:
+                    fail_s = f"[{S_ERR}]{lp:.0f}% fail[/]" if lp > 0 else f"[{S_ERR}]FAILED[/]"
+                    rows.append(
+                        f"[{rc}]{icon}[/] [{UI_FG}]{r.hostname:<18}[/] [{S_ERR}]lookup failed[/]"
+                        f"{'':32} {fail_s}"
+                    )
+            dns_rows.update("\n".join(rows))
+            dns_rows.display = True
+        else:
+            ok_dns  = [r for r in iq.dns if r.success]
+            bad_dns = [r for r in iq.dns if not r.success]
+            if ok_dns:
+                dns_compact.update("  ".join(
+                    f"[{S_OK}]●[/] [{UI_FG}]{r.hostname}[/]" for r in ok_dns
+                ))
+                dns_compact.display = True
+            else:
+                dns_compact.display = False
+            if bad_dns:
+                detail_rows = []
+                for r in bad_dns:
+                    loss_h = snapshot.inet_dns_loss.get(r.hostname, [])
+                    lp     = _loss_pct(loss_h)
+                    fail_s = f"[{S_ERR}]{lp:.0f}% fail[/]" if lp > 0 else f"[{S_ERR}]FAILED[/]"
+                    detail_rows.append(
+                        f"[{S_ERR}]✗[/] [{UI_FG}]{r.hostname:<18}[/]"
+                        f" [{S_ERR}]lookup failed[/]  {fail_s}"
+                    )
+                dns_rows.update("\n".join(detail_rows))
+                dns_rows.display = True
+            else:
+                dns_rows.display = False
+
+        # ── HTTP section ─────────────────────────────────────────
         self.query_one("#inet-http-hdr", Label).update(
             f"[{UI_DIM}]HTTP[/] {_count_label(http_ok, http_tot)}"
         )
+        http_compact = self.query_one("#inet-http-compact", Label)
+        http_rows    = self.query_one("#inet-http-rows",    Label)
 
-        # ── Raw IP section ──────────────────────────────────────
-        ip_lines: list[str] = []
-        for r in iq.raw_ip:
-            rc  = _sc(r.status)
-            icon = "●" if r.status == ProbeStatus.HEALTHY else ("~" if r.status == ProbeStatus.DEGRADED else "✗")
-            rtt_s = f"[{rc}]{r.rtt_ms:.0f}ms[/]" if r.rtt_ms is not None else f"[{S_ERR}]timeout[/]"
-            hist  = snapshot.inet_ip_lat.get(r.target, [])
-            loss_h = snapshot.inet_ip_loss.get(r.target, [])
-            j  = _jitter(hist)
-            p  = _p95(hist)
-            lp = _loss_pct(loss_h)
-            j_s  = f"[{UI_DIM}]±{j:.1f}ms[/]"   if j  is not None else f"[{UI_DIM}]jitter —[/]"
-            p_s  = f"[{UI_DIM}]P95 {p:.0f}ms[/]" if p  is not None else f"[{UI_DIM}]P95 —[/]"
-            lp_s = f"[{S_ERR}]{lp:.0f}% loss[/]" if lp > 0 else f"[{UI_DIM}]0% loss[/]"
-            ip_lines.append(
-                f"[{rc}]{icon}[/] [{UI_FG}]{r.target:<9}[/] [{UI_DIM}]{r.label:<11}[/]"
-                f" {rtt_s:<18} {j_s:<22} {lp_s:<20} {p_s}"
-            )
-        self.query_one("#inet-ip-rows", Label).update("\n".join(ip_lines))
-
-        # ── DNS section ─────────────────────────────────────────
-        dns_lines: list[str] = []
-        for r in iq.dns:
+        def _http_row(r: HttpResult) -> str:
             rc   = S_OK if r.success else S_ERR
             icon = "●" if r.success else "✗"
-            hist = snapshot.inet_dns_lat.get(r.hostname, [])
-            loss_h = snapshot.inet_dns_loss.get(r.hostname, [])
-            avg_ms = _rolling_avg(hist)
-            lp = _loss_pct(loss_h)
-            if r.success:
-                ms_s  = f"[{rc}]{r.lookup_ms:.0f}ms[/]" if r.lookup_ms is not None else "—"
-                avg_s = f"[{UI_DIM}]avg {avg_ms:.0f}ms[/]" if avg_ms is not None else ""
-                ip_s  = f"[{UI_DIM}]→ {r.resolved_ip}[/]" if r.resolved_ip else ""
-                lp_s  = f"[{S_ERR}]{lp:.0f}% fail[/]" if lp > 0 else f"[{UI_DIM}]0% fail[/]"
-                dns_lines.append(
-                    f"[{rc}]{icon}[/] [{UI_FG}]{r.hostname:<18}[/] {ip_s:<30} {ms_s:<14} {avg_s:<22} {lp_s}"
-                )
-            else:
-                fail_s = f"[{UI_DIM}]{lp:.0f}% fail[/]" if lp > 0 else f"[{S_ERR}]FAILED[/]"
-                dns_lines.append(
-                    f"[{rc}]{icon}[/] [{UI_FG}]{r.hostname:<18}[/] [{S_ERR}]lookup failed[/]"
-                    f"{'':30} {fail_s}"
-                )
-        self.query_one("#inet-dns-rows", Label).update("\n".join(dns_lines))
-
-        # ── HTTP section ─────────────────────────────────────────
-        self.query_one("#inet-http-meta", Label).update(
-            f"[{UI_DIM}]{'':28}{'tcp':>8}{'tls':>8}{'ttfb':>8}{'total':>8}[/]"
-        )
-
-        def _col(v: float | None) -> str:
-            return f"[{UI_FG}]{v:>5.0f}ms[/]" if v is not None else f"[{UI_DIM}]{'—':>6}[/]"
-
-        http_lines: list[str] = []
-        for r in iq.http:
-            rc   = S_OK if r.success else S_ERR
-            icon = "●" if r.success else "✗"
-            sc_s = (f"[{rc}]{r.status_code}[/]" if r.status_code is not None
-                    else f"[{S_ERR}]err[/]")
-            http_lines.append(
+            sc_s = f"[{rc}]{r.status_code}[/]" if r.status_code is not None else f"[{S_ERR}]err[/]"
+            tot_s = f"[{UI_FG}]{r.total_ms:.0f}ms[/]" if r.total_ms is not None else f"[{UI_DIM}]—[/]"
+            return (
                 f"[{rc}]{icon}[/] [{UI_FG}]{r.label:<11}[/]"
-                f" [{UI_DIM}]{r.short_path:<16}[/] {sc_s:<14}"
-                f" {_col(r.tcp_ms)} {_col(r.tls_ms)} {_col(r.ttfb_ms)} {_col(r.total_ms)}"
+                f" [{UI_DIM}]{r.short_path:<18}[/] {sc_s:<10} {tot_s}"
             )
-        self.query_one("#inet-http-rows", Label).update("\n".join(http_lines))
 
-        # ── Latency sparkline for primary IP target ─────────────
-        primary_hist = snapshot.inet_ip_lat.get("1.1.1.1", ont_lat)
+        if self._http_expanded:
+            http_compact.display = False
+            http_rows.update("\n".join(_http_row(r) for r in iq.http))
+            http_rows.display = True
+        else:
+            ok_http  = [r for r in iq.http if r.success]
+            bad_http = [r for r in iq.http if not r.success]
+            if ok_http:
+                http_compact.update("  ".join(
+                    f"[{S_OK}]●[/] [{UI_FG}]{r.label}[/]" for r in ok_http
+                ))
+                http_compact.display = True
+            else:
+                http_compact.display = False
+            if bad_http:
+                http_rows.update("\n".join(_http_row(r) for r in bad_http))
+                http_rows.display = True
+            else:
+                http_rows.display = False
+
+        # ── Latency sparkline ────────────────────────────────────
+        primary_hist  = snapshot.inet_ip_lat.get("1.1.1.1", ont_lat)
         avg_rtt_spark = _rolling_avg(primary_hist) if primary_hist else None
-        avg_rtt_s = f"{avg_rtt_spark:.0f}ms" if avg_rtt_spark is not None else "—"
-        self.query_one("#inet-spark-hdr", Label).update(
-            f"[{UI_DIM}]LATENCY[/]  [{UI_DIM}]1.1.1.1  RTT avg {avg_rtt_s}[/]"
-        )
+        if avg_rtt_spark is not None:
+            q_c, q_s = _latency_qualifier(avg_rtt_spark)
+            self.query_one("#inet-spark-hdr", Label).update(
+                f"[{UI_DIM}]LATENCY  1.1.1.1  avg {avg_rtt_spark:.0f}ms[/]"
+                f"  [{q_c}]{q_s}[/]"
+            )
+        else:
+            self.query_one("#inet-spark-hdr", Label).update(
+                f"[{UI_DIM}]LATENCY  1.1.1.1  avg —[/]"
+            )
         if primary_hist:
             self.query_one("#inet-lat-spark", Sparkline).data = primary_hist
 
-        # ── Speed test section ───────────────────────────────────
+        # ── Speed section ────────────────────────────────────────
+        dl_hist = snapshot.dl_hist
+        avg_dl  = _rolling_avg(dl_hist) if dl_hist else None
+
         if speed and speed.ok:
             age_s  = _fmt_uptime(time.time() - speed.timestamp)
             dl_c   = S_OK if speed.download_mbps >= 50 else (S_WARN if speed.download_mbps >= 10 else S_ERR)
             ping_c = S_OK if speed.ping_ms <= 30        else (S_WARN if speed.ping_ms <= 80        else S_ERR)
+            avg_part = (
+                f"  [{UI_DIM}]·  avg ~{avg_dl:.0f} Mbps[/]" if avg_dl is not None else ""
+            )
             self.query_one("#inet-speed-row", Label).update(
-                f"[{UI_DIM}]Download[/] [{dl_c}]{speed.download_mbps:.0f} Mbps[/]"
-                f"  [{UI_DIM}]·  Ping[/] [{ping_c}]{speed.ping_ms:.0f}ms[/]"
-                f"  [{UI_DIM}]·  tested {age_s} ago[/]"
+                f"[{UI_DIM}]↓[/] [{dl_c}]{speed.download_mbps:.0f} Mbps[/]"
+                f"  [{UI_DIM}]·  ping[/] [{ping_c}]{speed.ping_ms:.0f}ms[/]"
+                + avg_part
+                + f"  [{UI_DIM}]·  tested {age_s} ago[/]"
             )
         else:
             self.query_one("#inet-speed-row", Label).update(
                 f"[{UI_DIM}]Pending — runs every 5 min[/]"
             )
-        dl_hist = snapshot.dl_hist
         if dl_hist:
-            avg_dl = _rolling_avg(dl_hist)
-            avg_dl_s = f"{avg_dl:.0f} Mbps" if avg_dl is not None else "—"
-            self.query_one("#inet-speed-spark-hdr", Label).update(
-                f"[{UI_DIM}]Download history  avg {avg_dl_s}[/]"
-            )
             self.query_one("#inet-speed-spark", Sparkline).data = dl_hist
 
 
@@ -809,10 +981,21 @@ class StatusPanel(Widget):
             f"[{UI_FG}]S[/][{UI_DIM}] {arrow}[/]"
         )
 
-    def update(self, state: NetworkState, config: NetworkConfig) -> None:
+    def update(self, state: NetworkState, config: NetworkConfig,
+               iq: "InternetQuality | None" = None) -> None:
         issues = state.problems(config)
+        iq_issue: str | None = None
 
-        ont_down = state.ont_result and state.ont_result.status == ProbeStatus.UNREACHABLE
+        # Surface internet quality issues only when basic connectivity is up
+        ont_up = not (state.ont_result    and state.ont_result.status    == ProbeStatus.UNREACHABLE)
+        rtr_up = not (state.router_result and state.router_result.status == ProbeStatus.UNREACHABLE)
+        if iq is not None and ont_up and rtr_up:
+            diag_c, diag_msg = _internet_diagnosis(iq)
+            if diag_c != S_OK:
+                iq_issue = diag_msg
+                issues   = [diag_msg] + issues
+
+        ont_down = state.ont_result    and state.ont_result.status    == ProbeStatus.UNREACHABLE
         rtr_down = state.router_result and state.router_result.status == ProbeStatus.UNREACHABLE
 
         if ont_down or rtr_down:
@@ -820,9 +1003,11 @@ class StatusPanel(Widget):
             summary = issues[0] if issues else "Critical failure"
         elif issues:
             c, icon = S_WARN, "⚠"
-            gw  = sum(1 for i in issues if "gateway offline" in i)
-            dev = sum(1 for i in issues if "gateway offline" not in i)
+            net_issues = [i for i in issues if i != iq_issue]
+            gw  = sum(1 for i in net_issues if "gateway offline" in i)
+            dev = sum(1 for i in net_issues if "gateway offline" not in i)
             parts = []
+            if iq_issue:                       parts.append(iq_issue)
             if gw:  parts.append(f"{gw} gateway{'s' if gw > 1 else ''} offline")
             if dev: parts.append(f"{dev} device{'s' if dev > 1 else ''} unreachable")
             summary = " · ".join(parts) if parts else issues[0]
@@ -874,7 +1059,7 @@ class StatusScreen(Screen):
     def update_state(self, enriched, snapshot) -> None:
         s = enriched.network
         c = self._config
-        self.query_one(StatusPanel).update(s, c)
+        self.query_one(StatusPanel).update(s, c, enriched.internet_quality)
         self.query_one(InternetPanel).update(
             s, c, snapshot.ont_lat, snapshot.ont_loss,
             enriched.speed_result, enriched.internet_quality, snapshot,
