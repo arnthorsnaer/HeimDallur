@@ -279,28 +279,6 @@ class DevicesScreen(Screen):
 
     def update_state(self, state: NetworkState) -> None:
 
-        def _grp_has_any_online(group: Group) -> bool:
-            gw_result = state.gateway_results.get(group.gateway_ip) if group.gateway_ip else None
-            if gw_result and gw_result.status == ProbeStatus.UNREACHABLE:
-                return False
-            devices = self._config.devices_in_group(group.id)
-            return any(
-                (r := state.device_results.get(d.ip)) is not None
-                and r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED)
-                for d in devices
-            )
-
-        def _grp_all_online(group: Group) -> bool:
-            gw_result = state.gateway_results.get(group.gateway_ip) if group.gateway_ip else None
-            if gw_result and gw_result.status == ProbeStatus.UNREACHABLE:
-                return False
-            devices = self._config.devices_in_group(group.id)
-            results = [state.device_results.get(d.ip) for d in devices]
-            known = [r for r in results if r is not None]
-            if not known:
-                return True
-            return all(r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED) for r in known)
-
         def _section_counts(groups: list[Group]) -> tuple[int, int]:
             total = online = 0
             for g in groups:
