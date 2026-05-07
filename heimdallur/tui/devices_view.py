@@ -45,7 +45,7 @@ class SectionHeader(Widget):
         layout: horizontal;
         margin-top: 1;
     }}
-    .sec-lbl {{ width: 8; color: {UI_DIM}; text-style: bold; }}
+    .sec-lbl {{ width: 1fr; color: {UI_DIM}; text-style: bold; }}
     .sec-cnt {{ width: auto; }}
     """
 
@@ -301,12 +301,27 @@ class DevicesScreen(Screen):
                 return True
             return all(r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED) for r in known)
 
+        def _section_counts(groups: list[Group]) -> tuple[int, int]:
+            total = online = 0
+            for g in groups:
+                if g.gateway_ip:
+                    total += 1
+                    gw_r = state.gateway_results.get(g.gateway_ip)
+                    if gw_r and gw_r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED):
+                        online += 1
+                for d in self._config.devices_in_group(g.id):
+                    total += 1
+                    r = state.device_results.get(d.ip)
+                    if r and r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED):
+                        online += 1
+            return online, total
+
         if self._wifi_groups:
-            wifi_ok = sum(1 for g in self._wifi_groups if _grp_all_online(g))
-            self.query_one("#sechdr-wifi", SectionHeader).update(wifi_ok, len(self._wifi_groups))
+            wifi_online, wifi_total = _section_counts(self._wifi_groups)
+            self.query_one("#sechdr-wifi", SectionHeader).update(wifi_online, wifi_total)
         if self._lan_groups:
-            lan_ok = sum(1 for g in self._lan_groups if _grp_all_online(g))
-            self.query_one("#sechdr-lan", SectionHeader).update(lan_ok, len(self._lan_groups))
+            lan_online, lan_total = _section_counts(self._lan_groups)
+            self.query_one("#sechdr-lan", SectionHeader).update(lan_online, lan_total)
 
         for group in self._config.groups:
             self.query_one(f"#grpblk-{group.id}", GroupBlock).update(state)
