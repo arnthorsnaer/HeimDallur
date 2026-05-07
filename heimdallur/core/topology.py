@@ -52,7 +52,6 @@ class RouterStats:
 @dataclass
 class GatewayEnrichment:
     gateway_ip: str
-    signal_dbm: Optional[int]    # WiFi only
     client_count: Optional[int]  # WiFi only
 
 

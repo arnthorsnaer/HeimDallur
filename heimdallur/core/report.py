@@ -210,11 +210,8 @@ def render_markdown(
             gw_lat = _ms(gw_r.response_ms if gw_r else None)
             enr = enriched.gw_enrichment.get(group.gateway_ip)
             enr_parts = [f"**Gateway `{group.gateway_ip}`:** {gw_icon} {gw_lat}"]
-            if enr:
-                if enr.client_count is not None:
-                    enr_parts.append(f"**Clients:** {enr.client_count}")
-                if enr.signal_dbm is not None:
-                    enr_parts.append(f"**Signal:** {enr.signal_dbm} dBm")
+            if enr and enr.client_count is not None:
+                enr_parts.append(f"**Clients:** {enr.client_count}")
             lines.append("  |  ".join(enr_parts))
             lines.append("")
 

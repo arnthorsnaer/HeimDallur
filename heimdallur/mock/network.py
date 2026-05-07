@@ -14,10 +14,10 @@ from heimdallur.core.internet_probe import IP_TARGETS, DNS_TARGETS, HTTP_TARGETS
 _SCENARIO_PATH = Path(__file__).parent / "scenario.toml"
 
 _GW_BASES: dict[str, dict] = {
-    "192.168.1.95": {"dbm": -52, "clients": 3},
-    "192.168.1.44": {"dbm": -44, "clients": 8},
-    "192.168.1.43": {"dbm": -47, "clients": 5},
-    "192.168.1.45": {"dbm": -58, "clients": 9},
+    "192.168.1.95": {"clients": 3},
+    "192.168.1.44": {"clients": 8},
+    "192.168.1.43": {"clients": 5},
+    "192.168.1.45": {"clients": 9},
 }
 
 
@@ -76,13 +76,12 @@ class MockNetwork:
 
     def mock_gateway_enrichment(self, group: Group) -> GatewayEnrichment:
         if group.type == "wifi" and group.gateway_ip:
-            base = _GW_BASES.get(group.gateway_ip, {"dbm": -65, "clients": 3})
+            base = _GW_BASES.get(group.gateway_ip, {"clients": 3})
             return GatewayEnrichment(
                 gateway_ip=group.gateway_ip,
-                signal_dbm=base["dbm"] + random.randint(-3, 3),
                 client_count=max(0, base["clients"] + random.randint(-1, 2)),
             )
-        return GatewayEnrichment(gateway_ip=group.gateway_ip, signal_dbm=None, client_count=None)
+        return GatewayEnrichment(gateway_ip=group.gateway_ip, client_count=None)
 
     def mock_speed_result(self) -> SpeedResult:
         return SpeedResult(
