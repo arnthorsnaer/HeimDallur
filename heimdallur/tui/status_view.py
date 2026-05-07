@@ -378,11 +378,18 @@ class InternetPanel(Widget):
         c  = _sc(derived)
         sw = _status_word(derived)
 
-        if derived != self._prev_status:
-            self._prev_status = derived
+        # Duration tracks binary connectivity (online vs offline), not quality.
+        # HEALTHY and DEGRADED both count as "online" — the timer only resets
+        # when crossing the UNREACHABLE boundary in either direction.
+        offline      = derived        == ProbeStatus.UNREACHABLE
+        was_offline  = self._prev_status == ProbeStatus.UNREACHABLE
+        conn_changed = (self._prev_status is None) or (offline != was_offline)
+
+        if conn_changed:
             self._status_since = time.time()
-            self._status_word  = sw
-            self._status_color = c
+            self._status_word  = "Offline" if offline else "Online"
+            self._status_color = S_ERR if offline else S_OK
+        self._prev_status = derived
 
         self.styles.border = ("solid", c)
         self.border_title = f"[bold {c}]INTERNET · {sw.upper()}[/]"
@@ -390,7 +397,8 @@ class InternetPanel(Widget):
         if self._status_since:
             elapsed = time.time() - self._status_since
             self.query_one("#inet-duration", Label).update(
-                f"[{c}]{sw}[/] [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
+                f"[{self._status_color}]{self._status_word}[/]"
+                f" [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
             )
 
         # ── Collapsed summary line ──────────────────────────────
