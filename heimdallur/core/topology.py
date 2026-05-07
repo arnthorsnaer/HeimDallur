@@ -106,6 +106,12 @@ class InternetQuality:
 
 
 @dataclass
+class Contacts:
+    network_admin: str = "network admin"
+    isp_name: str = "ISP"
+
+
+@dataclass
 class NetworkConfig:
     ont_check_host: str
     router_ip: str
@@ -113,6 +119,7 @@ class NetworkConfig:
     speed_test_interval_seconds: int
     groups: list[Group]
     devices: list[Device]
+    contacts: Contacts = field(default_factory=Contacts)
 
     def group_by_id(self) -> dict[str, Group]:
         return {g.id: g for g in self.groups}

@@ -1,8 +1,8 @@
 import tomllib
 from pathlib import Path
-from heimdallur.core.topology import Device, Group, NetworkConfig
+from heimdallur.core.topology import Contacts, Device, Group, NetworkConfig
 
-_DEFAULT_PATH = Path(__file__).parent / "devices.toml"
+_DEFAULT_PATH = Path(__file__).parent / "network.toml"
 
 
 def load_config(path: Path | None = None) -> NetworkConfig:
@@ -10,6 +10,11 @@ def load_config(path: Path | None = None) -> NetworkConfig:
     with open(config_path, "rb") as f:
         data = tomllib.load(f)
 
+    ct = data.get("contacts", {})
+    contacts = Contacts(
+        network_admin=ct.get("network_admin", "network admin"),
+        isp_name=ct.get("isp_name", "ISP"),
+    )
     net = data["network"]
     groups = [
         Group(
@@ -40,4 +45,5 @@ def load_config(path: Path | None = None) -> NetworkConfig:
         speed_test_interval_seconds=net.get("speed_test_interval_seconds", 300),
         groups=groups,
         devices=devices,
+        contacts=contacts,
     )
