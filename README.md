@@ -56,6 +56,88 @@ make deploy   # rsyncs to pi@heimdallur.local and restarts the systemd service
 make logs     # tail the service log
 ```
 
+---
+
+## Running in production
+
+### Keeping the application up to date
+
+Heimdallur ships a systemd timer that checks the public GitHub repo for updates once an hour and applies them automatically. Install it once after the initial deploy:
+
+```bash
+# On the Pi
+sudo cp /opt/heimdallur/scripts/heimdallur-update.service /etc/systemd/system/
+sudo cp /opt/heimdallur/scripts/heimdallur-update.timer   /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now heimdallur-update.timer
+```
+
+When a new commit lands on `main` the timer will:
+1. `git pull --ff-only`
+2. `uv sync --no-dev`
+3. `systemctl restart heimdallur`
+
+All activity is logged to the systemd journal under the `heimdallur-update` identifier:
+
+```bash
+journalctl -t heimdallur-update -f
+```
+
+To trigger an immediate update without waiting for the timer:
+
+```bash
+sudo systemctl start heimdallur-update
+```
+
+To check the currently running version:
+
+```bash
+cd /opt/heimdallur && git log -1 --oneline
+```
+
+---
+
+### Updating device configuration
+
+All devices and groups are defined in `heimdallur/config/devices.toml`. On a live Pi you can edit this file directly (or copy a new version over SSH) and then restart the service:
+
+```bash
+# Validate before applying
+python /opt/heimdallur/scripts/validate-config.py /path/to/new-devices.toml
+
+# Apply
+cp /path/to/new-devices.toml /opt/heimdallur/heimdallur/config/devices.toml
+sudo systemctl restart heimdallur
+```
+
+The validator (`scripts/validate-config.py`) checks TOML syntax, required fields, IP address validity, duplicate IPs, and that every device references a defined group. It exits 0 on success, 1 on any error, so it is safe to use in automated workflows.
+
+---
+
+### Agent / automation access
+
+Heimdallur writes a markdown snapshot of its full current state to:
+
+```
+~/.local/share/heimdallur/status.md
+```
+
+This file is rewritten after every 30-second probe cycle. An agent with SSH access can read the current network state instantly without running a fresh probe:
+
+```bash
+ssh pi@heimdallur.local "cat ~/.local/share/heimdallur/status.md"
+```
+
+To force a fresh probe and get the result directly:
+
+```bash
+ssh pi@heimdallur.local "cd /opt/heimdallur && uv run python -m heimdallur --mode report"
+```
+
+See [`docs/agent-guide.md`](docs/agent-guide.md) for the full agent skill reference — status queries, config updates, service management, and the complete file reference.
+
+---
+
 ## Status
 
 Pre-alpha. Core monitoring loop, TUI, mock mode, and local history storage are working. Production hardening, real router stats integration, and a proper history screen are in progress.
