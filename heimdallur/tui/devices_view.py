@@ -61,7 +61,7 @@ class SectionHeader(Widget):
     def update(self, ok: int, total: int) -> None:
         c = S_OK if ok == total else (S_WARN if ok > 0 else S_ERR)
         self.query_one(f"#seccnt-{self._sid}", Label).update(
-            f"[{c}]{ok}[/][{UI_DIM}]/{total}[/]"
+            f"[{c}]{ok}/{total}[/]"
         )
 
 
@@ -132,7 +132,7 @@ class GroupHeaderRow(Widget):
                 online += 1
         count_c = S_OK if online == total else (S_WARN if online > 0 else S_ERR)
         self.query_one(f"#ghdr-cnt-{gid}", Label).update(
-            f"[{count_c}]{online}[/][{UI_DIM}]/{total}[/]"
+            f"[{count_c}]{online}/{total}[/]"
         )
 
 
