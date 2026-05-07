@@ -89,11 +89,7 @@ To trigger an immediate update without waiting for the timer:
 sudo systemctl start heimdallur-update
 ```
 
-To check the currently running version:
-
-```bash
-cd /opt/heimdallur && git log -1 --oneline
-```
+The footer shows the running version as `v0.3.0+20260507.d40c034` — date and git hash — so you can identify the exact commit at a glance and match it against the GitHub commit list without running any commands.
 
 ---
 
