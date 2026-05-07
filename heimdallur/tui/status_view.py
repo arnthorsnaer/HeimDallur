@@ -215,6 +215,9 @@ class InternetPanel(Widget):
     #inet-http-meta  {{ height: 1; color: {UI_DIM}; }}
     #inet-http-rows  {{ height: auto; }}
     #inet-spark-hdr  {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
+    #inet-speed-hdr  {{ height: 1; color: {UI_DIM}; text-style: bold; padding-top: 1; }}
+    #inet-speed-row  {{ height: 1; }}
+    #inet-speed-spark-hdr {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
     InternetPanel Sparkline {{ height: 3; }}
     """
 
@@ -241,6 +244,10 @@ class InternetPanel(Widget):
             yield Label("", id="inet-http-rows")
             yield Label("", id="inet-spark-hdr")
             yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-lat-spark")
+            yield Label("SPEED TEST", id="inet-speed-hdr")
+            yield Label("", id="inet-speed-row")
+            yield Label("", id="inet-speed-spark-hdr")
+            yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-speed-spark")
 
     def on_mount(self) -> None:
         self.border_title = "INTERNET"
@@ -411,6 +418,29 @@ class InternetPanel(Widget):
             )
             self.query_one("#inet-lat-spark", Sparkline).data = primary_hist
 
+        # ── Speed test section ───────────────────────────────────
+        if speed and speed.ok:
+            age_s = _fmt_uptime(time.time() - speed.timestamp)
+            dl_c = S_OK if speed.download_mbps >= 50 else (S_WARN if speed.download_mbps >= 10 else S_ERR)
+            ping_c = S_OK if speed.ping_ms <= 30 else (S_WARN if speed.ping_ms <= 80 else S_ERR)
+            self.query_one("#inet-speed-row", Label).update(
+                f"[{UI_DIM}]Download[/] [{dl_c}]{speed.download_mbps:.0f} Mbps[/]"
+                f"  [{UI_DIM}]·  Ping[/] [{ping_c}]{speed.ping_ms:.0f}ms[/]"
+                f"  [{UI_DIM}]·  tested {age_s} ago[/]"
+            )
+        else:
+            self.query_one("#inet-speed-row", Label).update(
+                f"[{UI_DIM}]No result yet — runs every 5 min[/]"
+            )
+        dl_hist = snapshot.dl_hist
+        if dl_hist:
+            avg_dl = _rolling_avg(dl_hist)
+            avg_dl_s = f"{avg_dl:.0f} Mbps" if avg_dl is not None else "—"
+            self.query_one("#inet-speed-spark-hdr", Label).update(
+                f"[{UI_DIM}]Download history  avg {avg_dl_s}[/]"
+            )
+            self.query_one("#inet-speed-spark", Sparkline).data = dl_hist
+
 
 # ── Home Network panel ─────────────────────────────────────────
 class HomeNetworkPanel(Widget):
@@ -484,7 +514,7 @@ class HomeNetworkPanel(Widget):
     def _refresh_hint(self) -> None:
         arrow = "▴" if self._expanded else "▾"
         self.query_one("#hn-hint", Label).update(
-            f"[{UI_FG}]r[/][{UI_DIM}] {arrow}[/]"
+            f"[{UI_FG}]n[/][{UI_DIM}] {arrow}[/]"
         )
 
     def _tick(self) -> None:
@@ -783,7 +813,7 @@ class StatusPanel(Widget):
     def _refresh_hint(self) -> None:
         arrow = "▴" if self._expanded else "▾"
         self.query_one("#st-hint", Label).update(
-            f"[{UI_FG}]Spc[/][{UI_DIM}] {arrow}[/]"
+            f"[{UI_FG}]S[/][{UI_DIM}] {arrow}[/]"
         )
 
     def update(self, state: NetworkState, config: NetworkConfig) -> None:
@@ -829,9 +859,9 @@ class StatusScreen(Screen):
     BINDINGS = [
         ("h",     "switch_to_history",  "History"),
         ("d",     "switch_to_devices",  "Devices"),
-        ("space", "toggle_status",      "Toggle Status"),
+        ("s",     "toggle_status",      "Toggle Status"),
         ("i",     "toggle_internet",    "Toggle Internet"),
-        ("r",     "toggle_home",        "Toggle Home Network"),
+        ("n",     "toggle_home",        "Toggle Home Network"),
         ("q",     "app.quit",           "Quit"),
     ]
 
