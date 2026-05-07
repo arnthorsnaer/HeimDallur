@@ -134,7 +134,7 @@ To force a fresh probe and get the result directly:
 ssh pi@heimdallur.local "cd /opt/heimdallur && uv run python -m heimdallur --mode report"
 ```
 
-See [`docs/agent-guide.md`](docs/agent-guide.md) for the full agent skill reference — status queries, config updates, service management, and the complete file reference.
+See [`SKILL.md`](SKILL.md) for the full agent skill reference — status queries, config updates, service management, and the complete file reference.
 
 ---
 
