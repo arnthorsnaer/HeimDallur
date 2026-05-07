@@ -60,6 +60,23 @@ class HeimdallurApp(App):
     def __init__(self) -> None:
         super().__init__()
         self._config: NetworkConfig = load_config()
+
+        # Allow screenshot/demo scripts to inject a recipient email without
+        # editing network.toml — set NETWATCH_DEMO_EMAIL to any address.
+        if _demo_email := os.getenv("NETWATCH_DEMO_EMAIL"):
+            import dataclasses as _dc
+            self._config = _dc.replace(
+                self._config,
+                contacts=_dc.replace(
+                    self._config.contacts,
+                    home_network_admin_email=_demo_email,
+                ),
+                gmail_notification=_dc.replace(
+                    self._config.gmail_notification,
+                    sender_email=os.getenv("NETWATCH_DEMO_SENDER_EMAIL", "alerts@gmail.com"),
+                    app_password="demo",
+                ),
+            )
         from pathlib import Path as _Path
         _db = os.getenv("NETWATCH_SCREENSHOT_DB")
         self._store = Store(_Path(_db)) if _db else Store()

@@ -31,6 +31,9 @@ CAPTURES: list[dict] = [
     # Status screen variants
     {"slug": "01-status-healthy",           "title": "Status — all healthy",
      "scenario": "all_healthy.toml"},
+    {"slug": "01b-status-email-configured", "title": "Status — email notifications configured",
+     "scenario": "all_healthy.toml",
+     "env": {"NETWATCH_DEMO_EMAIL": "addi@example.com"}},
     {"slug": "02-status-internet-degraded", "title": "Status — internet degraded",
      "scenario": "internet_degraded.toml"},
     {"slug": "03-status-internet-offline",  "title": "Status — internet offline",
@@ -56,7 +59,8 @@ CAPTURES: list[dict] = [
 ]
 
 
-async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path) -> None:
+async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path,
+                       extra_env: dict[str, str] | None = None) -> None:
     # Use a fresh temp DB per capture to avoid lock contention.
     import importlib
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
@@ -65,6 +69,8 @@ async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path) -> 
     os.environ["NETWATCH_MOCK"] = "1"
     os.environ["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
     os.environ["NETWATCH_SCREENSHOT_DB"] = tmp_db
+    if extra_env:
+        os.environ.update(extra_env)
 
     # Re-import the app module fresh each time so env vars are re-read.
     import heimdallur.tui.app as _app_mod
@@ -86,6 +92,9 @@ async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path) -> 
         Path(tmp_db).unlink(missing_ok=True)
     except OSError:
         pass
+    if extra_env:
+        for k in extra_env:
+            os.environ.pop(k, None)
 
 
 def _svg_to_png(svg_path: Path, png_path: Path) -> None:
@@ -127,15 +136,16 @@ def main() -> None:
     t_start = time.monotonic()
 
     for cap in CAPTURES:
-        slug     = cap["slug"]
-        scenario = _SCEN / cap["scenario"]
-        keys     = cap.get("keys", [])
-        svg_path = out_dir / f"{slug}.svg"
-        out_path = out_dir / f"{slug}.{args.ext}"
+        slug      = cap["slug"]
+        scenario  = _SCEN / cap["scenario"]
+        keys      = cap.get("keys", [])
+        extra_env = cap.get("env")
+        svg_path  = out_dir / f"{slug}.svg"
+        out_path  = out_dir / f"{slug}.{args.ext}"
 
         print(f"[{slug}]")
         t0 = time.monotonic()
-        asyncio.run(_capture_svg(scenario, keys, svg_path))
+        asyncio.run(_capture_svg(scenario, keys, svg_path, extra_env))
         print(f"  SVG done ({time.monotonic()-t0:.1f}s)")
 
         if args.ext == "png":
