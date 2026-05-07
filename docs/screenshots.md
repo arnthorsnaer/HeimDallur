@@ -73,6 +73,15 @@ A compound failure: an access point is offline, internet connectivity is degrade
 
 ---
 
+### Status banner expanded
+
+Press `s` to expand the top status banner into a full fault list. Each active problem is listed on its own line with a severity icon, giving a complete incident summary without leaving the main screen.
+
+| ![Status banner expanded — multiple issues](screenshots/06b-status-panel-expanded.png) |
+|:---:|
+
+---
+
 ## Expanded panel views
 
 Click any panel or press `i` (Internet) / `n` (Home Network) to expand it. The panel border subtitle changes from `▾` to `▴` and the detail view replaces the summary line.
@@ -97,11 +106,29 @@ The same expanded view under a partial failure: one DNS resolver is failing whil
 
 ---
 
+### Internet panel — offline
+
+The expanded Internet panel when internet connectivity is fully lost. All check rows show failing status and the diagnosis banner at the top states the conclusion plainly so no further interpretation is needed.
+
+| ![Internet panel expanded — offline](screenshots/07c-inet-panel-offline.png) |
+|:---:|
+
+---
+
 ### Home network panel
 
 The expanded Home Network panel shows router latency, memory usage, uptime, and per-group device counts. Each access point group lists its downstream devices with individual latency and online/offline status.
 
 | ![Home network panel expanded](screenshots/08-net-panel-expanded.png) |
+|:---:|
+
+---
+
+### Home network panel — AP offline
+
+The same panel with an access point down. The affected group is highlighted; its downstream devices are listed as `UNKNOWN` rather than individually failed, confirming that the cascade suppression is working correctly.
+
+| ![Home network panel expanded — AP offline](screenshots/08b-net-panel-gateway-offline.png) |
 |:---:|
 
 ---
