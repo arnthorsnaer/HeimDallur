@@ -108,7 +108,14 @@ class InternetQuality:
 @dataclass
 class Contacts:
     network_admin: str = "network admin"
+    home_network_admin_email: str = ""
     isp_name: str = "ISP"
+
+
+@dataclass
+class GmailNotificationConfig:
+    sender_email: str = ""
+    app_password: str = ""
 
 
 @dataclass
@@ -120,6 +127,7 @@ class NetworkConfig:
     groups: list[Group]
     devices: list[Device]
     contacts: Contacts = field(default_factory=Contacts)
+    gmail_notification: GmailNotificationConfig = field(default_factory=GmailNotificationConfig)
 
     def group_by_id(self) -> dict[str, Group]:
         return {g.id: g for g in self.groups}

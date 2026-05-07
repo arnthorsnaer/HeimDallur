@@ -177,6 +177,54 @@ ssh pi@heimdallur.local "cat ~/.local/share/heimdallur/status.md"
 
 ---
 
+## 3a. Configuring Incident Report Emails
+
+Heimdallur emails the home network admin when an outage ends (internet or home
+network going offline then back online). Emails are sent on recovery — not
+during the outage — so a full internet outage will still produce a report once
+connectivity is restored.
+
+### Configure in `network.toml`
+
+Add or update these two sections:
+
+```toml
+[contacts]
+home_network_admin_email = "you@example.com"   # recipient
+
+[notification_email_gmail]
+sender_email = "heimdallur.alerts@gmail.com"   # Gmail address to send from
+app_password = "xxxx xxxx xxxx xxxx"           # 16-char Gmail app password
+```
+
+**Step 1 — Create a Gmail app password:**
+Google Account → Security → 2-Step Verification → App passwords.
+Generate one named "Heimdallur" and copy the 16-character code.
+
+**Step 2 — Edit and validate:**
+```bash
+ssh pi@heimdallur.local "cat /opt/heimdallur/heimdallur/config/network.toml"
+# Edit locally, then:
+scp network.toml pi@heimdallur.local:/tmp/network-new.toml
+ssh pi@heimdallur.local "python3 /opt/heimdallur/scripts/validate-config.py /tmp/network-new.toml"
+```
+
+**Step 3 — Apply:**
+```bash
+ssh pi@heimdallur.local "cp /tmp/network-new.toml /opt/heimdallur/heimdallur/config/network.toml && sudo systemctl restart heimdallur"
+```
+
+**Step 4 — Verify:**
+The footer indicator confirms the state — `✉ you@example.com` means notifications
+are active; `✉  no email configured` means one or more fields are missing.
+
+To test without waiting for a real outage, temporarily set `app_password` to a
+valid value and bounce the service — the notifier fires on the OFFLINE→ONLINE
+transition, so toggling the ONT or router off/on in mock mode is not required;
+simply disconnecting and reconnecting your broadband will trigger it.
+
+---
+
 ## 4. Getting Network Status
 
 ### Fast read — snapshot file (preferred)

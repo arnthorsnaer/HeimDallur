@@ -60,6 +60,23 @@ class HeimdallurApp(App):
     def __init__(self) -> None:
         super().__init__()
         self._config: NetworkConfig = load_config()
+
+        # Allow screenshot/demo scripts to inject a recipient email without
+        # editing network.toml — set NETWATCH_DEMO_EMAIL to any address.
+        if _demo_email := os.getenv("NETWATCH_DEMO_EMAIL"):
+            import dataclasses as _dc
+            self._config = _dc.replace(
+                self._config,
+                contacts=_dc.replace(
+                    self._config.contacts,
+                    home_network_admin_email=_demo_email,
+                ),
+                gmail_notification=_dc.replace(
+                    self._config.gmail_notification,
+                    sender_email=os.getenv("NETWATCH_DEMO_SENDER_EMAIL", "alerts@gmail.com"),
+                    app_password="demo",
+                ),
+            )
         from pathlib import Path as _Path
         _db = os.getenv("NETWATCH_SCREENSHOT_DB")
         self._store = Store(_Path(_db)) if _db else Store()
@@ -79,6 +96,9 @@ class HeimdallurApp(App):
 
         from heimdallur.core.internet_probe import InternetProber
         self._inet_prober = InternetProber()
+
+        from heimdallur.core.notifier import IncidentNotifier
+        self._notifier = IncidentNotifier(self._config)
 
         # Rolling history — init loss with zeros so sparkline starts green not red
         self._lat:  dict[str, deque] = defaultdict(lambda: deque(maxlen=_HIST))
@@ -268,6 +288,9 @@ class HeimdallurApp(App):
             self.post_message(ProbeComplete(enriched, snapshot))
             asyncio.get_event_loop().run_in_executor(
                 None, self._write_report, enriched, snapshot
+            )
+            asyncio.get_event_loop().run_in_executor(
+                None, self._notifier.check, state
             )
             await asyncio.sleep(self._config.probe_interval_seconds)
 
