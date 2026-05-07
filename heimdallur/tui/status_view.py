@@ -919,14 +919,35 @@ class FooterBar(Widget):
         align: left middle;
     }}
     #ftr-summary {{ width: 1fr; color: {UI_DIM}; content-align: left middle; }}
+    #ftr-email   {{ width: 1fr; content-align: center middle; }}
+    #ftr-nav     {{ width: 1fr; layout: horizontal; align: right middle; }}
     FooterBar NavButton {{ margin-left: 1; }}
     """
 
+    def __init__(self, config: NetworkConfig) -> None:
+        super().__init__()
+        self._config = config
+
     def compose(self) -> ComposeResult:
         yield Label("", id="ftr-summary")
-        yield NavButton("H", "History", "history")
-        yield NavButton("D", "Devices", "devices")
-        yield NavButton("Q", "Quit",    "quit")
+        yield Label("", id="ftr-email")
+        with Horizontal(id="ftr-nav"):
+            yield NavButton("H", "History", "history")
+            yield NavButton("D", "Devices", "devices")
+            yield NavButton("Q", "Quit",    "quit")
+
+    def on_mount(self) -> None:
+        gm  = self._config.gmail_notification
+        rcpt = self._config.contacts.home_network_admin_email
+        enabled = bool(gm.sender_email and gm.app_password and rcpt)
+        if enabled:
+            self.query_one("#ftr-email", Label).update(
+                f"[{UI_DIM}]✉[/] [{UI_FG}]{rcpt}[/]"
+            )
+        else:
+            self.query_one("#ftr-email", Label).update(
+                f"[{UI_DIM}]✉  no email configured[/]"
+            )
 
     def update(self, state: NetworkState, config: NetworkConfig) -> None:
         total, ok, bad = state.summary(config)
@@ -1071,7 +1092,7 @@ class StatusScreen(Screen):
             yield StatusPanel()
             yield InternetPanel()
             yield HomeNetworkPanel(self._config)
-        yield FooterBar()
+        yield FooterBar(self._config)
 
     def update_state(self, enriched, snapshot) -> None:
         s = enriched.network

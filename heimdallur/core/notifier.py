@@ -87,7 +87,7 @@ class IncidentNotifier:
         cfg = self._config.gmail_notification
         if not cfg.sender_email or not cfg.app_password:
             return
-        recipient = self._config.contacts.network_admin_email
+        recipient = self._config.contacts.home_network_admin_email
         if not recipient:
             return
 
