@@ -640,9 +640,6 @@ class HomeNetworkPanel(Widget):
         border: solid {UI_BDR};
         padding: 0 1;
     }}
-    #hn-header     {{ height: 1; layout: horizontal; }}
-    #hn-duration   {{ width: 1fr; height: 1; }}
-    #hn-hint       {{ width: 9; height: 1; content-align: right middle; color: {UI_DIM}; }}
     #hn-summary    {{ height: 1; }}
     #hn-detail     {{ height: 1fr; }}
     #hn-cpu-hdr    {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
@@ -664,12 +661,9 @@ class HomeNetworkPanel(Widget):
         self._lat_hist: list[float] = []
         self._wifi_groups = [g for g in config.groups if g.type == "wifi"]
         self._lan_groups  = [g for g in config.groups if g.type == "lan"]
-        self._expanded: bool = True
 
     def compose(self) -> ComposeResult:
-        with Horizontal(id="hn-header"):
-            yield Label("", id="hn-duration")
-            yield Label("", id="hn-hint")
+        yield Label("", id="hn-duration")
         yield Label("", id="hn-summary")
         with Vertical(id="hn-detail"):
             yield Label("", id="hn-cpu-hdr")
@@ -689,21 +683,6 @@ class HomeNetworkPanel(Widget):
     def on_mount(self) -> None:
         self.border_title = "HOME NETWORK"
         self.set_interval(1, self._tick)
-        self._refresh_hint()
-
-    def on_click(self) -> None:
-        self._toggle()
-
-    def _toggle(self) -> None:
-        self._expanded = not self._expanded
-        self.query_one("#hn-detail", Vertical).display = self._expanded
-        self._refresh_hint()
-
-    def _refresh_hint(self) -> None:
-        arrow = "▴" if self._expanded else "▾"
-        self.query_one("#hn-hint", Label).update(
-            f"[{UI_FG}]N[/][{UI_DIM}] {arrow}[/]"
-        )
 
     def _tick(self) -> None:
         if not self._status_since:
@@ -1077,7 +1056,6 @@ class StatusScreen(Screen):
         ("d",     "switch_to_devices",  "Devices"),
         ("s",     "toggle_status",      "Toggle Status"),
         ("i",     "toggle_internet",    "Toggle Internet"),
-        ("n",     "toggle_home",        "Toggle Home Network"),
         ("q",     "app.quit",           "Quit"),
     ]
 
@@ -1113,9 +1091,6 @@ class StatusScreen(Screen):
 
     def action_toggle_internet(self) -> None:
         self.query_one(InternetPanel)._toggle()
-
-    def action_toggle_home(self) -> None:
-        self.query_one(HomeNetworkPanel)._toggle()
 
     def on_nav_button_pressed(self, msg: NavButton.Pressed) -> None:
         if msg.action == "history":
