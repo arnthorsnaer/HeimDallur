@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Commit and PR style
+
+Never append session URLs (e.g. `https://claude.ai/code/session_...`) to commit messages or pull request descriptions.
+
 ## Commands
 
 ```bash
