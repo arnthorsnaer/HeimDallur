@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Validate heimdallur/config/devices.toml before applying it to production.
+"""Validate heimdallur/config/network.toml before applying it to production.
 
 Usage:
     python scripts/validate-config.py                          # validates the default config
-    python scripts/validate-config.py /path/to/devices.toml   # validates a given file
+    python scripts/validate-config.py /path/to/network.toml   # validates a given file
 
 Exits 0 on success, 1 on any error. All output goes to stdout so agents can capture it.
 """
@@ -12,7 +12,7 @@ import sys
 import tomllib
 from pathlib import Path
 
-_DEFAULT = Path(__file__).parent.parent / "heimdallur" / "config" / "devices.toml"
+_DEFAULT = Path(__file__).parent.parent / "heimdallur" / "config" / "network.toml"
 _REQUIRED_GROUP_TYPES = {"wifi", "lan"}
 _REQUIRED_DEVICE_TYPES = {"generic", "light", "sensor", "smart_plug", "smart_switch", "server", "ap"}
 

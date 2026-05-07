@@ -2,7 +2,7 @@ import tomllib
 from pathlib import Path
 from heimdallur.core.topology import Contacts, Device, Group, NetworkConfig
 
-_DEFAULT_PATH = Path(__file__).parent / "devices.toml"
+_DEFAULT_PATH = Path(__file__).parent / "network.toml"
 
 
 def load_config(path: Path | None = None) -> NetworkConfig:

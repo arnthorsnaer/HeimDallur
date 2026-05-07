@@ -47,7 +47,7 @@ make dev
 
 ## Configuration
 
-All devices and groups are defined in `heimdallur/config/devices.toml`. Edit this file to match your network topology — groups, access points, and devices.
+All devices and groups are defined in `heimdallur/config/network.toml`. Edit this file to match your network topology — groups, access points, and devices.
 
 ## Deploying to a Raspberry Pi
 
@@ -95,14 +95,14 @@ The footer shows the running version as `v0.3.0+20260507.d40c034` — date and g
 
 ### Updating device configuration
 
-All devices and groups are defined in `heimdallur/config/devices.toml`. On a live Pi you can edit this file directly (or copy a new version over SSH) and then restart the service:
+All devices and groups are defined in `heimdallur/config/network.toml`. On a live Pi you can edit this file directly (or copy a new version over SSH) and then restart the service:
 
 ```bash
 # Validate before applying
-python /opt/heimdallur/scripts/validate-config.py /path/to/new-devices.toml
+python /opt/heimdallur/scripts/validate-config.py /path/to/new-network.toml
 
 # Apply
-cp /path/to/new-devices.toml /opt/heimdallur/heimdallur/config/devices.toml
+cp /path/to/new-network.toml /opt/heimdallur/heimdallur/config/network.toml
 sudo systemctl restart heimdallur
 ```
 
