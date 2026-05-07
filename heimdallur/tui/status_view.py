@@ -138,8 +138,7 @@ def _check_counts(iq: InternetQuality) -> tuple[int, int, int, int, int, int]:
 
 def _count_label(ok: int, total: int) -> str:
     c = S_OK if ok == total else (S_WARN if ok > 0 else S_ERR)
-    icon = "●" if ok == total else ("~" if ok > 0 else "✗")
-    return f"[{c}]{icon} {ok}/{total}[/]"
+    return f"[{c}]{ok}/{total}[/]"
 
 
 # ── Nav button (touch + keyboard) ──────────────────────────────
@@ -324,16 +323,10 @@ class InternetPanel(Widget):
             rtt_str = (f"  [{UI_DIM}]·  LATENCY[/] [{c}]{avg_rtt:.0f}ms[/]"
                        if avg_rtt is not None else "")
             spd_str = _speed_summary(speed)
-
-            def _dot(ok: int, total: int) -> str:
-                col = S_OK if ok == total else (S_WARN if ok > 0 else S_ERR)
-                icon = "●" if ok == total else ("~" if ok > 0 else "✗")
-                return f"[{col}]{icon}[/]"
-
             self.query_one("#inet-summary", Label).update(
-                f"{_dot(ip_ok, ip_tot)} [{UI_DIM}]IP[/]"
-                f"  {_dot(dns_ok, dns_tot)} [{UI_DIM}]DNS[/]"
-                f"  {_dot(http_ok, http_tot)} [{UI_DIM}]HTTP[/]"
+                f"[{UI_DIM}]IP[/] {_count_label(ip_ok, ip_tot)}"
+                f"   [{UI_DIM}]DNS[/] {_count_label(dns_ok, dns_tot)}"
+                f"   [{UI_DIM}]HTTP[/] {_count_label(http_ok, http_tot)}"
                 + rtt_str + spd_str
             )
         else:
