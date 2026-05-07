@@ -13,7 +13,7 @@ def load_config(path: Path | None = None) -> NetworkConfig:
     ct = data.get("contacts", {})
     contacts = Contacts(
         network_admin=ct.get("network_admin", "network admin"),
-        network_admin_email=ct.get("network_admin_email", ""),
+        home_network_admin_email=ct.get("home_network_admin_email", ""),
         isp_name=ct.get("isp_name", "ISP"),
     )
 

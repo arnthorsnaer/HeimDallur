@@ -108,7 +108,7 @@ class InternetQuality:
 @dataclass
 class Contacts:
     network_admin: str = "network admin"
-    network_admin_email: str = ""
+    home_network_admin_email: str = ""
     isp_name: str = "ISP"
 
 

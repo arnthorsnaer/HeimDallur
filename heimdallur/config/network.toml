@@ -1,6 +1,6 @@
 [contacts]
 network_admin       = "Addi"
-network_admin_email = ""   # recipient address for incident report emails
+home_network_admin_email = ""   # recipient address for incident report emails
 isp_name            = "Hringdu"
 
 # Gmail account used to send incident report emails.
