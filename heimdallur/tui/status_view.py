@@ -99,8 +99,8 @@ def _p95(data: list[float]) -> float | None:
 def _speed_summary(speed: "SpeedResult | None") -> str:
     if speed and speed.ok:
         dl_c = S_OK if speed.download_mbps >= 50 else (S_WARN if speed.download_mbps >= 10 else S_ERR)
-        return f"  [{UI_DIM}]·  ↓[/] [{dl_c}]{speed.download_mbps:.0f} Mbps[/]"
-    return f"  [{UI_DIM}]·  speed —[/]"
+        return f"  [{UI_DIM}]·  SPEED ↓[/] [{dl_c}]{speed.download_mbps:.0f} Mbps[/]"
+    return f"  [{UI_DIM}]·  SPEED —[/]"
 
 
 def _loss_pct(loss_flags: list[float]) -> float:
@@ -138,8 +138,7 @@ def _check_counts(iq: InternetQuality) -> tuple[int, int, int, int, int, int]:
 
 def _count_label(ok: int, total: int) -> str:
     c = S_OK if ok == total else (S_WARN if ok > 0 else S_ERR)
-    icon = "●" if ok == total else ("~" if ok > 0 else "✗")
-    return f"[{c}]{icon} {ok}/{total}[/]"
+    return f"[{c}]{ok}/{total}[/]"
 
 
 # ── Nav button (touch + keyboard) ──────────────────────────────
@@ -321,19 +320,19 @@ class InternetPanel(Widget):
             avg_rtt = _rolling_avg(
                 [r.rtt_ms for r in iq.raw_ip if r.rtt_ms is not None]
             )
-            rtt_str = (f"  [{UI_DIM}]·  RTT avg[/] [{c}]{avg_rtt:.0f}ms[/]"
+            rtt_str = (f"  [{UI_DIM}]·  LATENCY[/] [{c}]{avg_rtt:.0f}ms[/]"
                        if avg_rtt is not None else "")
             spd_str = _speed_summary(speed)
             self.query_one("#inet-summary", Label).update(
                 f"[{UI_DIM}]IP[/] {_count_label(ip_ok, ip_tot)}"
-                f"  [{UI_DIM}]DNS[/] {_count_label(dns_ok, dns_tot)}"
-                f"  [{UI_DIM}]HTTP[/] {_count_label(http_ok, http_tot)}"
+                f"   [{UI_DIM}]DNS[/] {_count_label(dns_ok, dns_tot)}"
+                f"   [{UI_DIM}]HTTP[/] {_count_label(http_ok, http_tot)}"
                 + rtt_str + spd_str
             )
         else:
             avg_lat = _rolling_avg(ont_lat)
-            avg_str = (f"[{UI_DIM}]RTT avg[/] [{c}]{avg_lat:.1f}ms[/]"
-                       if avg_lat is not None else f"[{S_UNK}]RTT —[/]")
+            avg_str = (f"[{UI_DIM}]LATENCY[/] [{c}]{avg_lat:.1f}ms[/]"
+                       if avg_lat is not None else f"[{S_UNK}]LATENCY —[/]")
             self.query_one("#inet-summary", Label).update(
                 avg_str + _speed_summary(speed)
             )
