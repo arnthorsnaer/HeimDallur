@@ -1,6 +1,14 @@
 [contacts]
-network_admin = "Addi"
-isp_name      = "Hringdu"
+network_admin       = "Addi"
+network_admin_email = ""   # recipient address for incident report emails
+isp_name            = "Hringdu"
+
+# Gmail account used to send incident report emails.
+# Use a dedicated Gmail app password (Google Account → Security → App passwords).
+# Leave both fields empty to disable email notifications.
+[notification_email_gmail]
+sender_email = ""   # e.g. "heimdallur.alerts@gmail.com"
+app_password = ""   # 16-character Gmail app password
 
 [network]
 ont_check_host              = "8.8.8.8"
