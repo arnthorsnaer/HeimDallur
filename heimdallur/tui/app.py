@@ -299,4 +299,4 @@ class HeimdallurApp(App):
         if isinstance(self.screen, StatusScreen):
             self.screen.update_state(message.enriched, message.snapshot)
         elif isinstance(self.screen, DevicesScreen):
-            self.screen.update_state(message.enriched.network, message.enriched.gw_enrichment)
+            self.screen.update_state(message.enriched.network)

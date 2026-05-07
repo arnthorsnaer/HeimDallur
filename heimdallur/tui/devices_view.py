@@ -7,7 +7,7 @@ from textual.widget import Widget
 from textual.widgets import Label
 
 from heimdallur.core.topology import (
-    Device, Group, NetworkConfig, NetworkState, ProbeStatus, GatewayEnrichment,
+    Device, Group, NetworkConfig, NetworkState, ProbeStatus,
 )
 
 UI_FG  = "#c9d1d9"
@@ -76,7 +76,6 @@ class GroupHeaderRow(Widget):
     }}
     .ghdr-icon {{ width: 2; }}
     .ghdr-name {{ width: 1fr; color: {UI_FG}; text-style: bold; }}
-    .ghdr-sig  {{ width: 13; content-align: right middle; color: {UI_DIM}; }}
     .ghdr-cnt  {{ width: 5; content-align: right middle; }}
     """
 
@@ -95,11 +94,9 @@ class GroupHeaderRow(Widget):
         gid = self._group.id
         yield Label("", id=f"ghdr-icon-{gid}", classes="ghdr-icon")
         yield Label(self._strip_name(), classes="ghdr-name")
-        yield Label("", id=f"ghdr-sig-{gid}",  classes="ghdr-sig")
         yield Label("", id=f"ghdr-cnt-{gid}",  classes="ghdr-cnt")
 
-    def update(self, state: NetworkState, devices: list[Device],
-               enrichment: GatewayEnrichment | None) -> None:
+    def update(self, state: NetworkState, devices: list[Device]) -> None:
         g = self._group
         gid = g.id
         has_gw = bool(g.gateway_ip)
@@ -124,13 +121,6 @@ class GroupHeaderRow(Widget):
                     c, icon = S_WARN, "~"
 
         self.query_one(f"#ghdr-icon-{gid}", Label).update(f"[{c}]{icon}[/]")
-
-        if has_gw and gw_result:
-            self.query_one(f"#ghdr-sig-{gid}", Label).update(
-                f"[{_sc(gw_result.status)}]{_ms(gw_result.response_ms)}[/]"
-            )
-        else:
-            self.query_one(f"#ghdr-sig-{gid}", Label).update("")
 
         total = len(devices) + (1 if has_gw else 0)
         online = 0
@@ -211,8 +201,8 @@ class GroupBlock(Widget):
         for dev in self._devices:
             yield DeviceRow(dev)
 
-    def update(self, state: NetworkState, enrichment: GatewayEnrichment | None) -> None:
-        self.query_one(GroupHeaderRow).update(state, self._devices, enrichment)
+    def update(self, state: NetworkState) -> None:
+        self.query_one(GroupHeaderRow).update(state, self._devices)
 
         g = self._group
         gw_result = state.gateway_results.get(g.gateway_ip) if g.gateway_ip else None
@@ -285,12 +275,9 @@ class DevicesScreen(Screen):
     def on_mount(self) -> None:
         enriched = getattr(self.app, "_last_enriched", None)
         if enriched is not None:
-            self.update_state(enriched.network, enriched.gw_enrichment)
+            self.update_state(enriched.network)
 
-    def update_state(self, state: NetworkState,
-                     gw_enrichment: dict[str, GatewayEnrichment] | None = None) -> None:
-        if gw_enrichment is None:
-            gw_enrichment = {}
+    def update_state(self, state: NetworkState) -> None:
 
         def _grp_has_any_online(group: Group) -> bool:
             gw_result = state.gateway_results.get(group.gateway_ip) if group.gateway_ip else None
@@ -322,8 +309,7 @@ class DevicesScreen(Screen):
             self.query_one("#sechdr-lan", SectionHeader).update(lan_ok, len(self._lan_groups))
 
         for group in self._config.groups:
-            enr = gw_enrichment.get(group.gateway_ip) if group.gateway_ip else None
-            self.query_one(f"#grpblk-{group.id}", GroupBlock).update(state, enr)
+            self.query_one(f"#grpblk-{group.id}", GroupBlock).update(state)
 
     def action_go_back(self) -> None:
         self.app.pop_screen()

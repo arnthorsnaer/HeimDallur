@@ -662,7 +662,6 @@ class GroupRow(Widget):
     }}
     .grp-icon  {{ width: 2; }}
     .grp-name  {{ width: 1fr; color: {UI_FG}; }}
-    .grp-sig   {{ width: 13; content-align: right middle; color: {UI_DIM}; }}
     .grp-count {{ width: 5; content-align: right middle; }}
     """
 
@@ -681,7 +680,6 @@ class GroupRow(Widget):
                 break
         yield Label("", id=f"grp-icon-{gid}",  classes="grp-icon")
         yield Label(name, classes="grp-name")
-        yield Label("", id=f"grp-sig-{gid}",   classes="grp-sig")
         yield Label("", id=f"grp-count-{gid}", classes="grp-count")
 
     def update(self, state: NetworkState, enrichment: GatewayEnrichment | None) -> None:
@@ -712,14 +710,6 @@ class GroupRow(Widget):
                     c, icon = S_WARN, "~"
 
         self.query_one(f"#grp-icon-{gid}", Label).update(f"[{c}]{icon}[/]")
-
-        # Latency for gateway
-        if has_gw and gw_result:
-            self.query_one(f"#grp-sig-{gid}", Label).update(
-                f"[{_sc(gw_result.status)}]{_ms(gw_result.response_ms)}[/]"
-            )
-        else:
-            self.query_one(f"#grp-sig-{gid}", Label).update("")
 
         # Online / total  (gateway counts as one device)
         total = len(self._devices) + (1 if has_gw else 0)
