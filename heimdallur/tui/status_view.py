@@ -218,17 +218,17 @@ class InternetPanel(Widget):
     #inet-hint       {{ width: 9; height: 1; content-align: right middle; color: {UI_DIM}; }}
     #inet-summary    {{ height: 1; }}
     #inet-detail     {{ height: auto; display: none; padding-top: 1; }}
-    #inet-ip-hdr     {{ height: 1; color: {UI_DIM}; text-style: bold; margin-bottom: 0; }}
+    #inet-ip-hdr     {{ height: 1; color: {UI_DIM}; text-style: bold; }}
     #inet-ip-rows    {{ height: auto; }}
-    #inet-dns-hdr    {{ height: 1; color: {UI_DIM}; text-style: bold; padding-top: 1; }}
+    #inet-dns-hdr    {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
     #inet-dns-rows   {{ height: auto; }}
-    #inet-http-hdr   {{ height: 1; color: {UI_DIM}; text-style: bold; padding-top: 1; }}
+    #inet-http-hdr   {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
     #inet-http-meta  {{ height: 1; color: {UI_DIM}; }}
     #inet-http-rows  {{ height: auto; }}
-    #inet-spark-hdr  {{ height: 1; color: {UI_DIM}; text-style: bold; padding-top: 1; }}
-    #inet-speed-hdr  {{ height: 1; color: {UI_DIM}; text-style: bold; padding-top: 1; }}
+    #inet-spark-hdr  {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
+    #inet-speed-hdr  {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
     #inet-speed-row  {{ height: 1; }}
-    #inet-speed-spark-hdr {{ height: 1; color: {UI_DIM}; padding-top: 1; }}
+    #inet-speed-spark-hdr {{ height: 1; color: {UI_DIM}; margin-top: 1; }}
     InternetPanel Sparkline {{ height: 3; }}
     """
 
