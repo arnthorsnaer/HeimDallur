@@ -200,42 +200,18 @@ class MockProber:
         gateway_results: dict[str, ProbeResult] = {}
         device_results: dict[str, ProbeResult] = {}
 
-        if router.status == ProbeStatus.UNREACHABLE:
-            for g in self._config.groups:
-                if g.gateway_ip:
-                    gateway_results[g.gateway_ip] = ProbeResult(
-                        ip=g.gateway_ip, status=ProbeStatus.UNKNOWN, response_ms=None, cause="router_offline"
-                    )
-            for d in self._config.devices:
-                device_results[d.ip] = ProbeResult(
-                    ip=d.ip, status=ProbeStatus.UNKNOWN, response_ms=None, cause="router_offline"
-                )
+        # Probe all gateways and devices in parallel — no cascade suppression.
+        gw_ips = list({g.gateway_ip for g in self._config.groups if g.gateway_ip})
+        all_tasks = [self._net.probe_ip(ip) for ip in gw_ips] + \
+                    [self._net.probe_ip(d.ip) for d in self._config.devices]
+
+        if all_tasks:
+            all_results = await asyncio.gather(*all_tasks)
+            gateway_results = dict(zip(gw_ips, all_results[:len(gw_ips)]))
+            device_results  = {d.ip: r for d, r in zip(self._config.devices, all_results[len(gw_ips):])}
         else:
-            gw_ips = list({g.gateway_ip for g in self._config.groups if g.gateway_ip})
-            gw_res = await asyncio.gather(*[self._net.probe_ip(ip) for ip in gw_ips])
-            gateway_results = dict(zip(gw_ips, gw_res))
-
-            grp_up: dict[str, bool] = {}
-            for g in self._config.groups:
-                if g.gateway_ip:
-                    r = gateway_results.get(g.gateway_ip)
-                    grp_up[g.id] = r is None or r.status != ProbeStatus.UNREACHABLE
-                else:
-                    grp_up[g.id] = True
-
-            pending: list[tuple[str, asyncio.Task]] = []
-            for d in self._config.devices:
-                if not grp_up.get(d.group_id, True):
-                    device_results[d.ip] = ProbeResult(
-                        ip=d.ip, status=ProbeStatus.UNKNOWN, response_ms=None, cause="gateway_offline"
-                    )
-                else:
-                    pending.append((d.ip, asyncio.create_task(self._net.probe_ip(d.ip))))
-
-            if pending:
-                res = await asyncio.gather(*[t for _, t in pending])
-                for (ip, _), r in zip(pending, res):
-                    device_results[ip] = r
+            gateway_results = {}
+            device_results  = {}
 
         return NetworkState(
             timestamp=ts,
