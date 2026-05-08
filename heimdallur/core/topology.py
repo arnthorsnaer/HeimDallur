@@ -157,22 +157,27 @@ class NetworkState:
             issues.append("WAN offline — full network unreachable")
             return issues
         if self.router_result and self.router_result.status == ProbeStatus.UNREACHABLE:
-            issues.append("Router offline — all downstream devices affected")
+            issues.append("Router offline — home network affected")
             return issues
-        grp = config.group_by_id()
+
+        # Report access point / switch failures.
+        # Track their group IDs so we don't double-report the devices behind them.
+        offline_group_ids: set[str] = set()
         for group in config.groups:
             if group.gateway_ip:
                 r = self.gateway_results.get(group.gateway_ip)
                 if r and r.status == ProbeStatus.UNREACHABLE:
                     n = len(config.devices_in_group(group.id))
-                    issues.append(f"{group.name} gateway offline — {n} devices affected")
+                    label = "WiFi access point" if group.type == "wifi" else "switch"
+                    issues.append(f"{group.name} {label} offline — {n} devices affected")
+                    offline_group_ids.add(group.id)
+
         for device in config.devices:
-            g = grp.get(device.group_id)
-            if g and not self.gateway_up(g):
-                continue  # suppressed by gateway cascade
+            if device.group_id in offline_group_ids:
+                continue  # access point explains this; don't double-report
             r = self.device_results.get(device.ip)
             if r and r.status == ProbeStatus.UNREACHABLE:
-                issues.append(f"{device.ip}  {device.name}")
+                issues.append(f"{device.name} unreachable")
         return issues
 
     def summary(self, config: NetworkConfig) -> tuple[int, int, int]:
