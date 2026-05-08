@@ -6,18 +6,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Heimdallur network monitor")
     parser.add_argument(
         "--mode",
-        choices=["tui", "tiny", "status", "report"],
+        choices=["tui", "status", "report"],
         default="tui",
         help=(
             "tui: interactive dashboard (default)  |  "
-            "tiny: same dashboard scaled for 800×480 displays  |  "
             "status: single-pass rich output  |  "
             "report: write markdown snapshot to ~/.local/share/heimdallur/status.md and print it"
         ),
     )
     args = parser.parse_args()
 
-    if args.mode in ("tui", "tiny"):
+    if args.mode == "tui":
         from heimdallur.tui.app import HeimdallurApp
         HeimdallurApp().run()
     elif args.mode == "status":
