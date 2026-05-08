@@ -84,27 +84,43 @@ jobs:
             const prNum  = context.issue.number;
             const branch = context.payload.pull_request.head.ref;
 
-            const base = [
+            const normalBase = [
               "https://raw.githubusercontent.com",
               owner, repo, branch, "docs/screenshots"
             ].join("/");
+            const tinyBase = normalBase + "/tiny";
 
-            // Must match the slugs defined in scripts/capture_all.py
-            const captures = [
-              { slug: "01-status-healthy",           title: "All healthy" },
-              { slug: "02-status-internet-degraded", title: "Internet degraded" },
-              { slug: "03-status-internet-offline",  title: "Internet offline" },
-              { slug: "04-status-router-offline",    title: "Router offline" },
-              { slug: "05-status-gateway-offline",   title: "AP offline" },
-              { slug: "06-status-multiple-issues",   title: "Multiple issues" },
-              { slug: "07-inet-panel-expanded",      title: "Internet panel expanded" },
-              { slug: "08-net-panel-expanded",         title: "Home network panel expanded" },
-              { slug: "09-history-screen",           title: "History screen" },
-              { slug: "10-devices-screen",           title: "Devices screen" },
+            // Side-by-side pairs: normal (120×38) vs tiny (66×20)
+            // Slugs must match scripts/capture_all.py CAPTURES and TINY_CAPTURES
+            const pairs = [
+              { normal: "01-status-healthy",           tiny: "t01-status-healthy",         title: "All healthy" },
+              { normal: "02-status-internet-degraded", tiny: "t02-status-degraded",         title: "Internet degraded" },
+              { normal: "06-status-multiple-issues",   tiny: "t03-status-multiple-issues",  title: "Multiple issues" },
+              { normal: "07-inet-panel-expanded",      tiny: "t04-internet",                title: "Internet panel" },
+              { normal: "08-net-panel-expanded",       tiny: "t05-home",                    title: "Home panel" },
             ];
 
-            const rows = captures.map(c =>
-              `| **${c.title}** |\n| ![${c.title}](${base}/${c.slug}.png) |`
+            // Normal-mode-only captures (no tiny equivalent)
+            const normalOnly = [
+              { slug: "01b-status-email-configured",    title: "Email configured" },
+              { slug: "03-status-internet-offline",     title: "Internet offline" },
+              { slug: "04-status-router-offline",       title: "Router offline" },
+              { slug: "05-status-gateway-offline",      title: "AP offline" },
+              { slug: "07b-inet-panel-partial",         title: "Internet panel — partial failure" },
+              { slug: "07c-inet-panel-offline",         title: "Internet panel — offline" },
+              { slug: "06b-status-panel-expanded",      title: "Status banner expanded" },
+              { slug: "08b-net-panel-gateway-offline",  title: "Home panel — AP offline" },
+              { slug: "09-history-screen",              title: "History screen" },
+              { slug: "10-devices-screen",              title: "Devices screen" },
+            ];
+
+            const pairRows = pairs.map(p =>
+              `| **${p.title}** | **${p.title}** |\n` +
+              `| ![${p.title} — normal](${normalBase}/${p.normal}.png) | ![${p.title} — tiny](${tinyBase}/${p.tiny}.png) |`
+            ).join("\n");
+
+            const normalOnlyRows = normalOnly.map(c =>
+              `| **${c.title}** |\n| ![${c.title}](${normalBase}/${c.slug}.png) |`
             ).join("\n");
 
             const section = [
@@ -112,7 +128,15 @@ jobs:
               "---",
               "## UI Screenshots",
               "",
-              rows,
+              "### Normal mode (120×38) vs Tiny mode (66×20)",
+              "",
+              "| Normal | Tiny |",
+              "|---|---|",
+              pairRows,
+              "",
+              "### Normal mode only",
+              "",
+              normalOnlyRows,
               "",
               `<sub>Auto-generated from mock data — updated on every push.</sub>`,
             ].join("\n");
@@ -131,7 +155,7 @@ jobs:
               owner, repo, pull_number: prNum, body,
             });
 
-            core.info(`PR #${prNum} updated with ${captures.length} screenshots.`);
+            core.info(`PR #${prNum} updated with ${pairs.length * 2 + normalOnly.length} screenshots.`);
 
   note-no-screenshots:
     needs: check-ui-changes

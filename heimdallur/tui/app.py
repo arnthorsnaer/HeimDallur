@@ -323,3 +323,23 @@ class HeimdallurApp(App):
             self.screen.update_state(message.enriched, message.snapshot)
         elif isinstance(self.screen, DevicesScreen):
             self.screen.update_state(message.enriched.network)
+
+
+class TinyApp(HeimdallurApp):
+    """Tiny Monitor Mode — optimised for 66×20 terminals (800×480 displays)."""
+
+    async def on_mount(self) -> None:
+        from heimdallur.tui.tiny_view import TinyScreen
+        from heimdallur.mock.network import MockProber
+        await self._store.open()
+        await self.push_screen(TinyScreen(self._config, self._start_time))
+        if isinstance(self._prober, MockProber):
+            self._seed_mock_history()
+        self._probe_loop()
+        self._speed_loop()
+
+    def on_probe_complete(self, message: ProbeComplete) -> None:
+        from heimdallur.tui.tiny_view import TinyScreen
+        self._last_enriched = message.enriched
+        if isinstance(self.screen, TinyScreen):
+            self.screen.update_state(message.enriched, message.snapshot)

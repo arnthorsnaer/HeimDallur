@@ -21,8 +21,10 @@ from pathlib import Path
 _REPO  = Path(__file__).parent.parent
 _SCEN  = _REPO / "heimdallur" / "mock" / "scenarios"
 
-COLUMNS = 120
-ROWS    = 38
+COLUMNS      = 120
+ROWS         = 38
+TINY_COLUMNS = 66
+TINY_ROWS    = 20
 SETTLE  = 5.0   # seconds — long enough for probe + speed-test mock to fire
 NAV     = 0.6   # seconds — pause after navigation keypresses
 
@@ -64,9 +66,27 @@ CAPTURES: list[dict] = [
      "scenario": "gateway_offline.toml", "keys": ["d"]},
 ]
 
+TINY_CAPTURES: list[dict] = [
+    # STATUS panel — various scenarios
+    {"slug": "t01-status-healthy",         "title": "Tiny — all healthy",
+     "scenario": "all_healthy.toml"},
+    {"slug": "t02-status-degraded",        "title": "Tiny — internet degraded",
+     "scenario": "internet_degraded.toml"},
+    {"slug": "t03-status-multiple-issues", "title": "Tiny — multiple issues",
+     "scenario": "multiple_issues.toml"},
+    # INTERNET panel (navigate with right arrow — only works when no active errors)
+    {"slug": "t04-internet",               "title": "Tiny — internet panel",
+     "scenario": "all_healthy.toml",       "keys": ["right"]},
+    # HOME panel
+    {"slug": "t05-home",                   "title": "Tiny — home panel",
+     "scenario": "all_healthy.toml",       "keys": ["right", "right"]},
+]
+
 
 async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path,
-                       extra_env: dict[str, str] | None = None) -> None:
+                       extra_env: dict[str, str] | None = None,
+                       size: tuple[int, int] = (COLUMNS, ROWS),
+                       app_class: str = "HeimdallurApp") -> None:
     # Use a fresh temp DB per capture to avoid lock contention.
     import importlib
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
@@ -81,9 +101,9 @@ async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path,
     # Re-import the app module fresh each time so env vars are re-read.
     import heimdallur.tui.app as _app_mod
     importlib.reload(_app_mod)
-    app = _app_mod.HeimdallurApp()
+    app = getattr(_app_mod, app_class)()
 
-    async with app.run_test(size=(COLUMNS, ROWS)) as pilot:
+    async with app.run_test(size=size) as pilot:
         await pilot.pause(SETTLE)
         for key in keys:
             await pilot.press(key)
@@ -138,31 +158,46 @@ def main() -> None:
     out_dir = (_REPO / args.output_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Generating {len(CAPTURES)} screenshots → {out_dir}\n")
+    total = len(CAPTURES) + len(TINY_CAPTURES)
+    print(f"Generating {total} screenshots ({len(CAPTURES)} normal + {len(TINY_CAPTURES)} tiny) → {out_dir}\n")
     t_start = time.monotonic()
 
-    for cap in CAPTURES:
+    def _run_capture(cap: dict, subdir: str = "",
+                     size: tuple[int, int] = (COLUMNS, ROWS),
+                     app_class: str = "HeimdallurApp") -> None:
         slug      = cap["slug"]
         scenario  = _SCEN / cap["scenario"]
         keys      = cap.get("keys", [])
         extra_env = cap.get("env")
-        svg_path  = out_dir / f"{slug}.svg"
-        out_path  = out_dir / f"{slug}.{args.ext}"
+        dest      = out_dir / subdir if subdir else out_dir
+        svg_path  = dest / f"{slug}.svg"
+        out_path  = dest / f"{slug}.{args.ext}"
 
         print(f"[{slug}]")
         t0 = time.monotonic()
-        asyncio.run(_capture_svg(scenario, keys, svg_path, extra_env))
+        asyncio.run(_capture_svg(scenario, keys, svg_path, extra_env, size, app_class))
         print(f"  SVG done ({time.monotonic()-t0:.1f}s)")
 
         if args.ext == "png":
             _svg_to_png(svg_path, out_path)
             svg_path.unlink()
-            print(f"  PNG saved → {out_path.name}")
+            print(f"  PNG saved → {('tiny/' if subdir else '') + out_path.name}")
         else:
-            print(f"  SVG saved → {out_path.name}")
+            print(f"  SVG saved → {('tiny/' if subdir else '') + out_path.name}")
+
+    print("── Normal mode (120×38) ──────────────────────")
+    for cap in CAPTURES:
+        _run_capture(cap)
+
+    print("\n── Tiny mode (66×20) ─────────────────────────")
+    (out_dir / "tiny").mkdir(parents=True, exist_ok=True)
+    for cap in TINY_CAPTURES:
+        _run_capture(cap, subdir="tiny",
+                     size=(TINY_COLUMNS, TINY_ROWS),
+                     app_class="TinyApp")
 
     elapsed = time.monotonic() - t_start
-    print(f"\nDone — {len(CAPTURES)} screenshots in {elapsed:.0f}s")
+    print(f"\nDone — {total} screenshots in {elapsed:.0f}s")
 
 
 if __name__ == "__main__":
