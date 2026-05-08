@@ -260,9 +260,8 @@ class InternetPanel(Widget):
         padding: 0 1;
     }}
     #inet-header       {{ height: 1; layout: horizontal; }}
-    #inet-duration     {{ width: 1fr; height: 1; }}
+    #inet-summary      {{ width: 1fr; height: 1; }}
     #inet-hint         {{ width: 9; height: 1; content-align: right middle; color: {UI_DIM}; }}
-    #inet-summary      {{ height: 1; }}
     #inet-detail       {{ height: auto; display: none; padding-top: 1; }}
     #inet-diagnosis    {{ height: 1; }}
     #inet-ip-hdr-row   {{ height: 1; layout: horizontal; margin-top: 1; }}
@@ -277,8 +276,8 @@ class InternetPanel(Widget):
     #inet-http-hdr     {{ width: auto; margin-right: 2; color: {UI_DIM}; text-style: bold; }}
     #inet-http-compact {{ width: 1fr; height: 1; }}
     #inet-http-rows    {{ height: auto; }}
-    #inet-spark-hdr    {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
     #inet-speed-hdr    {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
+    #inet-spark-hdr    {{ height: 1; color: {UI_DIM}; text-style: bold; margin-top: 1; }}
     #inet-speed-row    {{ height: 1; }}
     InternetPanel Sparkline {{ height: 3; }}
     """
@@ -297,9 +296,8 @@ class InternetPanel(Widget):
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="inet-header"):
-            yield Label("", id="inet-duration")
+            yield Label("", id="inet-summary")
             yield Label("", id="inet-hint")
-        yield Label("", id="inet-summary")
         with Vertical(id="inet-detail"):
             yield Label("", id="inet-diagnosis")
             with Horizontal(id="inet-ip-hdr-row"):
@@ -317,11 +315,11 @@ class InternetPanel(Widget):
                 yield Label("", id="inet-http-compact")
                 yield SectionToggle("http")
             yield Label("", id="inet-http-rows")
-            yield Label("", id="inet-spark-hdr")
-            yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-lat-spark")
             yield Label("SPEED TEST", id="inet-speed-hdr")
             yield Label("", id="inet-speed-row")
             yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-speed-spark")
+            yield Label("", id="inet-spark-hdr")
+            yield Sparkline([], min_color=SPARK_OK_LO, max_color=SPARK_OK_HI, id="inet-lat-spark")
 
     def on_mount(self) -> None:
         self.border_title = "INTERNET"
@@ -348,9 +346,11 @@ class InternetPanel(Widget):
         if not self._status_since:
             return
         elapsed = time.time() - self._status_since
-        self.query_one("#inet-duration", Label).update(
-            f"[{self._status_color}]{self._status_word}[/]"
-            f" [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
+        c = self._status_color
+        sw = self._status_word
+        self.border_title = (
+            f"[bold {c}]INTERNET · {sw.upper()}[/]"
+            f" [{UI_DIM}]({_fmt_uptime(elapsed)})[/]"
         )
 
     def on_section_toggle_toggled(self, msg: SectionToggle.Toggled) -> None:
@@ -392,14 +392,11 @@ class InternetPanel(Widget):
         self._prev_status = derived
 
         self.styles.border = ("solid", c)
-        self.border_title = f"[bold {c}]INTERNET · {sw.upper()}[/]"
-
-        if self._status_since:
-            elapsed = time.time() - self._status_since
-            self.query_one("#inet-duration", Label).update(
-                f"[{self._status_color}]{self._status_word}[/]"
-                f" [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
-            )
+        elapsed = time.time() - self._status_since if self._status_since else 0.0
+        self.border_title = (
+            f"[bold {c}]INTERNET · {sw.upper()}[/]"
+            f" [{UI_DIM}]({_fmt_uptime(elapsed)})[/]"
+        )
 
         # ── Collapsed summary line ──────────────────────────────
         if iq is not None:
@@ -414,15 +411,18 @@ class InternetPanel(Widget):
                 f"[{UI_DIM}]IP[/] {_count_label(ip_ok, ip_tot)}"
                 f"   [{UI_DIM}]DNS[/] {_count_label(dns_ok, dns_tot)}"
                 f"   [{UI_DIM}]HTTP[/] {_count_label(http_ok, http_tot)}"
-                + rtt_str + spd_str
+                + spd_str + rtt_str
             )
         else:
             avg_lat = _rolling_avg(ont_lat)
-            avg_str = (f"[{UI_DIM}]LATENCY[/] [{c}]{avg_lat:.1f}ms[/]"
-                       if avg_lat is not None else f"[{S_UNK}]LATENCY —[/]")
-            self.query_one("#inet-summary", Label).update(
-                avg_str + _speed_summary(speed)
-            )
+            lat_str = (f"  [{UI_DIM}]·  LATENCY[/] [{c}]{avg_lat:.1f}ms[/]"
+                       if avg_lat is not None else "")
+            if speed and speed.ok:
+                dl_c = S_OK if speed.download_mbps >= 50 else (S_WARN if speed.download_mbps >= 10 else S_ERR)
+                spd_lead = f"[{UI_DIM}]SPEED ↓[/] [{dl_c}]{speed.download_mbps:.0f} Mbps[/]"
+            else:
+                spd_lead = f"[{UI_DIM}]SPEED —[/]"
+            self.query_one("#inet-summary", Label).update(spd_lead + lat_str)
 
         if iq is None:
             return
@@ -640,7 +640,7 @@ class HomeNetworkPanel(Widget):
         border: solid {UI_BDR};
         padding: 0 1;
     }}
-    #hn-groups     {{ height: 1fr; margin-top: 1; layout: horizontal; }}
+    #hn-groups     {{ height: 1fr; layout: horizontal; }}
     #hn-wifi-col   {{ width: 1fr; margin-right: 4; }}
     #hn-lan-col    {{ width: 1fr; }}
     #hn-wifi-hdr   {{ height: 1; color: {UI_DIM}; text-style: bold; }}
@@ -658,7 +658,6 @@ class HomeNetworkPanel(Widget):
         self._lan_groups  = [g for g in config.groups if g.type == "lan"]
 
     def compose(self) -> ComposeResult:
-        yield Label("", id="hn-duration")
         with Horizontal(id="hn-groups"):
             with VerticalScroll(id="hn-wifi-col"):
                 yield Label("", id="hn-wifi-hdr")
@@ -679,9 +678,11 @@ class HomeNetworkPanel(Widget):
         if not self._status_since:
             return
         elapsed = time.time() - self._status_since
-        self.query_one("#hn-duration", Label).update(
-            f"[{self._status_color}]{self._status_word}[/]"
-            f" [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
+        c = self._status_color
+        sw = self._status_word
+        self.border_title = (
+            f"[bold {c}]HOME NETWORK · {sw.upper()}[/]"
+            f" [{UI_DIM}]({_fmt_uptime(elapsed)})[/]"
         )
 
     def _composite_status(self, state: NetworkState) -> ProbeStatus:
@@ -714,13 +715,11 @@ class HomeNetworkPanel(Widget):
             self._status_color = c
 
         self.styles.border = ("solid", c)
-        self.border_title = f"[bold {c}]HOME NETWORK · {sw.upper()}[/]"
-
-        if self._status_since:
-            elapsed = time.time() - self._status_since
-            self.query_one("#hn-duration", Label).update(
-                f"[{c}]{sw}[/] [{UI_DIM}]for {_fmt_uptime(elapsed)}[/]"
-            )
+        elapsed = time.time() - self._status_since if self._status_since else 0.0
+        self.border_title = (
+            f"[bold {c}]HOME NETWORK · {sw.upper()}[/]"
+            f" [{UI_DIM}]({_fmt_uptime(elapsed)})[/]"
+        )
 
         # Count healthy groups per type
         def _groups_ok(groups: list) -> int:

@@ -76,6 +76,37 @@ make deploy   # rsyncs to pi@heimdallur.local and restarts the systemd service
 make logs     # tail the service log
 ```
 
+### Console font size
+
+Heimdallur is designed to fill an 800×480 display (e.g. HyperPixel 4") using a large terminal font so the status is legible from across the room. The right font depends on your display resolution:
+
+| Display | Target size | Font |
+|---|---|---|
+| 800×480 | ~66×20 | Terminus 12×24 |
+| 1024×600 | ~80×24 | Terminus 12×24 |
+| 1280×800 | ~100×30 | Terminus 12×24 |
+
+To set the console font on the Pi, edit `/etc/default/console-setup`:
+
+```
+FONTFACE="Terminus"
+FONTSIZE="12x24"
+```
+
+Then apply without rebooting:
+
+```bash
+sudo setupcon
+```
+
+To verify the terminal dimensions after the font change:
+
+```bash
+stty -F /dev/tty1 size   # prints rows cols, e.g. "20 66"
+```
+
+The `terminus-font` package must be installed (`sudo apt install terminus-font`).
+
 ---
 
 ## Running in production
