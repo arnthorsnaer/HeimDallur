@@ -406,58 +406,6 @@ def _write_output_formats_doc(
     return doc_path
 
 
-# ── UI snapshots appendix generation ─────────────────────────────
-
-def _write_ui_snapshots(
-    out_dir: Path,
-    text_results: list[TextResult],
-    report_results: list[TextResult],
-    web_slugs: list[WebSlug],
-    img_ext: str,
-    github_repo: str | None = None,
-    branch: str | None = None,
-) -> Path:
-    """Generate docs/ui-snapshots.md — an appendix to append to a PR description.
-
-    Organised by network state: TUI snapshot visible, Web UI / status output /
-    markdown report each in a collapsed <details> block.
-
-    When github_repo and branch are provided, snapshot URLs are absolute
-    raw.githubusercontent.com links so images render in the PR description.
-    """
-    def _abs_url(slug: str) -> str:
-        rel = f"docs/snapshots/{slug}.{img_ext}"
-        if github_repo and branch:
-            return f"https://raw.githubusercontent.com/{github_repo}/{branch}/{rel}"
-        return rel
-
-    def _img_tag(alt: str, url: str) -> str:
-        return f"![{alt}]({url})"
-
-    web_by_name    = {name: slug for slug, _, name in web_slugs}
-    report_by_name = {name: md   for _, _, name, md in report_results}
-
-    lines: list[str] = []
-
-    for slug, title, name, text in text_results:
-        img_url = _abs_url(slug)
-        lines += [
-            f"## {title}",
-            "",
-            f"![{title}]({img_url})",
-            "",
-        ]
-        lines += _state_sections(
-            slug, title, name, text, report_by_name.get(name, ""),
-            web_by_name, _abs_url, _img_tag,
-        )
-        lines += ["---", ""]
-
-    path = out_dir.parent / "ui-snapshots.md"
-    path.write_text("\n".join(lines), encoding="utf-8")
-    return path
-
-
 # ── ui-states.md marker injection ───────────────────────────────
 
 def _update_ui_states_doc(
@@ -516,10 +464,6 @@ def main() -> None:
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--output-dir", default="docs/snapshots")
     parser.add_argument(
-        "--github-repo", default="arnthorsnaer/HeimDallur",
-        help="owner/repo slug — used for absolute image URLs in ui-snapshots.md",
-    )
-    parser.add_argument(
         "--scenarios",
         help=(
             "Comma-separated scenario names to capture (default: all). "
@@ -528,7 +472,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--pr-only", action="store_true",
-        help="Skip TUI snapshot generation; only regenerate status/report text and ui-snapshots.md",
+        help="Skip TUI snapshot generation; only regenerate status/report text and docs",
     )
     parser.add_argument(
         "--no-web", action="store_true",
@@ -554,16 +498,6 @@ def main() -> None:
     active_web  = [s for s in WEB_SCENARIOS  if s["name"] in selected]
     # For TUI captures, include entries whose scenario file matches the selection.
     active_caps = [c for c in CAPTURES if Path(c["scenario"]).stem in selected]
-
-    # Detect current git branch for absolute image URLs in ui-snapshots.md.
-    try:
-        import subprocess as _sp
-        _branch = _sp.check_output(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            cwd=_REPO, text=True, stderr=_sp.DEVNULL,
-        ).strip()
-    except Exception:
-        _branch = None
 
     out_dir = (_REPO / args.output_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -654,15 +588,10 @@ def main() -> None:
         report_results.append((slug, title, name, md))
 
     # ── Write docs ───────────────────────────────────────────────
-    doc_path      = _write_output_formats_doc(out_dir, text_results, report_results, web_slugs, args.ext)
-    snapshot_path = _write_ui_snapshots(
-        out_dir, text_results, report_results, web_slugs, args.ext,
-        github_repo=args.github_repo, branch=_branch,
-    )
+    doc_path = _write_output_formats_doc(out_dir, text_results, report_results, web_slugs, args.ext)
     _update_ui_states_doc(out_dir, text_results, report_results, web_slugs, args.ext)
 
     print(f"\nOutput-formats doc → {doc_path.relative_to(_REPO)}")
-    print(f"UI snapshots       → {snapshot_path.relative_to(_REPO)}")
     print(f"UI states updated  → docs/ui-states.md")
 
     elapsed = time.monotonic() - t_start

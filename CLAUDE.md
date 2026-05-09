@@ -26,20 +26,17 @@ The `docs/` outputs are kept in sync manually. After changing anything in `heimd
 
 ```bash
 PYTHONPATH=. python scripts/capture_all.py --output-dir docs/snapshots
-git add docs/snapshots/ docs/output-formats.md docs/ui-snapshots.md docs/ui-states.md
+git add docs/snapshots/ docs/output-formats.md docs/ui-states.md
 ```
 
-`capture_all.py` produces three sets of artifacts:
+`capture_all.py` produces two sets of artifacts:
 
 | Artifact | Location | What it shows |
 |---|---|---|
 | PNG snapshots | `docs/snapshots/*.png` | TUI in 15 distinct UI states |
 | Output-formats doc | `docs/output-formats.md` | All 4 output modes per scenario, organised by state |
-| UI snapshots appendix | `docs/ui-snapshots.md` | Same content, formatted for appending to a PR description |
 
 It also injects Web UI / status / report samples into the marker sections of `docs/ui-states.md`.
-
-**When creating a pull request in this repo, write the PR description normally, then append the contents of `docs/ui-snapshots.md` to the PR body.**
 
 The full run takes ~90 s. It requires Python 3.12 and either `rsvg-convert` (librsvg2-bin) or `cairosvg` (`pip install cairosvg`) for PNG conversion.
 
@@ -48,7 +45,7 @@ The full run takes ~90 s. It requires Python 3.12 and either `rsvg-convert` (lib
 Instead of regenerating all 6 scenarios (90 s), use `--scenarios` to capture only the states affected by the change (~2–10 s). Use `--pr-only` to skip TUI snapshot regeneration when the TUI itself didn't change.
 
 ```bash
-# Only regenerate what's relevant, then append docs/ui-snapshots.md to the PR body:
+# Only regenerate what's relevant:
 python scripts/capture_all.py --pr-only --scenarios internet_degraded,internet_offline
 ```
 
