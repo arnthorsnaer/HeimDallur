@@ -46,17 +46,21 @@ All outputs below are generated from mock data via the scenario files in
 
 ```text
 
-HEIMDALLUR  18:31:41
+HEIMDALLUR  20:17:21
 
-                              
-   INTERNET         ✓  38ms   
-   ROUTER           ✓  1ms    
-                              
-Access Points
-  ✓  4ms  WiFi Garage
-  ✓  2ms  WiFi Living Room
+INTERNET  ✓  36ms
+  IP 3/3  ·  DNS 3/3  ·  HTTP 3/3
+  ↓ 364 Mbps  ·  ping 17 ms  (0s ago)
+
+HOME NETWORK
+  ROUTER  ✓  2ms
+  ✓  2ms  WiFi Garage
+  ✓  4ms  WiFi Living Room
   ✓  2ms  WiFi Upper Floor
-  ✓  3ms  WiFi Basement
+  ✓  4ms  WiFi Basement
+  LAN  LAN Studio
+  LAN  LAN Home Theater
+  LAN  LAN Router
 
 All monitored devices OK
 
@@ -67,19 +71,24 @@ All monitored devices OK
 
 ```text
 
-HEIMDALLUR  18:31:41
+HEIMDALLUR  20:17:21
 
-                              
-   INTERNET         ~  82ms   
-   ROUTER           ✓  3ms    
-                              
-Access Points
-  ✓  1ms  WiFi Garage
+INTERNET  ✗  131ms
+  IP 0/3  ·  DNS 3/3  ·  HTTP 3/3
+  ↓ 328 Mbps  ·  ping 30 ms  (0s ago)
+
+HOME NETWORK
+  ROUTER  ✓  1ms
+  ✓  3ms  WiFi Garage
   ✓  3ms  WiFi Living Room
-  ✓  2ms  WiFi Upper Floor
-  ✓  4ms  WiFi Basement
+  ✓  3ms  WiFi Upper Floor
+  ✓  3ms  WiFi Basement
+  LAN  LAN Studio
+  LAN  LAN Home Theater
+  LAN  LAN Router
 
-All monitored devices OK
+PROBLEMS
+  ✗  Internet offline — full network unreachable
 
 33 monitored  ·  33 OK  ·  0 down
 ```
@@ -88,20 +97,24 @@ All monitored devices OK
 
 ```text
 
-HEIMDALLUR  18:31:41
+HEIMDALLUR  20:17:21
 
-                                 
-   INTERNET         ✗  timeout   
-   ROUTER           ✓  2ms       
-                                 
-Access Points
-  ✓  1ms  WiFi Garage
-  ✓  5ms  WiFi Living Room
+INTERNET  ✗  timeout
+  IP 0/3  ·  DNS 0/3  ·  HTTP 0/3
+  ↓ 324 Mbps  ·  ping 21 ms  (0s ago)
+
+HOME NETWORK
+  ROUTER  ✓  1ms
+  ✓  3ms  WiFi Garage
+  ✓  3ms  WiFi Living Room
   ✓  2ms  WiFi Upper Floor
-  ✓  1ms  WiFi Basement
+  ✓  5ms  WiFi Basement
+  LAN  LAN Studio
+  LAN  LAN Home Theater
+  LAN  LAN Router
 
 PROBLEMS
-  ✗  WAN offline — full network unreachable
+  ✗  Internet offline — full network unreachable
 
 33 monitored  ·  33 OK  ·  0 down
 ```
@@ -110,17 +123,21 @@ PROBLEMS
 
 ```text
 
-HEIMDALLUR  18:31:41
+HEIMDALLUR  20:17:21
 
-                                 
-   INTERNET         ✓  22ms      
-   ROUTER           ✗  timeout   
-                                 
-Access Points
-  ✓  5ms  WiFi Garage
-  ✓  1ms  WiFi Living Room
-  ✓  3ms  WiFi Upper Floor
+INTERNET  ✓  51ms
+  IP 3/3  ·  DNS 3/3  ·  HTTP 3/3
+  ↓ 329 Mbps  ·  ping 13 ms  (0s ago)
+
+HOME NETWORK
+  ROUTER  ✗  timeout
+  ✓  4ms  WiFi Garage
+  ✓  2ms  WiFi Living Room
+  ✓  2ms  WiFi Upper Floor
   ✓  3ms  WiFi Basement
+  LAN  LAN Studio
+  LAN  LAN Home Theater
+  LAN  LAN Router
 
 PROBLEMS
   ✗  Router offline — home network affected
@@ -132,17 +149,21 @@ PROBLEMS
 
 ```text
 
-HEIMDALLUR  18:31:41
+HEIMDALLUR  20:17:21
 
-                              
-   INTERNET         ✓  27ms   
-   ROUTER           ✓  3ms    
-                              
-Access Points
+INTERNET  ✓  27ms
+  IP 3/3  ·  DNS 3/3  ·  HTTP 3/3
+  ↓ 282 Mbps  ·  ping 10 ms  (0s ago)
+
+HOME NETWORK
+  ROUTER  ✓  2ms
   ✓  2ms  WiFi Garage
-  ✓  4ms  WiFi Living Room
-  ✓  3ms  WiFi Upper Floor
+  ✓  1ms  WiFi Living Room
+  ✓  4ms  WiFi Upper Floor
   ✗  timeout  WiFi Basement
+  LAN  LAN Studio
+  LAN  LAN Home Theater
+  LAN  LAN Router
 
 PROBLEMS
   ✗  WiFi Basement WiFi access point offline — 9 devices affected
@@ -154,17 +175,21 @@ PROBLEMS
 
 ```text
 
-HEIMDALLUR  18:31:41
+HEIMDALLUR  20:17:21
 
-                              
-   INTERNET         ✓  19ms   
-   ROUTER           ✓  3ms    
-                              
-Access Points
-  ✗  166ms  WiFi Garage
-  ✓  3ms  WiFi Living Room
-  ✓  4ms  WiFi Upper Floor
+INTERNET  ✓  47ms
+  IP 3/3  ·  DNS 3/3  ·  HTTP 3/3
+  ↓ 413 Mbps  ·  ping 11 ms  (0s ago)
+
+HOME NETWORK
+  ROUTER  ✓  2ms
+  ✗  121ms  WiFi Garage
+  ✓  4ms  WiFi Living Room
+  ✓  2ms  WiFi Upper Floor
   ✗  timeout  WiFi Basement
+  LAN  LAN Studio
+  LAN  LAN Home Theater
+  LAN  LAN Router
 
 PROBLEMS
   ✗  WiFi Garage WiFi access point offline — 4 devices affected
@@ -181,7 +206,7 @@ PROBLEMS
 
 # Heimdallur Network Status
 
-**Probed:** 2026-05-09 18:31:41 UTC  |  **Interval:** 30s
+**Probed:** 2026-05-09 20:17:21 UTC  |  **Interval:** 30s
 
 ## Summary
 
@@ -191,127 +216,128 @@ PROBLEMS
 
 ## Internet
 
-**Status:** ✅ HEALTHY  |  **Latency (ONT):** 47 ms avg  |  **Loss:** 0%
+**Status:** ✅ HEALTHY  |  **Latency (ONT):** 28 ms avg  |  **Loss:** 0%
 
 ### IP Reachability
 
 | Target | Status | Latency |
 |--------|--------|---------|
-| Cloudflare (1.1.1.1) | ✅ healthy | 12 ms |
-| Google (8.8.8.8) | ✅ healthy | 25 ms |
-| Quad9 (9.9.9.9) | ✅ healthy | 15 ms |
+| Cloudflare (1.1.1.1) | ✅ healthy | 19 ms |
+| Google (8.8.8.8) | ✅ healthy | 20 ms |
+| Quad9 (9.9.9.9) | ✅ healthy | 22 ms |
 
 ### DNS
 
 | Resolver | Status | Lookup |
 |----------|--------|--------|
-| Cloudflare (cloudflare.com) | ✅ ok | 11 ms |
-| Google (google.com) | ✅ ok | 15 ms |
-| Quad9 (quad9.net) | ✅ ok | 8 ms |
+| Cloudflare (cloudflare.com) | ✅ ok | 12 ms |
+| Google (google.com) | ✅ ok | 13 ms |
+| Quad9 (quad9.net) | ✅ ok | 15 ms |
 
 ### HTTP
 
 | Endpoint | Status | TTFB | Total |
 |----------|--------|------|-------|
-| Cloudflare | ✅ ok | 50 ms | 69 ms |
-| Google | ✅ ok | 72 ms | 78 ms |
-| Microsoft | ✅ ok | 45 ms | 60 ms |
+| Cloudflare | ✅ ok | 56 ms | 69 ms |
+| Google | ✅ ok | 44 ms | 51 ms |
+| Microsoft | ✅ ok | 71 ms | 95 ms |
 
-**Speed test:** ↓ 187 Mbps  |  ping 21 ms  *(0s ago)*
+**Speed test:** ↓ 346 Mbps  |  ping 29 ms  *(0s ago)*
 
 ---
 
-## Router
+## Home Network
+
+### Router
 
 **Status:** ✅ HEALTHY  |  **Latency:** 1 ms
-**CPU:** 11%  |  **Memory:** 36%  |  **Uptime:** 3d
+**CPU:** 20%  |  **Memory:** 43%  |  **Uptime:** 3d
 
----
+### Groups
 
-## Groups
+#### WiFi Garage  |  2.4GHz  ch 11
 
-### WiFi Garage  |  2.4GHz  ch 11
-
-**Gateway `192.168.1.95`:** ✅ 1 ms  |  **Clients:** 2
+**Gateway `192.168.1.95`:** ✅ 4 ms  |  **Clients:** 4
 
 **Devices:** 4 / 4 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Rafmagnsmaelir 1-fasa | `192.168.1.100` | ✅ healthy | 1 ms |
-| Rafmagnsmaelir 3-fasa | `192.168.1.101` | ✅ healthy | 2 ms |
-| Bílskúrshurð | `192.168.1.102` | ✅ healthy | 1 ms |
+| Rafmagnsmaelir 1-fasa | `192.168.1.100` | ✅ healthy | 2 ms |
+| Rafmagnsmaelir 3-fasa | `192.168.1.101` | ✅ healthy | 3 ms |
+| Bílskúrshurð | `192.168.1.102` | ✅ healthy | 2 ms |
 | Bílskúrsljós | `192.168.1.103` | ✅ healthy | 4 ms |
 
-### WiFi Living Room  |  5GHz  ch 36
+#### WiFi Living Room  |  5GHz  ch 36
 
-**Gateway `192.168.1.44`:** ✅ 3 ms  |  **Clients:** 10
+**Gateway `192.168.1.44`:** ✅ 5 ms  |  **Clients:** 8
 
 **Devices:** 11 / 11 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Inngangur ljós | `192.168.1.110` | ✅ healthy | 3 ms |
-| Gestasnyrtingur ljós | `192.168.1.111` | ✅ healthy | 2 ms |
-| Eldhús efri ljós | `192.168.1.112` | ✅ healthy | 2 ms |
+| Inngangur ljós | `192.168.1.110` | ✅ healthy | 1 ms |
+| Gestasnyrtingur ljós | `192.168.1.111` | ✅ healthy | 4 ms |
+| Eldhús efri ljós | `192.168.1.112` | ✅ healthy | 1 ms |
 | Eldhús neðri ljós | `192.168.1.113` | ✅ healthy | 4 ms |
 | Stofa ljós 1 | `192.168.1.114` | ✅ healthy | 1 ms |
-| Stofa ljós 2 | `192.168.1.115` | ✅ healthy | 2 ms |
+| Stofa ljós 2 | `192.168.1.115` | ✅ healthy | 3 ms |
 | Stofa ljós 3 | `192.168.1.116` | ✅ healthy | 2 ms |
-| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 3 ms |
-| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 2 ms |
-| Plöntuljós | `192.168.1.119` | ✅ healthy | 3 ms |
+| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 2 ms |
+| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 1 ms |
+| Plöntuljós | `192.168.1.119` | ✅ healthy | 4 ms |
 | Kaffivél | `192.168.1.219` | ✅ healthy | 2 ms |
 
-### WiFi Upper Floor  |  5GHz  ch 44
+#### WiFi Upper Floor  |  5GHz  ch 44
 
-**Gateway `192.168.1.43`:** ✅ 3 ms  |  **Clients:** 5
+**Gateway `192.168.1.43`:** ✅ 4 ms  |  **Clients:** 4
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 2 ms |
-| Gólfahitun | `192.168.1.131` | ✅ healthy | 5 ms |
+| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 3 ms |
+| Gólfahitun | `192.168.1.131` | ✅ healthy | 3 ms |
 
-### WiFi Basement  |  2.4GHz  ch 6
+#### WiFi Basement  |  2.4GHz  ch 6
 
-**Gateway `192.168.1.45`:** ✅ 2 ms  |  **Clients:** 11
+**Gateway `192.168.1.45`:** ✅ 5 ms  |  **Clients:** 8
 
 **Devices:** 9 / 9 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Svefnherbergi ljós 1 | `192.168.1.140` | ✅ healthy | 3 ms |
-| Svefnherbergi ljós 2 | `192.168.1.141` | ✅ healthy | 2 ms |
-| Baðherbergi ljós | `192.168.1.142` | ✅ healthy | 3 ms |
-| Kvikmyndaherbergi | `192.168.1.143` | ✅ healthy | 4 ms |
-| Þvottavél blásari | `192.168.1.144` | ✅ healthy | 2 ms |
-| Þvottaherbergi ljós | `192.168.1.145` | ✅ healthy | 3 ms |
-| Geymsla ljós | `192.168.1.146` | ✅ healthy | 2 ms |
-| Garðljós | `192.168.1.214` | ✅ healthy | 2 ms |
+| Svefnherbergi ljós 1 | `192.168.1.140` | ✅ healthy | 1 ms |
+| Svefnherbergi ljós 2 | `192.168.1.141` | ✅ healthy | 5 ms |
+| Baðherbergi ljós | `192.168.1.142` | ✅ healthy | 2 ms |
+| Kvikmyndaherbergi | `192.168.1.143` | ✅ healthy | 3 ms |
+| Þvottavél blásari | `192.168.1.144` | ✅ healthy | 5 ms |
+| Þvottaherbergi ljós | `192.168.1.145` | ✅ healthy | 2 ms |
+| Geymsla ljós | `192.168.1.146` | ✅ healthy | 1 ms |
+| Garðljós | `192.168.1.214` | ✅ healthy | 5 ms |
 | Garðtenglar | `192.168.1.148` | ✅ healthy | 3 ms |
 
-### LAN Studio
+#### LAN Studio
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Stúdíóbúnaður | `192.168.1.132` | ✅ healthy | 4 ms |
-| Home Assistant | `192.168.1.64` | ✅ healthy | 4 ms |
+| Stúdíóbúnaður | `192.168.1.132` | ✅ healthy | 5 ms |
+| Home Assistant | `192.168.1.64` | ✅ healthy | 2 ms |
 
-### LAN Home Theater
+#### LAN Home Theater
 
 **Devices:** 0 / 0 online
 
-### LAN Router
+#### LAN Router
 
 **Devices:** 1 / 1 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Unifi Controller | `192.168.1.151` | ✅ healthy | 2 ms |
+| Unifi Controller | `192.168.1.151` | ✅ healthy | 1 ms |
+
 
 ---
 
@@ -319,34 +345,34 @@ PROBLEMS
 
 | Device | IP | Group | Status | Latency |
 |--------|----|-------|--------|---------|
-| Rafmagnsmaelir 1-fasa | `192.168.1.100` | WiFi Garage | ✅ healthy | 1 ms |
-| Rafmagnsmaelir 3-fasa | `192.168.1.101` | WiFi Garage | ✅ healthy | 2 ms |
-| Bílskúrshurð | `192.168.1.102` | WiFi Garage | ✅ healthy | 1 ms |
+| Rafmagnsmaelir 1-fasa | `192.168.1.100` | WiFi Garage | ✅ healthy | 2 ms |
+| Rafmagnsmaelir 3-fasa | `192.168.1.101` | WiFi Garage | ✅ healthy | 3 ms |
+| Bílskúrshurð | `192.168.1.102` | WiFi Garage | ✅ healthy | 2 ms |
 | Bílskúrsljós | `192.168.1.103` | WiFi Garage | ✅ healthy | 4 ms |
-| Inngangur ljós | `192.168.1.110` | WiFi Living Room | ✅ healthy | 3 ms |
-| Gestasnyrtingur ljós | `192.168.1.111` | WiFi Living Room | ✅ healthy | 2 ms |
-| Eldhús efri ljós | `192.168.1.112` | WiFi Living Room | ✅ healthy | 2 ms |
+| Inngangur ljós | `192.168.1.110` | WiFi Living Room | ✅ healthy | 1 ms |
+| Gestasnyrtingur ljós | `192.168.1.111` | WiFi Living Room | ✅ healthy | 4 ms |
+| Eldhús efri ljós | `192.168.1.112` | WiFi Living Room | ✅ healthy | 1 ms |
 | Eldhús neðri ljós | `192.168.1.113` | WiFi Living Room | ✅ healthy | 4 ms |
 | Stofa ljós 1 | `192.168.1.114` | WiFi Living Room | ✅ healthy | 1 ms |
-| Stofa ljós 2 | `192.168.1.115` | WiFi Living Room | ✅ healthy | 2 ms |
+| Stofa ljós 2 | `192.168.1.115` | WiFi Living Room | ✅ healthy | 3 ms |
 | Stofa ljós 3 | `192.168.1.116` | WiFi Living Room | ✅ healthy | 2 ms |
-| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 3 ms |
-| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 2 ms |
-| Plöntuljós | `192.168.1.119` | WiFi Living Room | ✅ healthy | 3 ms |
+| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 2 ms |
+| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 1 ms |
+| Plöntuljós | `192.168.1.119` | WiFi Living Room | ✅ healthy | 4 ms |
 | Kaffivél | `192.168.1.219` | WiFi Living Room | ✅ healthy | 2 ms |
-| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 2 ms |
-| Gólfahitun | `192.168.1.131` | WiFi Upper Floor | ✅ healthy | 5 ms |
-| Stúdíóbúnaður | `192.168.1.132` | LAN Studio | ✅ healthy | 4 ms |
-| Home Assistant | `192.168.1.64` | LAN Studio | ✅ healthy | 4 ms |
-| Unifi Controller | `192.168.1.151` | LAN Router | ✅ healthy | 2 ms |
-| Svefnherbergi ljós 1 | `192.168.1.140` | WiFi Basement | ✅ healthy | 3 ms |
-| Svefnherbergi ljós 2 | `192.168.1.141` | WiFi Basement | ✅ healthy | 2 ms |
-| Baðherbergi ljós | `192.168.1.142` | WiFi Basement | ✅ healthy | 3 ms |
-| Kvikmyndaherbergi | `192.168.1.143` | WiFi Basement | ✅ healthy | 4 ms |
-| Þvottavél blásari | `192.168.1.144` | WiFi Basement | ✅ healthy | 2 ms |
-| Þvottaherbergi ljós | `192.168.1.145` | WiFi Basement | ✅ healthy | 3 ms |
-| Geymsla ljós | `192.168.1.146` | WiFi Basement | ✅ healthy | 2 ms |
-| Garðljós | `192.168.1.214` | WiFi Basement | ✅ healthy | 2 ms |
+| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 3 ms |
+| Gólfahitun | `192.168.1.131` | WiFi Upper Floor | ✅ healthy | 3 ms |
+| Stúdíóbúnaður | `192.168.1.132` | LAN Studio | ✅ healthy | 5 ms |
+| Home Assistant | `192.168.1.64` | LAN Studio | ✅ healthy | 2 ms |
+| Unifi Controller | `192.168.1.151` | LAN Router | ✅ healthy | 1 ms |
+| Svefnherbergi ljós 1 | `192.168.1.140` | WiFi Basement | ✅ healthy | 1 ms |
+| Svefnherbergi ljós 2 | `192.168.1.141` | WiFi Basement | ✅ healthy | 5 ms |
+| Baðherbergi ljós | `192.168.1.142` | WiFi Basement | ✅ healthy | 2 ms |
+| Kvikmyndaherbergi | `192.168.1.143` | WiFi Basement | ✅ healthy | 3 ms |
+| Þvottavél blásari | `192.168.1.144` | WiFi Basement | ✅ healthy | 5 ms |
+| Þvottaherbergi ljós | `192.168.1.145` | WiFi Basement | ✅ healthy | 2 ms |
+| Geymsla ljós | `192.168.1.146` | WiFi Basement | ✅ healthy | 1 ms |
+| Garðljós | `192.168.1.214` | WiFi Basement | ✅ healthy | 5 ms |
 | Garðtenglar | `192.168.1.148` | WiFi Basement | ✅ healthy | 3 ms |
 
 ---
@@ -357,60 +383,58 @@ PROBLEMS
 
 # Heimdallur Network Status
 
-**Probed:** 2026-05-09 18:31:41 UTC  |  **Interval:** 30s
+**Probed:** 2026-05-09 20:17:21 UTC  |  **Interval:** 30s
 
 ## Summary
 
-⚠️  1 issue(s) detected — 33 / 33 devices online
-
-- WAN offline — full network unreachable
+✅ All systems healthy — 33 / 33 devices online
 
 ---
 
 ## Internet
 
-**Status:** ❌ UNREACHABLE  |  **Latency (ONT):** 112 ms avg  |  **Loss:** 0%
+**Status:** ⚠️ DEGRADED  |  **Latency (ONT):** 76 ms avg  |  **Loss:** 0%
 
 ### IP Reachability
 
 | Target | Status | Latency |
 |--------|--------|---------|
-| Cloudflare (1.1.1.1) | ❌ unreachable | 104 ms |
-| Google (8.8.8.8) | ❌ unreachable | 174 ms |
-| Quad9 (9.9.9.9) | ⚠️ degraded | 92 ms |
+| Cloudflare (1.1.1.1) | ❌ unreachable | 128 ms |
+| Google (8.8.8.8) | ❌ unreachable | 194 ms |
+| Quad9 (9.9.9.9) | ❌ unreachable | 192 ms |
 
 ### DNS
 
 | Resolver | Status | Lookup |
 |----------|--------|--------|
-| Cloudflare (cloudflare.com) | ✅ ok | 138 ms |
-| Google (google.com) | ✅ ok | 123 ms |
-| Quad9 (quad9.net) | ✅ ok | 138 ms |
+| Cloudflare (cloudflare.com) | ✅ ok | 92 ms |
+| Google (google.com) | ✅ ok | 111 ms |
+| Quad9 (quad9.net) | ✅ ok | 62 ms |
 
 ### HTTP
 
 | Endpoint | Status | TTFB | Total |
 |----------|--------|------|-------|
-| Cloudflare | ✅ ok | 346 ms | 393 ms |
-| Google | ✅ ok | 321 ms | 398 ms |
-| Microsoft | ✅ ok | 303 ms | 324 ms |
+| Cloudflare | ✅ ok | 327 ms | 358 ms |
+| Google | ✅ ok | 367 ms | 411 ms |
+| Microsoft | ✅ ok | 337 ms | 379 ms |
 
-**Speed test:** ↓ 282 Mbps  |  ping 31 ms  *(0s ago)*
-
----
-
-## Router
-
-**Status:** ✅ HEALTHY  |  **Latency:** 3 ms
-**CPU:** 16%  |  **Memory:** 39%  |  **Uptime:** 3d
+**Speed test:** ↓ 401 Mbps  |  ping 22 ms  *(0s ago)*
 
 ---
 
-## Groups
+## Home Network
 
-### WiFi Garage  |  2.4GHz  ch 11
+### Router
 
-**Gateway `192.168.1.95`:** ✅ 2 ms  |  **Clients:** 2
+**Status:** ✅ HEALTHY  |  **Latency:** 2 ms
+**CPU:** 4%  |  **Memory:** 51%  |  **Uptime:** 3d
+
+### Groups
+
+#### WiFi Garage  |  2.4GHz  ch 11
+
+**Gateway `192.168.1.95`:** ✅ 2 ms  |  **Clients:** 4
 
 **Devices:** 4 / 4 online
 
@@ -418,30 +442,30 @@ PROBLEMS
 |--------|----|--------|---------|
 | Rafmagnsmaelir 1-fasa | `192.168.1.100` | ✅ healthy | 3 ms |
 | Rafmagnsmaelir 3-fasa | `192.168.1.101` | ✅ healthy | 3 ms |
-| Bílskúrshurð | `192.168.1.102` | ✅ healthy | 1 ms |
-| Bílskúrsljós | `192.168.1.103` | ✅ healthy | 5 ms |
+| Bílskúrshurð | `192.168.1.102` | ✅ healthy | 3 ms |
+| Bílskúrsljós | `192.168.1.103` | ✅ healthy | 2 ms |
 
-### WiFi Living Room  |  5GHz  ch 36
+#### WiFi Living Room  |  5GHz  ch 36
 
-**Gateway `192.168.1.44`:** ✅ 4 ms  |  **Clients:** 8
+**Gateway `192.168.1.44`:** ✅ 4 ms  |  **Clients:** 9
 
 **Devices:** 11 / 11 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Inngangur ljós | `192.168.1.110` | ✅ healthy | 2 ms |
-| Gestasnyrtingur ljós | `192.168.1.111` | ✅ healthy | 1 ms |
-| Eldhús efri ljós | `192.168.1.112` | ✅ healthy | 1 ms |
-| Eldhús neðri ljós | `192.168.1.113` | ✅ healthy | 4 ms |
+| Inngangur ljós | `192.168.1.110` | ✅ healthy | 3 ms |
+| Gestasnyrtingur ljós | `192.168.1.111` | ✅ healthy | 5 ms |
+| Eldhús efri ljós | `192.168.1.112` | ✅ healthy | 5 ms |
+| Eldhús neðri ljós | `192.168.1.113` | ✅ healthy | 3 ms |
 | Stofa ljós 1 | `192.168.1.114` | ✅ healthy | 4 ms |
 | Stofa ljós 2 | `192.168.1.115` | ✅ healthy | 2 ms |
-| Stofa ljós 3 | `192.168.1.116` | ✅ healthy | 2 ms |
-| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 1 ms |
-| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 2 ms |
-| Plöntuljós | `192.168.1.119` | ✅ healthy | 3 ms |
-| Kaffivél | `192.168.1.219` | ✅ healthy | 3 ms |
+| Stofa ljós 3 | `192.168.1.116` | ✅ healthy | 5 ms |
+| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 3 ms |
+| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 3 ms |
+| Plöntuljós | `192.168.1.119` | ✅ healthy | 2 ms |
+| Kaffivél | `192.168.1.219` | ✅ healthy | 2 ms |
 
-### WiFi Upper Floor  |  5GHz  ch 44
+#### WiFi Upper Floor  |  5GHz  ch 44
 
 **Gateway `192.168.1.43`:** ✅ 4 ms  |  **Clients:** 5
 
@@ -449,10 +473,10 @@ PROBLEMS
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 2 ms |
-| Gólfahitun | `192.168.1.131` | ✅ healthy | 3 ms |
+| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 3 ms |
+| Gólfahitun | `192.168.1.131` | ✅ healthy | 4 ms |
 
-### WiFi Basement  |  2.4GHz  ch 6
+#### WiFi Basement  |  2.4GHz  ch 6
 
 **Gateway `192.168.1.45`:** ✅ 3 ms  |  **Clients:** 11
 
@@ -460,36 +484,37 @@ PROBLEMS
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Svefnherbergi ljós 1 | `192.168.1.140` | ✅ healthy | 3 ms |
-| Svefnherbergi ljós 2 | `192.168.1.141` | ✅ healthy | 2 ms |
-| Baðherbergi ljós | `192.168.1.142` | ✅ healthy | 3 ms |
-| Kvikmyndaherbergi | `192.168.1.143` | ✅ healthy | 2 ms |
-| Þvottavél blásari | `192.168.1.144` | ✅ healthy | 1 ms |
+| Svefnherbergi ljós 1 | `192.168.1.140` | ✅ healthy | 4 ms |
+| Svefnherbergi ljós 2 | `192.168.1.141` | ✅ healthy | 5 ms |
+| Baðherbergi ljós | `192.168.1.142` | ✅ healthy | 5 ms |
+| Kvikmyndaherbergi | `192.168.1.143` | ✅ healthy | 4 ms |
+| Þvottavél blásari | `192.168.1.144` | ✅ healthy | 2 ms |
 | Þvottaherbergi ljós | `192.168.1.145` | ✅ healthy | 4 ms |
 | Geymsla ljós | `192.168.1.146` | ✅ healthy | 1 ms |
-| Garðljós | `192.168.1.214` | ✅ healthy | 2 ms |
+| Garðljós | `192.168.1.214` | ✅ healthy | 4 ms |
 | Garðtenglar | `192.168.1.148` | ✅ healthy | 2 ms |
 
-### LAN Studio
+#### LAN Studio
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Stúdíóbúnaður | `192.168.1.132` | ✅ healthy | 4 ms |
-| Home Assistant | `192.168.1.64` | ✅ healthy | 2 ms |
+| Stúdíóbúnaður | `192.168.1.132` | ✅ healthy | 2 ms |
+| Home Assistant | `192.168.1.64` | ✅ healthy | 4 ms |
 
-### LAN Home Theater
+#### LAN Home Theater
 
 **Devices:** 0 / 0 online
 
-### LAN Router
+#### LAN Router
 
 **Devices:** 1 / 1 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Unifi Controller | `192.168.1.151` | ✅ healthy | 1 ms |
+| Unifi Controller | `192.168.1.151` | ✅ healthy | 2 ms |
+
 
 ---
 
@@ -499,32 +524,32 @@ PROBLEMS
 |--------|----|-------|--------|---------|
 | Rafmagnsmaelir 1-fasa | `192.168.1.100` | WiFi Garage | ✅ healthy | 3 ms |
 | Rafmagnsmaelir 3-fasa | `192.168.1.101` | WiFi Garage | ✅ healthy | 3 ms |
-| Bílskúrshurð | `192.168.1.102` | WiFi Garage | ✅ healthy | 1 ms |
-| Bílskúrsljós | `192.168.1.103` | WiFi Garage | ✅ healthy | 5 ms |
-| Inngangur ljós | `192.168.1.110` | WiFi Living Room | ✅ healthy | 2 ms |
-| Gestasnyrtingur ljós | `192.168.1.111` | WiFi Living Room | ✅ healthy | 1 ms |
-| Eldhús efri ljós | `192.168.1.112` | WiFi Living Room | ✅ healthy | 1 ms |
-| Eldhús neðri ljós | `192.168.1.113` | WiFi Living Room | ✅ healthy | 4 ms |
+| Bílskúrshurð | `192.168.1.102` | WiFi Garage | ✅ healthy | 3 ms |
+| Bílskúrsljós | `192.168.1.103` | WiFi Garage | ✅ healthy | 2 ms |
+| Inngangur ljós | `192.168.1.110` | WiFi Living Room | ✅ healthy | 3 ms |
+| Gestasnyrtingur ljós | `192.168.1.111` | WiFi Living Room | ✅ healthy | 5 ms |
+| Eldhús efri ljós | `192.168.1.112` | WiFi Living Room | ✅ healthy | 5 ms |
+| Eldhús neðri ljós | `192.168.1.113` | WiFi Living Room | ✅ healthy | 3 ms |
 | Stofa ljós 1 | `192.168.1.114` | WiFi Living Room | ✅ healthy | 4 ms |
 | Stofa ljós 2 | `192.168.1.115` | WiFi Living Room | ✅ healthy | 2 ms |
-| Stofa ljós 3 | `192.168.1.116` | WiFi Living Room | ✅ healthy | 2 ms |
-| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 1 ms |
-| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 2 ms |
-| Plöntuljós | `192.168.1.119` | WiFi Living Room | ✅ healthy | 3 ms |
-| Kaffivél | `192.168.1.219` | WiFi Living Room | ✅ healthy | 3 ms |
-| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 2 ms |
-| Gólfahitun | `192.168.1.131` | WiFi Upper Floor | ✅ healthy | 3 ms |
-| Stúdíóbúnaður | `192.168.1.132` | LAN Studio | ✅ healthy | 4 ms |
-| Home Assistant | `192.168.1.64` | LAN Studio | ✅ healthy | 2 ms |
-| Unifi Controller | `192.168.1.151` | LAN Router | ✅ healthy | 1 ms |
-| Svefnherbergi ljós 1 | `192.168.1.140` | WiFi Basement | ✅ healthy | 3 ms |
-| Svefnherbergi ljós 2 | `192.168.1.141` | WiFi Basement | ✅ healthy | 2 ms |
-| Baðherbergi ljós | `192.168.1.142` | WiFi Basement | ✅ healthy | 3 ms |
-| Kvikmyndaherbergi | `192.168.1.143` | WiFi Basement | ✅ healthy | 2 ms |
-| Þvottavél blásari | `192.168.1.144` | WiFi Basement | ✅ healthy | 1 ms |
+| Stofa ljós 3 | `192.168.1.116` | WiFi Living Room | ✅ healthy | 5 ms |
+| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 3 ms |
+| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 3 ms |
+| Plöntuljós | `192.168.1.119` | WiFi Living Room | ✅ healthy | 2 ms |
+| Kaffivél | `192.168.1.219` | WiFi Living Room | ✅ healthy | 2 ms |
+| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 3 ms |
+| Gólfahitun | `192.168.1.131` | WiFi Upper Floor | ✅ healthy | 4 ms |
+| Stúdíóbúnaður | `192.168.1.132` | LAN Studio | ✅ healthy | 2 ms |
+| Home Assistant | `192.168.1.64` | LAN Studio | ✅ healthy | 4 ms |
+| Unifi Controller | `192.168.1.151` | LAN Router | ✅ healthy | 2 ms |
+| Svefnherbergi ljós 1 | `192.168.1.140` | WiFi Basement | ✅ healthy | 4 ms |
+| Svefnherbergi ljós 2 | `192.168.1.141` | WiFi Basement | ✅ healthy | 5 ms |
+| Baðherbergi ljós | `192.168.1.142` | WiFi Basement | ✅ healthy | 5 ms |
+| Kvikmyndaherbergi | `192.168.1.143` | WiFi Basement | ✅ healthy | 4 ms |
+| Þvottavél blásari | `192.168.1.144` | WiFi Basement | ✅ healthy | 2 ms |
 | Þvottaherbergi ljós | `192.168.1.145` | WiFi Basement | ✅ healthy | 4 ms |
 | Geymsla ljós | `192.168.1.146` | WiFi Basement | ✅ healthy | 1 ms |
-| Garðljós | `192.168.1.214` | WiFi Basement | ✅ healthy | 2 ms |
+| Garðljós | `192.168.1.214` | WiFi Basement | ✅ healthy | 4 ms |
 | Garðtenglar | `192.168.1.148` | WiFi Basement | ✅ healthy | 2 ms |
 
 ---
@@ -535,13 +560,13 @@ PROBLEMS
 
 # Heimdallur Network Status
 
-**Probed:** 2026-05-09 18:31:41 UTC  |  **Interval:** 30s
+**Probed:** 2026-05-09 20:17:21 UTC  |  **Interval:** 30s
 
 ## Summary
 
 ⚠️  1 issue(s) detected — 33 / 33 devices online
 
-- WAN offline — full network unreachable
+- Internet offline — full network unreachable
 
 ---
 
@@ -573,95 +598,95 @@ PROBLEMS
 | Google | ❌ fail | — | — |
 | Microsoft | ❌ fail | — | — |
 
-**Speed test:** ↓ 200 Mbps  |  ping 11 ms  *(0s ago)*
+**Speed test:** ↓ 272 Mbps  |  ping 22 ms  *(0s ago)*
 
 ---
 
-## Router
+## Home Network
 
-**Status:** ✅ HEALTHY  |  **Latency:** 2 ms
-**CPU:** 22%  |  **Memory:** 48%  |  **Uptime:** 3d
+### Router
 
----
+**Status:** ✅ HEALTHY  |  **Latency:** 3 ms
+**CPU:** 17%  |  **Memory:** 47%  |  **Uptime:** 3d
 
-## Groups
+### Groups
 
-### WiFi Garage  |  2.4GHz  ch 11
+#### WiFi Garage  |  2.4GHz  ch 11
 
-**Gateway `192.168.1.95`:** ✅ 2 ms  |  **Clients:** 3
+**Gateway `192.168.1.95`:** ✅ 5 ms  |  **Clients:** 3
 
 **Devices:** 4 / 4 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Rafmagnsmaelir 1-fasa | `192.168.1.100` | ✅ healthy | 3 ms |
-| Rafmagnsmaelir 3-fasa | `192.168.1.101` | ✅ healthy | 5 ms |
+| Rafmagnsmaelir 1-fasa | `192.168.1.100` | ✅ healthy | 2 ms |
+| Rafmagnsmaelir 3-fasa | `192.168.1.101` | ✅ healthy | 2 ms |
 | Bílskúrshurð | `192.168.1.102` | ✅ healthy | 3 ms |
-| Bílskúrsljós | `192.168.1.103` | ✅ healthy | 3 ms |
+| Bílskúrsljós | `192.168.1.103` | ✅ healthy | 5 ms |
 
-### WiFi Living Room  |  5GHz  ch 36
+#### WiFi Living Room  |  5GHz  ch 36
 
-**Gateway `192.168.1.44`:** ✅ 3 ms  |  **Clients:** 8
+**Gateway `192.168.1.44`:** ✅ 3 ms  |  **Clients:** 9
 
 **Devices:** 11 / 11 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
 | Inngangur ljós | `192.168.1.110` | ✅ healthy | 4 ms |
-| Gestasnyrtingur ljós | `192.168.1.111` | ✅ healthy | 4 ms |
+| Gestasnyrtingur ljós | `192.168.1.111` | ✅ healthy | 2 ms |
 | Eldhús efri ljós | `192.168.1.112` | ✅ healthy | 1 ms |
-| Eldhús neðri ljós | `192.168.1.113` | ✅ healthy | 1 ms |
-| Stofa ljós 1 | `192.168.1.114` | ✅ healthy | 4 ms |
-| Stofa ljós 2 | `192.168.1.115` | ✅ healthy | 5 ms |
-| Stofa ljós 3 | `192.168.1.116` | ✅ healthy | 2 ms |
-| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 2 ms |
-| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 4 ms |
-| Plöntuljós | `192.168.1.119` | ✅ healthy | 3 ms |
-| Kaffivél | `192.168.1.219` | ✅ healthy | 4 ms |
+| Eldhús neðri ljós | `192.168.1.113` | ✅ healthy | 3 ms |
+| Stofa ljós 1 | `192.168.1.114` | ✅ healthy | 3 ms |
+| Stofa ljós 2 | `192.168.1.115` | ✅ healthy | 2 ms |
+| Stofa ljós 3 | `192.168.1.116` | ✅ healthy | 1 ms |
+| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 4 ms |
+| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 5 ms |
+| Plöntuljós | `192.168.1.119` | ✅ healthy | 2 ms |
+| Kaffivél | `192.168.1.219` | ✅ healthy | 1 ms |
 
-### WiFi Upper Floor  |  5GHz  ch 44
+#### WiFi Upper Floor  |  5GHz  ch 44
 
-**Gateway `192.168.1.43`:** ✅ 2 ms  |  **Clients:** 6
+**Gateway `192.168.1.43`:** ✅ 5 ms  |  **Clients:** 5
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 5 ms |
+| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 1 ms |
 | Gólfahitun | `192.168.1.131` | ✅ healthy | 3 ms |
 
-### WiFi Basement  |  2.4GHz  ch 6
+#### WiFi Basement  |  2.4GHz  ch 6
 
-**Gateway `192.168.1.45`:** ✅ 2 ms  |  **Clients:** 10
+**Gateway `192.168.1.45`:** ✅ 1 ms  |  **Clients:** 8
 
 **Devices:** 9 / 9 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Svefnherbergi ljós 1 | `192.168.1.140` | ✅ healthy | 1 ms |
+| Svefnherbergi ljós 1 | `192.168.1.140` | ✅ healthy | 4 ms |
 | Svefnherbergi ljós 2 | `192.168.1.141` | ✅ healthy | 3 ms |
-| Baðherbergi ljós | `192.168.1.142` | ✅ healthy | 1 ms |
+| Baðherbergi ljós | `192.168.1.142` | ✅ healthy | 3 ms |
 | Kvikmyndaherbergi | `192.168.1.143` | ✅ healthy | 2 ms |
-| Þvottavél blásari | `192.168.1.144` | ✅ healthy | 4 ms |
-| Þvottaherbergi ljós | `192.168.1.145` | ✅ healthy | 1 ms |
-| Geymsla ljós | `192.168.1.146` | ✅ healthy | 5 ms |
+| Þvottavél blásari | `192.168.1.144` | ✅ healthy | 2 ms |
+| Þvottaherbergi ljós | `192.168.1.145` | ✅ healthy | 4 ms |
+| Geymsla ljós | `192.168.1.146` | ✅ healthy | 4 ms |
 | Garðljós | `192.168.1.214` | ✅ healthy | 3 ms |
-| Garðtenglar | `192.168.1.148` | ✅ healthy | 4 ms |
+| Garðtenglar | `192.168.1.148` | ✅ healthy | 2 ms |
 
-### LAN Studio
+#### LAN Studio
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Stúdíóbúnaður | `192.168.1.132` | ✅ healthy | 2 ms |
-| Home Assistant | `192.168.1.64` | ✅ healthy | 1 ms |
+| Stúdíóbúnaður | `192.168.1.132` | ✅ healthy | 4 ms |
+| Home Assistant | `192.168.1.64` | ✅ healthy | 4 ms |
 
-### LAN Home Theater
+#### LAN Home Theater
 
 **Devices:** 0 / 0 online
 
-### LAN Router
+#### LAN Router
 
 **Devices:** 1 / 1 online
 
@@ -669,41 +694,42 @@ PROBLEMS
 |--------|----|--------|---------|
 | Unifi Controller | `192.168.1.151` | ✅ healthy | 2 ms |
 
+
 ---
 
 ## All Devices
 
 | Device | IP | Group | Status | Latency |
 |--------|----|-------|--------|---------|
-| Rafmagnsmaelir 1-fasa | `192.168.1.100` | WiFi Garage | ✅ healthy | 3 ms |
-| Rafmagnsmaelir 3-fasa | `192.168.1.101` | WiFi Garage | ✅ healthy | 5 ms |
+| Rafmagnsmaelir 1-fasa | `192.168.1.100` | WiFi Garage | ✅ healthy | 2 ms |
+| Rafmagnsmaelir 3-fasa | `192.168.1.101` | WiFi Garage | ✅ healthy | 2 ms |
 | Bílskúrshurð | `192.168.1.102` | WiFi Garage | ✅ healthy | 3 ms |
-| Bílskúrsljós | `192.168.1.103` | WiFi Garage | ✅ healthy | 3 ms |
+| Bílskúrsljós | `192.168.1.103` | WiFi Garage | ✅ healthy | 5 ms |
 | Inngangur ljós | `192.168.1.110` | WiFi Living Room | ✅ healthy | 4 ms |
-| Gestasnyrtingur ljós | `192.168.1.111` | WiFi Living Room | ✅ healthy | 4 ms |
+| Gestasnyrtingur ljós | `192.168.1.111` | WiFi Living Room | ✅ healthy | 2 ms |
 | Eldhús efri ljós | `192.168.1.112` | WiFi Living Room | ✅ healthy | 1 ms |
-| Eldhús neðri ljós | `192.168.1.113` | WiFi Living Room | ✅ healthy | 1 ms |
-| Stofa ljós 1 | `192.168.1.114` | WiFi Living Room | ✅ healthy | 4 ms |
-| Stofa ljós 2 | `192.168.1.115` | WiFi Living Room | ✅ healthy | 5 ms |
-| Stofa ljós 3 | `192.168.1.116` | WiFi Living Room | ✅ healthy | 2 ms |
-| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 2 ms |
-| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 4 ms |
-| Plöntuljós | `192.168.1.119` | WiFi Living Room | ✅ healthy | 3 ms |
-| Kaffivél | `192.168.1.219` | WiFi Living Room | ✅ healthy | 4 ms |
-| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 5 ms |
+| Eldhús neðri ljós | `192.168.1.113` | WiFi Living Room | ✅ healthy | 3 ms |
+| Stofa ljós 1 | `192.168.1.114` | WiFi Living Room | ✅ healthy | 3 ms |
+| Stofa ljós 2 | `192.168.1.115` | WiFi Living Room | ✅ healthy | 2 ms |
+| Stofa ljós 3 | `192.168.1.116` | WiFi Living Room | ✅ healthy | 1 ms |
+| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 4 ms |
+| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 5 ms |
+| Plöntuljós | `192.168.1.119` | WiFi Living Room | ✅ healthy | 2 ms |
+| Kaffivél | `192.168.1.219` | WiFi Living Room | ✅ healthy | 1 ms |
+| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 1 ms |
 | Gólfahitun | `192.168.1.131` | WiFi Upper Floor | ✅ healthy | 3 ms |
-| Stúdíóbúnaður | `192.168.1.132` | LAN Studio | ✅ healthy | 2 ms |
-| Home Assistant | `192.168.1.64` | LAN Studio | ✅ healthy | 1 ms |
+| Stúdíóbúnaður | `192.168.1.132` | LAN Studio | ✅ healthy | 4 ms |
+| Home Assistant | `192.168.1.64` | LAN Studio | ✅ healthy | 4 ms |
 | Unifi Controller | `192.168.1.151` | LAN Router | ✅ healthy | 2 ms |
-| Svefnherbergi ljós 1 | `192.168.1.140` | WiFi Basement | ✅ healthy | 1 ms |
+| Svefnherbergi ljós 1 | `192.168.1.140` | WiFi Basement | ✅ healthy | 4 ms |
 | Svefnherbergi ljós 2 | `192.168.1.141` | WiFi Basement | ✅ healthy | 3 ms |
-| Baðherbergi ljós | `192.168.1.142` | WiFi Basement | ✅ healthy | 1 ms |
+| Baðherbergi ljós | `192.168.1.142` | WiFi Basement | ✅ healthy | 3 ms |
 | Kvikmyndaherbergi | `192.168.1.143` | WiFi Basement | ✅ healthy | 2 ms |
-| Þvottavél blásari | `192.168.1.144` | WiFi Basement | ✅ healthy | 4 ms |
-| Þvottaherbergi ljós | `192.168.1.145` | WiFi Basement | ✅ healthy | 1 ms |
-| Geymsla ljós | `192.168.1.146` | WiFi Basement | ✅ healthy | 5 ms |
+| Þvottavél blásari | `192.168.1.144` | WiFi Basement | ✅ healthy | 2 ms |
+| Þvottaherbergi ljós | `192.168.1.145` | WiFi Basement | ✅ healthy | 4 ms |
+| Geymsla ljós | `192.168.1.146` | WiFi Basement | ✅ healthy | 4 ms |
 | Garðljós | `192.168.1.214` | WiFi Basement | ✅ healthy | 3 ms |
-| Garðtenglar | `192.168.1.148` | WiFi Basement | ✅ healthy | 4 ms |
+| Garðtenglar | `192.168.1.148` | WiFi Basement | ✅ healthy | 2 ms |
 
 ---
 
@@ -713,7 +739,7 @@ PROBLEMS
 
 # Heimdallur Network Status
 
-**Probed:** 2026-05-09 18:31:41 UTC  |  **Interval:** 30s
+**Probed:** 2026-05-09 20:17:21 UTC  |  **Interval:** 30s
 
 ## Summary
 
@@ -725,108 +751,108 @@ PROBLEMS
 
 ## Internet
 
-**Status:** ✅ HEALTHY  |  **Latency (ONT):** 38 ms avg  |  **Loss:** 0%
+**Status:** ✅ HEALTHY  |  **Latency (ONT):** 41 ms avg  |  **Loss:** 0%
 
 ### IP Reachability
 
 | Target | Status | Latency |
 |--------|--------|---------|
-| Cloudflare (1.1.1.1) | ✅ healthy | 18 ms |
-| Google (8.8.8.8) | ✅ healthy | 23 ms |
-| Quad9 (9.9.9.9) | ✅ healthy | 19 ms |
+| Cloudflare (1.1.1.1) | ✅ healthy | 24 ms |
+| Google (8.8.8.8) | ✅ healthy | 33 ms |
+| Quad9 (9.9.9.9) | ✅ healthy | 16 ms |
 
 ### DNS
 
 | Resolver | Status | Lookup |
 |----------|--------|--------|
-| Cloudflare (cloudflare.com) | ✅ ok | 11 ms |
-| Google (google.com) | ✅ ok | 2 ms |
-| Quad9 (quad9.net) | ✅ ok | 17 ms |
+| Cloudflare (cloudflare.com) | ✅ ok | 2 ms |
+| Google (google.com) | ✅ ok | 3 ms |
+| Quad9 (quad9.net) | ✅ ok | 5 ms |
 
 ### HTTP
 
 | Endpoint | Status | TTFB | Total |
 |----------|--------|------|-------|
-| Cloudflare | ✅ ok | 68 ms | 91 ms |
-| Google | ✅ ok | 60 ms | 78 ms |
-| Microsoft | ✅ ok | 71 ms | 76 ms |
+| Cloudflare | ✅ ok | 75 ms | 90 ms |
+| Google | ✅ ok | 50 ms | 68 ms |
+| Microsoft | ✅ ok | 73 ms | 91 ms |
 
-**Speed test:** ↓ 181 Mbps  |  ping 28 ms  *(0s ago)*
+**Speed test:** ↓ 324 Mbps  |  ping 12 ms  *(0s ago)*
 
 ---
 
-## Router
+## Home Network
+
+### Router
 
 **Status:** ❌ UNREACHABLE  |  **Latency:** —
-**CPU:** 7%  |  **Memory:** 49%  |  **Uptime:** 3d
+**CPU:** 9%  |  **Memory:** 37%  |  **Uptime:** 3d
 
----
+### Groups
 
-## Groups
+#### WiFi Garage  |  2.4GHz  ch 11
 
-### WiFi Garage  |  2.4GHz  ch 11
-
-**Gateway `192.168.1.95`:** ✅ 3 ms  |  **Clients:** 5
+**Gateway `192.168.1.95`:** ✅ 4 ms  |  **Clients:** 4
 
 **Devices:** 4 / 4 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
 | Rafmagnsmaelir 1-fasa | `192.168.1.100` | ✅ healthy | 3 ms |
-| Rafmagnsmaelir 3-fasa | `192.168.1.101` | ✅ healthy | 1 ms |
+| Rafmagnsmaelir 3-fasa | `192.168.1.101` | ✅ healthy | 2 ms |
 | Bílskúrshurð | `192.168.1.102` | ✅ healthy | 4 ms |
-| Bílskúrsljós | `192.168.1.103` | ✅ healthy | 5 ms |
+| Bílskúrsljós | `192.168.1.103` | ✅ healthy | 1 ms |
 
-### WiFi Living Room  |  5GHz  ch 36
+#### WiFi Living Room  |  5GHz  ch 36
 
-**Gateway `192.168.1.44`:** ✅ 4 ms  |  **Clients:** 10
+**Gateway `192.168.1.44`:** ✅ 2 ms  |  **Clients:** 9
 
 **Devices:** 11 / 11 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Inngangur ljós | `192.168.1.110` | ✅ healthy | 1 ms |
-| Gestasnyrtingur ljós | `192.168.1.111` | ✅ healthy | 3 ms |
-| Eldhús efri ljós | `192.168.1.112` | ✅ healthy | 4 ms |
-| Eldhús neðri ljós | `192.168.1.113` | ✅ healthy | 3 ms |
-| Stofa ljós 1 | `192.168.1.114` | ✅ healthy | 3 ms |
-| Stofa ljós 2 | `192.168.1.115` | ✅ healthy | 3 ms |
+| Inngangur ljós | `192.168.1.110` | ✅ healthy | 3 ms |
+| Gestasnyrtingur ljós | `192.168.1.111` | ✅ healthy | 4 ms |
+| Eldhús efri ljós | `192.168.1.112` | ✅ healthy | 3 ms |
+| Eldhús neðri ljós | `192.168.1.113` | ✅ healthy | 5 ms |
+| Stofa ljós 1 | `192.168.1.114` | ✅ healthy | 1 ms |
+| Stofa ljós 2 | `192.168.1.115` | ✅ healthy | 4 ms |
 | Stofa ljós 3 | `192.168.1.116` | ✅ healthy | 4 ms |
-| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 3 ms |
-| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 4 ms |
-| Plöntuljós | `192.168.1.119` | ✅ healthy | 4 ms |
+| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 2 ms |
+| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 5 ms |
+| Plöntuljós | `192.168.1.119` | ✅ healthy | 3 ms |
 | Kaffivél | `192.168.1.219` | ✅ healthy | 4 ms |
 
-### WiFi Upper Floor  |  5GHz  ch 44
+#### WiFi Upper Floor  |  5GHz  ch 44
 
-**Gateway `192.168.1.43`:** ✅ 2 ms  |  **Clients:** 5
+**Gateway `192.168.1.43`:** ✅ 2 ms  |  **Clients:** 4
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 4 ms |
+| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 2 ms |
 | Gólfahitun | `192.168.1.131` | ✅ healthy | 2 ms |
 
-### WiFi Basement  |  2.4GHz  ch 6
+#### WiFi Basement  |  2.4GHz  ch 6
 
-**Gateway `192.168.1.45`:** ✅ 4 ms  |  **Clients:** 10
+**Gateway `192.168.1.45`:** ✅ 1 ms  |  **Clients:** 9
 
 **Devices:** 9 / 9 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
 | Svefnherbergi ljós 1 | `192.168.1.140` | ✅ healthy | 2 ms |
-| Svefnherbergi ljós 2 | `192.168.1.141` | ✅ healthy | 4 ms |
+| Svefnherbergi ljós 2 | `192.168.1.141` | ✅ healthy | 5 ms |
 | Baðherbergi ljós | `192.168.1.142` | ✅ healthy | 4 ms |
-| Kvikmyndaherbergi | `192.168.1.143` | ✅ healthy | 2 ms |
-| Þvottavél blásari | `192.168.1.144` | ✅ healthy | 2 ms |
+| Kvikmyndaherbergi | `192.168.1.143` | ✅ healthy | 4 ms |
+| Þvottavél blásari | `192.168.1.144` | ✅ healthy | 1 ms |
 | Þvottaherbergi ljós | `192.168.1.145` | ✅ healthy | 2 ms |
-| Geymsla ljós | `192.168.1.146` | ✅ healthy | 2 ms |
-| Garðljós | `192.168.1.214` | ✅ healthy | 5 ms |
-| Garðtenglar | `192.168.1.148` | ✅ healthy | 3 ms |
+| Geymsla ljós | `192.168.1.146` | ✅ healthy | 3 ms |
+| Garðljós | `192.168.1.214` | ✅ healthy | 4 ms |
+| Garðtenglar | `192.168.1.148` | ✅ healthy | 2 ms |
 
-### LAN Studio
+#### LAN Studio
 
 **Devices:** 2 / 2 online
 
@@ -835,17 +861,18 @@ PROBLEMS
 | Stúdíóbúnaður | `192.168.1.132` | ✅ healthy | 1 ms |
 | Home Assistant | `192.168.1.64` | ✅ healthy | 2 ms |
 
-### LAN Home Theater
+#### LAN Home Theater
 
 **Devices:** 0 / 0 online
 
-### LAN Router
+#### LAN Router
 
 **Devices:** 1 / 1 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Unifi Controller | `192.168.1.151` | ✅ healthy | 3 ms |
+| Unifi Controller | `192.168.1.151` | ✅ healthy | 1 ms |
+
 
 ---
 
@@ -854,34 +881,34 @@ PROBLEMS
 | Device | IP | Group | Status | Latency |
 |--------|----|-------|--------|---------|
 | Rafmagnsmaelir 1-fasa | `192.168.1.100` | WiFi Garage | ✅ healthy | 3 ms |
-| Rafmagnsmaelir 3-fasa | `192.168.1.101` | WiFi Garage | ✅ healthy | 1 ms |
+| Rafmagnsmaelir 3-fasa | `192.168.1.101` | WiFi Garage | ✅ healthy | 2 ms |
 | Bílskúrshurð | `192.168.1.102` | WiFi Garage | ✅ healthy | 4 ms |
-| Bílskúrsljós | `192.168.1.103` | WiFi Garage | ✅ healthy | 5 ms |
-| Inngangur ljós | `192.168.1.110` | WiFi Living Room | ✅ healthy | 1 ms |
-| Gestasnyrtingur ljós | `192.168.1.111` | WiFi Living Room | ✅ healthy | 3 ms |
-| Eldhús efri ljós | `192.168.1.112` | WiFi Living Room | ✅ healthy | 4 ms |
-| Eldhús neðri ljós | `192.168.1.113` | WiFi Living Room | ✅ healthy | 3 ms |
-| Stofa ljós 1 | `192.168.1.114` | WiFi Living Room | ✅ healthy | 3 ms |
-| Stofa ljós 2 | `192.168.1.115` | WiFi Living Room | ✅ healthy | 3 ms |
+| Bílskúrsljós | `192.168.1.103` | WiFi Garage | ✅ healthy | 1 ms |
+| Inngangur ljós | `192.168.1.110` | WiFi Living Room | ✅ healthy | 3 ms |
+| Gestasnyrtingur ljós | `192.168.1.111` | WiFi Living Room | ✅ healthy | 4 ms |
+| Eldhús efri ljós | `192.168.1.112` | WiFi Living Room | ✅ healthy | 3 ms |
+| Eldhús neðri ljós | `192.168.1.113` | WiFi Living Room | ✅ healthy | 5 ms |
+| Stofa ljós 1 | `192.168.1.114` | WiFi Living Room | ✅ healthy | 1 ms |
+| Stofa ljós 2 | `192.168.1.115` | WiFi Living Room | ✅ healthy | 4 ms |
 | Stofa ljós 3 | `192.168.1.116` | WiFi Living Room | ✅ healthy | 4 ms |
-| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 3 ms |
-| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 4 ms |
-| Plöntuljós | `192.168.1.119` | WiFi Living Room | ✅ healthy | 4 ms |
+| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 2 ms |
+| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 5 ms |
+| Plöntuljós | `192.168.1.119` | WiFi Living Room | ✅ healthy | 3 ms |
 | Kaffivél | `192.168.1.219` | WiFi Living Room | ✅ healthy | 4 ms |
-| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 4 ms |
+| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 2 ms |
 | Gólfahitun | `192.168.1.131` | WiFi Upper Floor | ✅ healthy | 2 ms |
 | Stúdíóbúnaður | `192.168.1.132` | LAN Studio | ✅ healthy | 1 ms |
 | Home Assistant | `192.168.1.64` | LAN Studio | ✅ healthy | 2 ms |
-| Unifi Controller | `192.168.1.151` | LAN Router | ✅ healthy | 3 ms |
+| Unifi Controller | `192.168.1.151` | LAN Router | ✅ healthy | 1 ms |
 | Svefnherbergi ljós 1 | `192.168.1.140` | WiFi Basement | ✅ healthy | 2 ms |
-| Svefnherbergi ljós 2 | `192.168.1.141` | WiFi Basement | ✅ healthy | 4 ms |
+| Svefnherbergi ljós 2 | `192.168.1.141` | WiFi Basement | ✅ healthy | 5 ms |
 | Baðherbergi ljós | `192.168.1.142` | WiFi Basement | ✅ healthy | 4 ms |
-| Kvikmyndaherbergi | `192.168.1.143` | WiFi Basement | ✅ healthy | 2 ms |
-| Þvottavél blásari | `192.168.1.144` | WiFi Basement | ✅ healthy | 2 ms |
+| Kvikmyndaherbergi | `192.168.1.143` | WiFi Basement | ✅ healthy | 4 ms |
+| Þvottavél blásari | `192.168.1.144` | WiFi Basement | ✅ healthy | 1 ms |
 | Þvottaherbergi ljós | `192.168.1.145` | WiFi Basement | ✅ healthy | 2 ms |
-| Geymsla ljós | `192.168.1.146` | WiFi Basement | ✅ healthy | 2 ms |
-| Garðljós | `192.168.1.214` | WiFi Basement | ✅ healthy | 5 ms |
-| Garðtenglar | `192.168.1.148` | WiFi Basement | ✅ healthy | 3 ms |
+| Geymsla ljós | `192.168.1.146` | WiFi Basement | ✅ healthy | 3 ms |
+| Garðljós | `192.168.1.214` | WiFi Basement | ✅ healthy | 4 ms |
+| Garðtenglar | `192.168.1.148` | WiFi Basement | ✅ healthy | 2 ms |
 
 ---
 
@@ -891,7 +918,7 @@ PROBLEMS
 
 # Heimdallur Network Status
 
-**Probed:** 2026-05-09 18:31:41 UTC  |  **Interval:** 30s
+**Probed:** 2026-05-09 20:17:21 UTC  |  **Interval:** 30s
 
 ## Summary
 
@@ -903,90 +930,90 @@ PROBLEMS
 
 ## Internet
 
-**Status:** ✅ HEALTHY  |  **Latency (ONT):** 50 ms avg  |  **Loss:** 0%
+**Status:** ✅ HEALTHY  |  **Latency (ONT):** 23 ms avg  |  **Loss:** 0%
 
 ### IP Reachability
 
 | Target | Status | Latency |
 |--------|--------|---------|
-| Cloudflare (1.1.1.1) | ✅ healthy | 23 ms |
+| Cloudflare (1.1.1.1) | ✅ healthy | 17 ms |
 | Google (8.8.8.8) | ✅ healthy | 26 ms |
-| Quad9 (9.9.9.9) | ✅ healthy | 18 ms |
+| Quad9 (9.9.9.9) | ✅ healthy | 22 ms |
 
 ### DNS
 
 | Resolver | Status | Lookup |
 |----------|--------|--------|
-| Cloudflare (cloudflare.com) | ✅ ok | 4 ms |
-| Google (google.com) | ✅ ok | 6 ms |
-| Quad9 (quad9.net) | ✅ ok | 15 ms |
+| Cloudflare (cloudflare.com) | ✅ ok | 11 ms |
+| Google (google.com) | ✅ ok | 9 ms |
+| Quad9 (quad9.net) | ✅ ok | 6 ms |
 
 ### HTTP
 
 | Endpoint | Status | TTFB | Total |
 |----------|--------|------|-------|
-| Cloudflare | ✅ ok | 53 ms | 75 ms |
-| Google | ✅ ok | 54 ms | 67 ms |
-| Microsoft | ✅ ok | 59 ms | 65 ms |
+| Cloudflare | ✅ ok | 51 ms | 69 ms |
+| Google | ✅ ok | 64 ms | 73 ms |
+| Microsoft | ✅ ok | 73 ms | 92 ms |
 
-**Speed test:** ↓ 198 Mbps  |  ping 11 ms  *(0s ago)*
-
----
-
-## Router
-
-**Status:** ✅ HEALTHY  |  **Latency:** 2 ms
-**CPU:** 19%  |  **Memory:** 49%  |  **Uptime:** 3d
+**Speed test:** ↓ 288 Mbps  |  ping 26 ms  *(0s ago)*
 
 ---
 
-## Groups
+## Home Network
 
-### WiFi Garage  |  2.4GHz  ch 11
+### Router
 
-**Gateway `192.168.1.95`:** ✅ 3 ms  |  **Clients:** 2
+**Status:** ✅ HEALTHY  |  **Latency:** 3 ms
+**CPU:** 15%  |  **Memory:** 46%  |  **Uptime:** 3d
+
+### Groups
+
+#### WiFi Garage  |  2.4GHz  ch 11
+
+**Gateway `192.168.1.95`:** ✅ 2 ms  |  **Clients:** 4
 
 **Devices:** 4 / 4 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Rafmagnsmaelir 1-fasa | `192.168.1.100` | ✅ healthy | 4 ms |
-| Rafmagnsmaelir 3-fasa | `192.168.1.101` | ✅ healthy | 5 ms |
-| Bílskúrshurð | `192.168.1.102` | ✅ healthy | 4 ms |
-| Bílskúrsljós | `192.168.1.103` | ✅ healthy | 1 ms |
+| Rafmagnsmaelir 1-fasa | `192.168.1.100` | ✅ healthy | 3 ms |
+| Rafmagnsmaelir 3-fasa | `192.168.1.101` | ✅ healthy | 4 ms |
+| Bílskúrshurð | `192.168.1.102` | ✅ healthy | 2 ms |
+| Bílskúrsljós | `192.168.1.103` | ✅ healthy | 5 ms |
 
-### WiFi Living Room  |  5GHz  ch 36
+#### WiFi Living Room  |  5GHz  ch 36
 
-**Gateway `192.168.1.44`:** ✅ 4 ms  |  **Clients:** 10
+**Gateway `192.168.1.44`:** ✅ 3 ms  |  **Clients:** 10
 
 **Devices:** 11 / 11 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Inngangur ljós | `192.168.1.110` | ✅ healthy | 5 ms |
-| Gestasnyrtingur ljós | `192.168.1.111` | ✅ healthy | 2 ms |
-| Eldhús efri ljós | `192.168.1.112` | ✅ healthy | 2 ms |
-| Eldhús neðri ljós | `192.168.1.113` | ✅ healthy | 2 ms |
-| Stofa ljós 1 | `192.168.1.114` | ✅ healthy | 2 ms |
-| Stofa ljós 2 | `192.168.1.115` | ✅ healthy | 4 ms |
+| Inngangur ljós | `192.168.1.110` | ✅ healthy | 1 ms |
+| Gestasnyrtingur ljós | `192.168.1.111` | ✅ healthy | 4 ms |
+| Eldhús efri ljós | `192.168.1.112` | ✅ healthy | 4 ms |
+| Eldhús neðri ljós | `192.168.1.113` | ✅ healthy | 5 ms |
+| Stofa ljós 1 | `192.168.1.114` | ✅ healthy | 3 ms |
+| Stofa ljós 2 | `192.168.1.115` | ✅ healthy | 1 ms |
 | Stofa ljós 3 | `192.168.1.116` | ✅ healthy | 4 ms |
-| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 3 ms |
-| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 3 ms |
+| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 5 ms |
+| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 1 ms |
 | Plöntuljós | `192.168.1.119` | ✅ healthy | 2 ms |
-| Kaffivél | `192.168.1.219` | ✅ healthy | 4 ms |
+| Kaffivél | `192.168.1.219` | ✅ healthy | 2 ms |
 
-### WiFi Upper Floor  |  5GHz  ch 44
+#### WiFi Upper Floor  |  5GHz  ch 44
 
-**Gateway `192.168.1.43`:** ✅ 4 ms  |  **Clients:** 4
+**Gateway `192.168.1.43`:** ✅ 1 ms  |  **Clients:** 4
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 1 ms |
-| Gólfahitun | `192.168.1.131` | ✅ healthy | 1 ms |
+| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 2 ms |
+| Gólfahitun | `192.168.1.131` | ✅ healthy | 3 ms |
 
-### WiFi Basement  |  2.4GHz  ch 6
+#### WiFi Basement  |  2.4GHz  ch 6
 
 **Gateway `192.168.1.45`:** ❌ —  |  **Clients:** 8
 
@@ -1004,26 +1031,27 @@ PROBLEMS
 | Garðljós | `192.168.1.214` | ❓ unknown (gateway down) | — |
 | Garðtenglar | `192.168.1.148` | ❓ unknown (gateway down) | — |
 
-### LAN Studio
+#### LAN Studio
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Stúdíóbúnaður | `192.168.1.132` | ✅ healthy | 4 ms |
+| Stúdíóbúnaður | `192.168.1.132` | ✅ healthy | 2 ms |
 | Home Assistant | `192.168.1.64` | ✅ healthy | 3 ms |
 
-### LAN Home Theater
+#### LAN Home Theater
 
 **Devices:** 0 / 0 online
 
-### LAN Router
+#### LAN Router
 
 **Devices:** 1 / 1 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Unifi Controller | `192.168.1.151` | ✅ healthy | 4 ms |
+| Unifi Controller | `192.168.1.151` | ✅ healthy | 1 ms |
+
 
 ---
 
@@ -1031,26 +1059,26 @@ PROBLEMS
 
 | Device | IP | Group | Status | Latency |
 |--------|----|-------|--------|---------|
-| Rafmagnsmaelir 1-fasa | `192.168.1.100` | WiFi Garage | ✅ healthy | 4 ms |
-| Rafmagnsmaelir 3-fasa | `192.168.1.101` | WiFi Garage | ✅ healthy | 5 ms |
-| Bílskúrshurð | `192.168.1.102` | WiFi Garage | ✅ healthy | 4 ms |
-| Bílskúrsljós | `192.168.1.103` | WiFi Garage | ✅ healthy | 1 ms |
-| Inngangur ljós | `192.168.1.110` | WiFi Living Room | ✅ healthy | 5 ms |
-| Gestasnyrtingur ljós | `192.168.1.111` | WiFi Living Room | ✅ healthy | 2 ms |
-| Eldhús efri ljós | `192.168.1.112` | WiFi Living Room | ✅ healthy | 2 ms |
-| Eldhús neðri ljós | `192.168.1.113` | WiFi Living Room | ✅ healthy | 2 ms |
-| Stofa ljós 1 | `192.168.1.114` | WiFi Living Room | ✅ healthy | 2 ms |
-| Stofa ljós 2 | `192.168.1.115` | WiFi Living Room | ✅ healthy | 4 ms |
+| Rafmagnsmaelir 1-fasa | `192.168.1.100` | WiFi Garage | ✅ healthy | 3 ms |
+| Rafmagnsmaelir 3-fasa | `192.168.1.101` | WiFi Garage | ✅ healthy | 4 ms |
+| Bílskúrshurð | `192.168.1.102` | WiFi Garage | ✅ healthy | 2 ms |
+| Bílskúrsljós | `192.168.1.103` | WiFi Garage | ✅ healthy | 5 ms |
+| Inngangur ljós | `192.168.1.110` | WiFi Living Room | ✅ healthy | 1 ms |
+| Gestasnyrtingur ljós | `192.168.1.111` | WiFi Living Room | ✅ healthy | 4 ms |
+| Eldhús efri ljós | `192.168.1.112` | WiFi Living Room | ✅ healthy | 4 ms |
+| Eldhús neðri ljós | `192.168.1.113` | WiFi Living Room | ✅ healthy | 5 ms |
+| Stofa ljós 1 | `192.168.1.114` | WiFi Living Room | ✅ healthy | 3 ms |
+| Stofa ljós 2 | `192.168.1.115` | WiFi Living Room | ✅ healthy | 1 ms |
 | Stofa ljós 3 | `192.168.1.116` | WiFi Living Room | ✅ healthy | 4 ms |
-| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 3 ms |
-| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 3 ms |
+| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 5 ms |
+| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 1 ms |
 | Plöntuljós | `192.168.1.119` | WiFi Living Room | ✅ healthy | 2 ms |
-| Kaffivél | `192.168.1.219` | WiFi Living Room | ✅ healthy | 4 ms |
-| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 1 ms |
-| Gólfahitun | `192.168.1.131` | WiFi Upper Floor | ✅ healthy | 1 ms |
-| Stúdíóbúnaður | `192.168.1.132` | LAN Studio | ✅ healthy | 4 ms |
+| Kaffivél | `192.168.1.219` | WiFi Living Room | ✅ healthy | 2 ms |
+| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 2 ms |
+| Gólfahitun | `192.168.1.131` | WiFi Upper Floor | ✅ healthy | 3 ms |
+| Stúdíóbúnaður | `192.168.1.132` | LAN Studio | ✅ healthy | 2 ms |
 | Home Assistant | `192.168.1.64` | LAN Studio | ✅ healthy | 3 ms |
-| Unifi Controller | `192.168.1.151` | LAN Router | ✅ healthy | 4 ms |
+| Unifi Controller | `192.168.1.151` | LAN Router | ✅ healthy | 1 ms |
 | Svefnherbergi ljós 1 | `192.168.1.140` | WiFi Basement | ❓ unknown | — |
 | Svefnherbergi ljós 2 | `192.168.1.141` | WiFi Basement | ❓ unknown | — |
 | Baðherbergi ljós | `192.168.1.142` | WiFi Basement | ❓ unknown | — |
@@ -1069,62 +1097,61 @@ PROBLEMS
 
 # Heimdallur Network Status
 
-**Probed:** 2026-05-09 18:31:41 UTC  |  **Interval:** 30s
+**Probed:** 2026-05-09 20:17:21 UTC  |  **Interval:** 30s
 
 ## Summary
 
-⚠️  3 issue(s) detected — 30 / 33 devices online
+⚠️  2 issue(s) detected — 31 / 33 devices online
 
 - WiFi Garage WiFi access point offline — 4 devices affected
 - WiFi Basement WiFi access point offline — 9 devices affected
-- Kaffivél unreachable
 
 ---
 
 ## Internet
 
-**Status:** ✅ HEALTHY  |  **Latency (ONT):** 29 ms avg  |  **Loss:** 0%
+**Status:** ✅ HEALTHY  |  **Latency (ONT):** 34 ms avg  |  **Loss:** 0%
 
 ### IP Reachability
 
 | Target | Status | Latency |
 |--------|--------|---------|
-| Cloudflare (1.1.1.1) | ✅ healthy | 17 ms |
-| Google (8.8.8.8) | ✅ healthy | 20 ms |
-| Quad9 (9.9.9.9) | ✅ healthy | 21 ms |
+| Cloudflare (1.1.1.1) | ✅ healthy | 24 ms |
+| Google (8.8.8.8) | ✅ healthy | 31 ms |
+| Quad9 (9.9.9.9) | ✅ healthy | 22 ms |
 
 ### DNS
 
 | Resolver | Status | Lookup |
 |----------|--------|--------|
-| Cloudflare (cloudflare.com) | ✅ ok | 6 ms |
-| Google (google.com) | ✅ ok | 6 ms |
-| Quad9 (quad9.net) | ✅ ok | 13 ms |
+| Cloudflare (cloudflare.com) | ✅ ok | 7 ms |
+| Google (google.com) | ✅ ok | 9 ms |
+| Quad9 (quad9.net) | ✅ ok | 16 ms |
 
 ### HTTP
 
 | Endpoint | Status | TTFB | Total |
 |----------|--------|------|-------|
-| Cloudflare | ✅ ok | 54 ms | 68 ms |
-| Google | ✅ ok | 69 ms | 82 ms |
-| Microsoft | ✅ ok | 61 ms | 66 ms |
+| Cloudflare | ✅ ok | 57 ms | 68 ms |
+| Google | ✅ ok | 72 ms | 81 ms |
+| Microsoft | ✅ ok | 81 ms | 96 ms |
 
-**Speed test:** ↓ 373 Mbps  |  ping 29 ms  *(0s ago)*
-
----
-
-## Router
-
-**Status:** ✅ HEALTHY  |  **Latency:** 3 ms
-**CPU:** 10%  |  **Memory:** 37%  |  **Uptime:** 3d
+**Speed test:** ↓ 423 Mbps  |  ping 22 ms  *(0s ago)*
 
 ---
 
-## Groups
+## Home Network
 
-### WiFi Garage  |  2.4GHz  ch 11
+### Router
 
-**Gateway `192.168.1.95`:** ❌ 153 ms  |  **Clients:** 3
+**Status:** ✅ HEALTHY  |  **Latency:** 2 ms
+**CPU:** 7%  |  **Memory:** 37%  |  **Uptime:** 3d
+
+### Groups
+
+#### WiFi Garage  |  2.4GHz  ch 11
+
+**Gateway `192.168.1.95`:** ❌ 166 ms  |  **Clients:** 4
 
 **Devices:** 4 / 4 online
 
@@ -1135,38 +1162,38 @@ PROBLEMS
 | Bílskúrshurð | `192.168.1.102` | ❓ unknown (gateway down) | — |
 | Bílskúrsljós | `192.168.1.103` | ❓ unknown (gateway down) | — |
 
-### WiFi Living Room  |  5GHz  ch 36
+#### WiFi Living Room  |  5GHz  ch 36
 
-**Gateway `192.168.1.44`:** ✅ 4 ms  |  **Clients:** 10
+**Gateway `192.168.1.44`:** ✅ 3 ms  |  **Clients:** 9
 
-**Devices:** 10 / 11 online
+**Devices:** 11 / 11 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Inngangur ljós | `192.168.1.110` | ✅ healthy | 5 ms |
+| Inngangur ljós | `192.168.1.110` | ✅ healthy | 4 ms |
 | Gestasnyrtingur ljós | `192.168.1.111` | ✅ healthy | 1 ms |
 | Eldhús efri ljós | `192.168.1.112` | ✅ healthy | 1 ms |
-| Eldhús neðri ljós | `192.168.1.113` | ✅ healthy | 3 ms |
+| Eldhús neðri ljós | `192.168.1.113` | ✅ healthy | 2 ms |
 | Stofa ljós 1 | `192.168.1.114` | ✅ healthy | 2 ms |
-| Stofa ljós 2 | `192.168.1.115` | ✅ healthy | 4 ms |
-| Stofa ljós 3 | `192.168.1.116` | ✅ healthy | 2 ms |
-| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 2 ms |
-| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 1 ms |
-| Plöntuljós | `192.168.1.119` | ✅ healthy | 2 ms |
-| Kaffivél | `192.168.1.219` | ❌ unreachable | — |
+| Stofa ljós 2 | `192.168.1.115` | ✅ healthy | 5 ms |
+| Stofa ljós 3 | `192.168.1.116` | ✅ healthy | 4 ms |
+| Kjallaragang ljós | `192.168.1.117` | ✅ healthy | 3 ms |
+| Útiljós framhlið | `192.168.1.118` | ✅ healthy | 2 ms |
+| Plöntuljós | `192.168.1.119` | ✅ healthy | 4 ms |
+| Kaffivél | `192.168.1.219` | ✅ healthy | 5 ms |
 
-### WiFi Upper Floor  |  5GHz  ch 44
+#### WiFi Upper Floor  |  5GHz  ch 44
 
-**Gateway `192.168.1.43`:** ✅ 4 ms  |  **Clients:** 6
+**Gateway `192.168.1.43`:** ✅ 2 ms  |  **Clients:** 7
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 1 ms |
-| Gólfahitun | `192.168.1.131` | ✅ healthy | 5 ms |
+| Baðherbergi LED | `192.168.1.130` | ✅ healthy | 2 ms |
+| Gólfahitun | `192.168.1.131` | ✅ healthy | 1 ms |
 
-### WiFi Basement  |  2.4GHz  ch 6
+#### WiFi Basement  |  2.4GHz  ch 6
 
 **Gateway `192.168.1.45`:** ❌ —  |  **Clients:** 10
 
@@ -1184,7 +1211,7 @@ PROBLEMS
 | Garðljós | `192.168.1.214` | ❓ unknown (gateway down) | — |
 | Garðtenglar | `192.168.1.148` | ❓ unknown (gateway down) | — |
 
-### LAN Studio
+#### LAN Studio
 
 **Devices:** 2 / 2 online
 
@@ -1193,17 +1220,18 @@ PROBLEMS
 | Stúdíóbúnaður | `192.168.1.132` | ✅ healthy | 5 ms |
 | Home Assistant | `192.168.1.64` | ✅ healthy | 1 ms |
 
-### LAN Home Theater
+#### LAN Home Theater
 
 **Devices:** 0 / 0 online
 
-### LAN Router
+#### LAN Router
 
 **Devices:** 1 / 1 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
 | Unifi Controller | `192.168.1.151` | ✅ healthy | 2 ms |
+
 
 ---
 
@@ -1215,19 +1243,19 @@ PROBLEMS
 | Rafmagnsmaelir 3-fasa | `192.168.1.101` | WiFi Garage | ❓ unknown | — |
 | Bílskúrshurð | `192.168.1.102` | WiFi Garage | ❓ unknown | — |
 | Bílskúrsljós | `192.168.1.103` | WiFi Garage | ❓ unknown | — |
-| Inngangur ljós | `192.168.1.110` | WiFi Living Room | ✅ healthy | 5 ms |
+| Inngangur ljós | `192.168.1.110` | WiFi Living Room | ✅ healthy | 4 ms |
 | Gestasnyrtingur ljós | `192.168.1.111` | WiFi Living Room | ✅ healthy | 1 ms |
 | Eldhús efri ljós | `192.168.1.112` | WiFi Living Room | ✅ healthy | 1 ms |
-| Eldhús neðri ljós | `192.168.1.113` | WiFi Living Room | ✅ healthy | 3 ms |
+| Eldhús neðri ljós | `192.168.1.113` | WiFi Living Room | ✅ healthy | 2 ms |
 | Stofa ljós 1 | `192.168.1.114` | WiFi Living Room | ✅ healthy | 2 ms |
-| Stofa ljós 2 | `192.168.1.115` | WiFi Living Room | ✅ healthy | 4 ms |
-| Stofa ljós 3 | `192.168.1.116` | WiFi Living Room | ✅ healthy | 2 ms |
-| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 2 ms |
-| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 1 ms |
-| Plöntuljós | `192.168.1.119` | WiFi Living Room | ✅ healthy | 2 ms |
-| Kaffivél | `192.168.1.219` | WiFi Living Room | ❌ unreachable | — |
-| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 1 ms |
-| Gólfahitun | `192.168.1.131` | WiFi Upper Floor | ✅ healthy | 5 ms |
+| Stofa ljós 2 | `192.168.1.115` | WiFi Living Room | ✅ healthy | 5 ms |
+| Stofa ljós 3 | `192.168.1.116` | WiFi Living Room | ✅ healthy | 4 ms |
+| Kjallaragang ljós | `192.168.1.117` | WiFi Living Room | ✅ healthy | 3 ms |
+| Útiljós framhlið | `192.168.1.118` | WiFi Living Room | ✅ healthy | 2 ms |
+| Plöntuljós | `192.168.1.119` | WiFi Living Room | ✅ healthy | 4 ms |
+| Kaffivél | `192.168.1.219` | WiFi Living Room | ✅ healthy | 5 ms |
+| Baðherbergi LED | `192.168.1.130` | WiFi Upper Floor | ✅ healthy | 2 ms |
+| Gólfahitun | `192.168.1.131` | WiFi Upper Floor | ✅ healthy | 1 ms |
 | Stúdíóbúnaður | `192.168.1.132` | LAN Studio | ✅ healthy | 5 ms |
 | Home Assistant | `192.168.1.64` | LAN Studio | ✅ healthy | 1 ms |
 | Unifi Controller | `192.168.1.151` | LAN Router | ✅ healthy | 2 ms |

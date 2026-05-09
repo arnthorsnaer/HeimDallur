@@ -101,6 +101,8 @@ async def render_status(console: "Console | None" = None) -> None:
         if group.gateway_ip:
             r = state.gateway_results.get(group.gateway_ip)
             console.print(f"  {_status_str(r.status if r else None, r.response_ms if r else None)}  {group.name}")
+        else:
+            console.print(f"  [{GRAY}]LAN[/]  {group.name}")
 
     problems = state.problems(config)
     if problems:
