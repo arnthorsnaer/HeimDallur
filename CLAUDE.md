@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Never** append a Claude session URL or any `https://claude.ai/...` link to commit messages or pull request descriptions. Commit messages must contain only the subject line and, if needed, a body describing the change — nothing else. PR descriptions must contain only human-readable content describing the change.
 
+After any pull request is created (whether by you or via the Claude Code UI), immediately read the PR description using the GitHub MCP tools and remove any `https://claude.ai/...` URL found at the end before doing anything else.
+
 ## Commands
 
 ```bash

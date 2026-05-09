@@ -377,29 +377,63 @@ def _write_output_formats_doc(
         "",
     ]
 
-    web_by_name    = {name: slug for slug, _, name in web_slugs}
-    report_by_name = {name: md   for _, _, name, md in report_results}
+    report_by_name = {name: md for _, _, name, md in report_results}
 
-    def _rel_url(slug: str) -> str:
-        return f"snapshots/{slug}.{img_ext}"
+    def _img(alt: str, slug: str) -> str:
+        return f"![{alt}](snapshots/{slug}.{img_ext})"
 
-    def _img_tag(alt: str, url: str) -> str:
-        return f"| ![{alt}]({url}) |\n|:---:|"
-
-    for slug, title, name, text in text_results:
-        img_url = _rel_url(slug)
+    # ── TUI section ──────────────────────────────────────────────────
+    lines += ["## TUI (`heimdallur`)", ""]
+    rows_of_3 = [text_results[i:i+3] for i in range(0, len(text_results), 3)]
+    for row in rows_of_3:
+        img_cells = " | ".join(_img(title, slug) for slug, title, _, __ in row)
+        cap_cells = " | ".join(title for _, title, __, ___ in row)
         lines += [
-            f"## {title}",
-            "",
-            f"| ![{title}]({img_url}) |",
-            "|:---:|",
+            f"| {img_cells} |",
+            "|" + "|".join(":---:" for _ in row) + "|",
+            f"| {cap_cells} |",
             "",
         ]
-        lines += _state_sections(
-            slug, title, name, text, report_by_name.get(name, ""),
-            web_by_name, _rel_url, _img_tag,
-        )
+    lines += ["---", ""]
+
+    # ── Web UI section ────────────────────────────────────────────────
+    if web_slugs:
+        lines += ["## Web UI (`make web`)", ""]
+        web_rows = [web_slugs[i:i+3] for i in range(0, len(web_slugs), 3)]
+        for row in web_rows:
+            img_cells = " | ".join(_img(title, slug) for slug, title, _ in row)
+            cap_cells = " | ".join(title.replace("Web UI — ", "") for _, title, __ in row)
+            lines += [
+                f"| {img_cells} |",
+                "|" + "|".join(":---:" for _ in row) + "|",
+                f"| {cap_cells} |",
+                "",
+            ]
         lines += ["---", ""]
+
+    # ── Status section ────────────────────────────────────────────────
+    lines += ["## Status output (`--mode status`)", ""]
+    for slug, title, name, text in text_results:
+        lines += [
+            f"### {title}",
+            "",
+            "```text",
+            text.rstrip(),
+            "```",
+            "",
+        ]
+    lines += ["---", ""]
+
+    # ── Report section ────────────────────────────────────────────────
+    lines += ["## Markdown report (`--mode report`)", ""]
+    for _, title, name, __ in text_results:
+        report = report_by_name.get(name, "")
+        lines += [
+            f"### {title}",
+            "",
+            report.strip(),
+            "",
+        ]
 
     doc_path = out_dir.parent / "output-formats.md"
     doc_path.write_text("\n".join(lines), encoding="utf-8")
