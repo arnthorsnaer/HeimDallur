@@ -307,26 +307,33 @@ def _write_pr_body(
     text_results: list[tuple[str, str, str]],   # (slug, title, text)
     report_results: list[tuple[str, str, str]],  # (slug, title, md)
     img_ext: str,
+    github_repo: str | None = None,
+    branch: str | None = None,
 ) -> Path:
     """Generate docs/pr-body.md — a ready-to-paste GitHub PR description.
 
     Three top-level collapsed sections (screenshots / status / markdown report),
     each containing per-scenario collapsed sub-sections.
+
+    When github_repo and branch are provided, screenshot URLs are absolute
+    raw.githubusercontent.com links so images render in the PR description.
     """
-    def _scenario_block(items: list[str]) -> list[str]:
-        return items
+    def _img_url(slug: str) -> str:
+        rel = f"docs/screenshots/{slug}.{img_ext}"
+        if github_repo and branch:
+            return f"https://raw.githubusercontent.com/{github_repo}/{branch}/{rel}"
+        return rel
 
     lines: list[str] = []
 
     # ── Screenshots ──────────────────────────────────────────────
     lines += ["<details>", "<summary><strong>Screenshots</strong></summary>", ""]
     for slug, title, _ in text_results:
-        img_path = f"docs/screenshots/{slug}.{img_ext}"
         lines += [
             "<details>",
             f"<summary>{title}</summary>",
             "",
-            f"![{title}]({img_path})",
+            f"![{title}]({_img_url(slug)})",
             "",
             "</details>",
             "",
@@ -374,11 +381,25 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--output-dir", default="docs/screenshots")
+    parser.add_argument(
+        "--github-repo", default="arnthorsnaer/HeimDallur",
+        help="owner/repo slug — used for absolute image URLs in pr-body.md (default: arnthorsnaer/HeimDallur)",
+    )
     fmt = parser.add_mutually_exclusive_group()
     fmt.add_argument("--png", dest="ext", action="store_const", const="png")
     fmt.add_argument("--svg", dest="ext", action="store_const", const="svg")
     parser.set_defaults(ext="png")
     args = parser.parse_args()
+
+    # Detect current git branch for absolute image URLs in the PR body.
+    try:
+        import subprocess as _sp
+        _branch = _sp.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=_REPO, text=True, stderr=_sp.DEVNULL,
+        ).strip()
+    except Exception:
+        _branch = None
 
     out_dir = (_REPO / args.output_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -432,7 +453,10 @@ def main() -> None:
 
     # ── Output-formats doc + PR body ────────────────────────────
     doc_path = _write_output_formats_doc(out_dir, text_results, report_results, args.ext)
-    pr_path  = _write_pr_body(out_dir, text_results, report_results, args.ext)
+    pr_path  = _write_pr_body(
+        out_dir, text_results, report_results, args.ext,
+        github_repo=args.github_repo, branch=_branch,
+    )
     print(f"\nOutput-formats doc → {doc_path.relative_to(_REPO)}")
     print(f"PR body            → {pr_path.relative_to(_REPO)}")
 
