@@ -264,9 +264,9 @@ class InternetPanel(Widget):
     #inet-hint         {{ width: 9; height: 1; content-align: right middle; color: {UI_DIM}; }}
     #inet-detail       {{ height: auto; display: none; padding-top: 1; }}
     #inet-diagnosis    {{ height: 1; }}
-    #inet-ip-hdr-row   {{ height: 1; layout: horizontal; margin-top: 1; }}
-    #inet-dns-hdr-row  {{ height: 1; layout: horizontal; margin-top: 1; }}
-    #inet-http-hdr-row {{ height: 1; layout: horizontal; margin-top: 1; }}
+    #inet-ip-hdr-row   {{ height: 1; layout: horizontal; }}
+    #inet-dns-hdr-row  {{ height: 1; layout: horizontal; }}
+    #inet-http-hdr-row {{ height: 1; layout: horizontal; }}
     #inet-ip-hdr       {{ width: auto; margin-right: 2; color: {UI_DIM}; text-style: bold; }}
     #inet-ip-compact   {{ width: 1fr; height: 1; }}
     #inet-ip-rows      {{ height: auto; }}
