@@ -21,8 +21,8 @@ from pathlib import Path
 _REPO  = Path(__file__).parent.parent
 _SCEN  = _REPO / "heimdallur" / "mock" / "scenarios"
 
-COLUMNS = 120
-ROWS    = 38
+COLUMNS = 66
+ROWS    = 20
 SETTLE  = 5.0   # seconds — long enough for probe + speed-test mock to fire
 NAV     = 0.6   # seconds — pause after navigation keypresses
 

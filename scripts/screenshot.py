@@ -23,8 +23,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-COLUMNS = 120
-ROWS    = 38
+COLUMNS = 66
+ROWS    = 20
 
 # Speed-test mock waits 3 s before first result; 5 s guarantees both
 # the probe loop and speed loop have fired at least once.
