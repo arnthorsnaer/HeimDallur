@@ -29,9 +29,16 @@ def _status_str(status: ProbeStatus | None, response_ms: float | None) -> str:
         ProbeStatus.UNREACHABLE: "✗",
         ProbeStatus.UNKNOWN:     "·",
     }
+    labels = {
+        ProbeStatus.HEALTHY:     "Online",
+        ProbeStatus.DEGRADED:    "Degraded",
+        ProbeStatus.UNREACHABLE: "Offline",
+        ProbeStatus.UNKNOWN:     "Unknown",
+    }
     c = colors[status]
     i = icons[status]
-    return f"[{c}]{i}  {ms}[/]"
+    lbl = labels[status]
+    return f"[{c}]{i} {lbl}  {ms}[/]"
 
 
 def _check_counts(ok: int, total: int) -> str:

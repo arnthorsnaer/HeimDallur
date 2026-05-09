@@ -149,7 +149,7 @@ def render_markdown(
             for r in iq.dns:
                 icon = "✅" if r.success else "❌"
                 lat_avg = _avg_ms(snapshot.inet_dns_lat.get(r.hostname, []))
-                lines.append(f"| {r.label} ({r.hostname}) | {icon} {'ok' if r.success else 'fail'} | {lat_avg} |")
+                lines.append(f"| {r.label} ({r.hostname}) | {icon} {'Online' if r.success else 'Offline'} | {lat_avg} |")
             lines.append("")
 
         if iq.http:
@@ -161,7 +161,7 @@ def render_markdown(
                 icon = "✅" if r.success else "❌"
                 ttfb = _avg_ms(snapshot.inet_http_ttfb.get(r.url, []))
                 total_t = _avg_ms(snapshot.inet_http_total.get(r.url, []))
-                lines.append(f"| {r.label} | {icon} {'ok' if r.success else 'fail'} | {ttfb} | {total_t} |")
+                lines.append(f"| {r.label} | {icon} {'Online' if r.success else 'Offline'} | {ttfb} | {total_t} |")
             lines.append("")
 
     spd = enriched.speed_result
