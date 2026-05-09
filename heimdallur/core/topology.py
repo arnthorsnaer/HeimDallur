@@ -154,7 +154,7 @@ class NetworkState:
     def problems(self, config: NetworkConfig) -> list[str]:
         issues = []
         if self.ont_result and self.ont_result.status == ProbeStatus.UNREACHABLE:
-            issues.append("WAN offline — full network unreachable")
+            issues.append("Internet offline — full network unreachable")
             return issues
         if self.router_result and self.router_result.status == ProbeStatus.UNREACHABLE:
             issues.append("Router offline — home network affected")
