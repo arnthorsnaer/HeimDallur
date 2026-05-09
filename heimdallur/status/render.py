@@ -35,17 +35,20 @@ def _status_str(status: ProbeStatus | None, response_ms: float | None) -> str:
     return f"[{c}]{i}  {ms}[/]"
 
 
-async def render_status() -> None:
+async def render_status(console: "Console | None" = None) -> None:
     config = load_config()
 
     if os.getenv("NETWATCH_MOCK"):
+        from pathlib import Path
         from heimdallur.mock.network import MockProber
-        prober = MockProber(config)
+        scenario = os.getenv("NETWATCH_MOCK_SCENARIO")
+        prober = MockProber(config, scenario_path=Path(scenario) if scenario else None)
     else:
         from heimdallur.core.prober import Prober
         prober = Prober(config)
 
-    console = Console()
+    if console is None:
+        console = Console()
     console.print(f"\n[bold]HEIMDALLUR[/]  {datetime.now().strftime('%H:%M:%S')}\n")
 
     state = await prober.probe_all()
@@ -60,9 +63,10 @@ async def render_status() -> None:
     console.print(t)
 
     console.print("[dim]Access Points[/]")
-    for ap in config.access_points:
-        r = state.ap_results.get(ap.ip)
-        console.print(f"  {_status_str(r.status if r else None, r.response_ms if r else None)}  {ap.name}")
+    for group in config.groups:
+        if group.gateway_ip:
+            r = state.gateway_results.get(group.gateway_ip)
+            console.print(f"  {_status_str(r.status if r else None, r.response_ms if r else None)}  {group.name}")
 
     problems = state.problems(config)
     if problems:
