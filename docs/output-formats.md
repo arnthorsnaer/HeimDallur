@@ -16,39 +16,39 @@ All outputs below are generated from mock data via the scenario files in
 
 ---
 
-## TUI Screenshots (`--mode tui`)
+## TUI Snapshots (`--mode tui`)
 
 The interactive dashboard. Press `i` / `n` to expand panels,
 `h` for history, `d` for devices, `q` to quit.
 
 ### All healthy
 
-| ![All healthy](screenshots/01-status-healthy.png) |
+| ![All healthy](snapshots/01-status-healthy.png) |
 |:---:|
 
 ### Internet degraded
 
-| ![Internet degraded](screenshots/02-status-internet-degraded.png) |
+| ![Internet degraded](snapshots/02-status-internet-degraded.png) |
 |:---:|
 
 ### Internet offline
 
-| ![Internet offline](screenshots/03-status-internet-offline.png) |
+| ![Internet offline](snapshots/03-status-internet-offline.png) |
 |:---:|
 
 ### Router offline
 
-| ![Router offline](screenshots/04-status-router-offline.png) |
+| ![Router offline](snapshots/04-status-router-offline.png) |
 |:---:|
 
 ### AP offline (Basement)
 
-| ![AP offline (Basement)](screenshots/05-status-gateway-offline.png) |
+| ![AP offline (Basement)](snapshots/05-status-gateway-offline.png) |
 |:---:|
 
 ### Multiple issues
 
-| ![Multiple issues](screenshots/06-status-multiple-issues.png) |
+| ![Multiple issues](snapshots/06-status-multiple-issues.png) |
 |:---:|
 
 ---
@@ -60,32 +60,32 @@ Open `http://heimdallur.local:8080` from any device on the local network.
 
 ### Web UI — all healthy
 
-| ![Web UI — all healthy](screenshots/web-01-status-healthy.png) |
+| ![Web UI — all healthy](snapshots/web-01-status-healthy.png) |
 |:---:|
 
 ### Web UI — internet degraded
 
-| ![Web UI — internet degraded](screenshots/web-02-status-internet-degraded.png) |
+| ![Web UI — internet degraded](snapshots/web-02-status-internet-degraded.png) |
 |:---:|
 
 ### Web UI — internet offline
 
-| ![Web UI — internet offline](screenshots/web-03-status-internet-offline.png) |
+| ![Web UI — internet offline](snapshots/web-03-status-internet-offline.png) |
 |:---:|
 
 ### Web UI — router offline
 
-| ![Web UI — router offline](screenshots/web-04-status-router-offline.png) |
+| ![Web UI — router offline](snapshots/web-04-status-router-offline.png) |
 |:---:|
 
 ### Web UI — AP offline (Basement)
 
-| ![Web UI — AP offline (Basement)](screenshots/web-05-status-gateway-offline.png) |
+| ![Web UI — AP offline (Basement)](snapshots/web-05-status-gateway-offline.png) |
 |:---:|
 
 ### Web UI — multiple issues
 
-| ![Web UI — multiple issues](screenshots/web-06-status-multiple-issues.png) |
+| ![Web UI — multiple issues](snapshots/web-06-status-multiple-issues.png) |
 |:---:|
 
 ---

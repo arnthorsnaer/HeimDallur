@@ -1,6 +1,6 @@
 # UI States
 
-All screenshots are generated from mock data via `scripts/capture_all.py` and committed to `docs/screenshots/`. The Web UI, status output, and markdown report samples for each base network state are injected automatically by the same script.
+All snapshots are generated from mock data via `scripts/capture_all.py` and committed to `docs/snapshots/`. The Web UI, status output, and markdown report samples for each base network state are injected automatically by the same script.
 
 ---
 
@@ -14,7 +14,7 @@ The main view, always visible. Three panels stack vertically: Internet, Home Net
 
 Everything reachable — internet, router, access points, and all devices. The status banner is collapsed since there is nothing to report.
 
-| ![Status — all healthy](screenshots/01-status-healthy.png) |
+| ![Status — all healthy](snapshots/01-status-healthy.png) |
 |:---:|
 
 <!-- generated:all_healthy:start -->
@@ -26,7 +26,7 @@ Everything reachable — internet, router, access points, and all devices. The s
 
 Same healthy state, but with a Gmail incident-report address configured. The footer shows the admin email address in place of the default "no email configured" placeholder.
 
-| ![Status — email notifications configured](screenshots/01b-status-email-configured.png) |
+| ![Status — email notifications configured](snapshots/01b-status-email-configured.png) |
 |:---:|
 
 ---
@@ -35,7 +35,7 @@ Same healthy state, but with a Gmail incident-report address configured. The foo
 
 Latency is elevated and packet loss is intermittent, but connectivity is maintained. The Internet panel changes colour and the rolling-average summary reflects the degraded quality; the status banner expands to name the fault.
 
-| ![Status — internet degraded](screenshots/02-status-internet-degraded.png) |
+| ![Status — internet degraded](snapshots/02-status-internet-degraded.png) |
 |:---:|
 
 <!-- generated:internet_degraded:start -->
@@ -47,7 +47,7 @@ Latency is elevated and packet loss is intermittent, but connectivity is maintai
 
 Complete loss of internet connectivity — IP, DNS, and HTTP checks all failing. The Internet panel shows `✗ OFFLINE` and the status banner surfaces the diagnosis.
 
-| ![Status — internet offline](screenshots/03-status-internet-offline.png) |
+| ![Status — internet offline](snapshots/03-status-internet-offline.png) |
 |:---:|
 
 <!-- generated:internet_offline:start -->
@@ -59,7 +59,7 @@ Complete loss of internet connectivity — IP, DNS, and HTTP checks all failing.
 
 The router is unreachable. Because all downstream devices depend on the router, every access point and device is shown as `UNKNOWN` rather than individually failed — fault cascade keeps the signal-to-noise ratio low and points to the root cause.
 
-| ![Status — router offline](screenshots/04-status-router-offline.png) |
+| ![Status — router offline](snapshots/04-status-router-offline.png) |
 |:---:|
 
 <!-- generated:router_offline:start -->
@@ -71,7 +71,7 @@ The router is unreachable. Because all downstream devices depend on the router, 
 
 One access point (Basement) is down. Its nine downstream devices are suppressed to `UNKNOWN`, while all other groups remain unaffected. Only the root-cause AP is highlighted.
 
-| ![Status — AP offline](screenshots/05-status-gateway-offline.png) |
+| ![Status — AP offline](snapshots/05-status-gateway-offline.png) |
 |:---:|
 
 <!-- generated:gateway_offline:start -->
@@ -83,7 +83,7 @@ One access point (Basement) is down. Its nine downstream devices are suppressed 
 
 A compound failure: an access point is offline, internet connectivity is degraded, and one device is flapping intermittently. The status banner lists every active fault; each affected panel reflects its own state independently.
 
-| ![Status — multiple issues](screenshots/06-status-multiple-issues.png) |
+| ![Status — multiple issues](snapshots/06-status-multiple-issues.png) |
 |:---:|
 
 <!-- generated:multiple_issues:start -->
@@ -95,7 +95,7 @@ A compound failure: an access point is offline, internet connectivity is degrade
 
 Press `s` to expand the top status banner into a full fault list. Each active problem is listed on its own line with a severity icon, giving a complete incident summary without leaving the main screen.
 
-| ![Status banner expanded — multiple issues](screenshots/06b-status-panel-expanded.png) |
+| ![Status banner expanded — multiple issues](snapshots/06b-status-panel-expanded.png) |
 |:---:|
 
 ---
@@ -110,7 +110,7 @@ Click any panel or press `i` (Internet) / `n` (Home Network) to expand it. The p
 
 The expanded Internet panel shows a latency sparkline, per-check results (IP reachability, DNS, HTTP) grouped by target, and the latest speed test reading with a historical average. Healthy targets are shown compactly; only degraded or failing targets get a detail row.
 
-| ![Internet panel expanded — all healthy](screenshots/07-inet-panel-expanded.png) |
+| ![Internet panel expanded — all healthy](snapshots/07-inet-panel-expanded.png) |
 |:---:|
 
 ---
@@ -119,7 +119,7 @@ The expanded Internet panel shows a latency sparkline, per-check results (IP rea
 
 The same expanded view under a partial failure: one DNS resolver is failing while others pass, surfacing a plain-language diagnosis at the top of the panel ("All DNS failing — ISP resolver issue — try manual DNS").
 
-| ![Internet panel expanded — partial failure](screenshots/07b-inet-panel-partial.png) |
+| ![Internet panel expanded — partial failure](snapshots/07b-inet-panel-partial.png) |
 |:---:|
 
 ---
@@ -128,7 +128,7 @@ The same expanded view under a partial failure: one DNS resolver is failing whil
 
 The expanded Internet panel when internet connectivity is fully lost. All check rows show failing status and the diagnosis banner at the top states the conclusion plainly so no further interpretation is needed.
 
-| ![Internet panel expanded — offline](screenshots/07c-inet-panel-offline.png) |
+| ![Internet panel expanded — offline](snapshots/07c-inet-panel-offline.png) |
 |:---:|
 
 ---
@@ -137,7 +137,7 @@ The expanded Internet panel when internet connectivity is fully lost. All check 
 
 The expanded Home Network panel shows router latency, memory usage, uptime, and per-group device counts. Each access point group lists its downstream devices with individual latency and online/offline status.
 
-| ![Home network panel expanded](screenshots/08-net-panel-expanded.png) |
+| ![Home network panel expanded](snapshots/08-net-panel-expanded.png) |
 |:---:|
 
 ---
@@ -146,7 +146,7 @@ The expanded Home Network panel shows router latency, memory usage, uptime, and 
 
 The same panel with an access point down. The affected group is highlighted; its downstream devices are listed as `UNKNOWN` rather than individually failed, confirming that the cascade suppression is working correctly.
 
-| ![Home network panel expanded — AP offline](screenshots/08b-net-panel-gateway-offline.png) |
+| ![Home network panel expanded — AP offline](snapshots/08b-net-panel-gateway-offline.png) |
 |:---:|
 
 ---
@@ -161,7 +161,7 @@ Press `h` for the history screen or `d` for the device list. Both screens are pu
 
 24-hour uptime bars per network segment, updated on each probe cycle. Each bar represents a 30-minute window; colour indicates healthy / degraded / offline.
 
-| ![History screen](screenshots/09-history-screen.png) |
+| ![History screen](snapshots/09-history-screen.png) |
 |:---:|
 
 ---
@@ -170,5 +170,5 @@ Press `h` for the history screen or `d` for the device list. Both screens are pu
 
 Full device inventory with live latency and status per device, grouped by access point. Devices whose gateway is offline are shown as `UNKNOWN` rather than individually failed, consistent with the cascade logic on the status screen.
 
-| ![Devices screen](screenshots/10-devices-screen.png) |
+| ![Devices screen](snapshots/10-devices-screen.png) |
 |:---:|

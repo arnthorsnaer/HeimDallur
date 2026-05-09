@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate screenshots and text outputs for every meaningful state of Heimdallur.
+"""Generate snapshots and text outputs for every meaningful state of Heimdallur.
 
 Runs all captures in a single process, one asyncio event loop per capture,
 so there is no subprocess overhead and no SQLite lock contention.
@@ -30,7 +30,7 @@ NAV     = 0.6   # seconds — pause after navigation keypresses
 # Chromium headless shell bundled with the system playwright installation.
 _CHROMIUM = "/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell"
 
-# ── TUI screenshot captures ─────────────────────────────────────
+# ── TUI snapshot captures ───────────────────────────────────────
 CAPTURES: list[dict] = [
     # Status screen variants
     {"slug": "01-status-healthy",           "title": "Status — all healthy",
@@ -88,7 +88,7 @@ TEXT_SCENARIOS: list[dict] = [
 
 _ALL_SCENARIO_NAMES = [s["name"] for s in TEXT_SCENARIOS]
 
-# Web screenshots mirror the 6 base scenarios (one browser capture each).
+# Web snapshots mirror the 6 base scenarios (one browser capture each).
 WEB_SCENARIOS: list[dict] = [
     {"slug": "web-01-status-healthy",           "title": "Web UI — all healthy",
      "name": "all_healthy",       "scenario": "all_healthy.toml"},
@@ -105,7 +105,7 @@ WEB_SCENARIOS: list[dict] = [
 ]
 
 
-# ── TUI screenshot capture ───────────────────────────────────────
+# ── TUI snapshot capture ────────────────────────────────────────
 
 async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path,
                        extra_env: dict[str, str] | None = None) -> None:
@@ -116,7 +116,7 @@ async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path,
 
     os.environ["NETWATCH_MOCK"] = "1"
     os.environ["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
-    os.environ["NETWATCH_SCREENSHOT_DB"] = tmp_db
+    os.environ["NETWATCH_SNAPSHOT_DB"] = tmp_db
     if extra_env:
         os.environ.update(extra_env)
 
@@ -167,18 +167,18 @@ def _svg_to_png(svg_path: Path, png_path: Path) -> None:
         )
 
 
-# ── Web (browser) screenshot capture ────────────────────────────
+# ── Web (browser) snapshot capture ──────────────────────────────
 
 _WEB_SETTLE   = 8.0   # seconds — wait for server + app to render in browser
 _WEB_PORT_BASE = 18080  # start port; incremented per capture to avoid conflicts
 
-def _capture_web_screenshot(
+def _capture_web_snapshot(
     scenario_path: Path,
     png_path: Path,
     port: int,
     extra_env: dict[str, str] | None = None,
 ) -> None:
-    """Start textual-serve for the given scenario, take a browser screenshot, stop."""
+    """Start textual-serve for the given scenario, take a browser snapshot, stop."""
     env = os.environ.copy()
     env["NETWATCH_MOCK"] = "1"
     env["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
@@ -381,7 +381,7 @@ def _write_output_formats_doc(
     report_by_name = {name: md   for _, _, name, md in report_results}
 
     def _rel_url(slug: str) -> str:
-        return f"screenshots/{slug}.{img_ext}"
+        return f"snapshots/{slug}.{img_ext}"
 
     def _img_tag(alt: str, url: str) -> str:
         return f"| ![{alt}]({url}) |\n|:---:|"
@@ -419,14 +419,14 @@ def _write_ui_snapshots(
 ) -> Path:
     """Generate docs/ui-snapshots.md — an appendix to append to a PR description.
 
-    Organised by network state: TUI screenshot visible, Web UI / status output /
+    Organised by network state: TUI snapshot visible, Web UI / status output /
     markdown report each in a collapsed <details> block.
 
-    When github_repo and branch are provided, screenshot URLs are absolute
+    When github_repo and branch are provided, snapshot URLs are absolute
     raw.githubusercontent.com links so images render in the PR description.
     """
     def _abs_url(slug: str) -> str:
-        rel = f"docs/screenshots/{slug}.{img_ext}"
+        rel = f"docs/snapshots/{slug}.{img_ext}"
         if github_repo and branch:
             return f"https://raw.githubusercontent.com/{github_repo}/{branch}/{rel}"
         return rel
@@ -483,7 +483,7 @@ def _update_ui_states_doc(
     report_by_name = {name: md   for _, _, name, md in report_results}
 
     def _rel_url(slug: str) -> str:
-        return f"screenshots/{slug}.{img_ext}"
+        return f"snapshots/{slug}.{img_ext}"
 
     def _img_tag(alt: str, url: str) -> str:
         return f"| ![{alt}]({url}) |\n|:---:|"
@@ -514,7 +514,7 @@ def _update_ui_states_doc(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--output-dir", default="docs/screenshots")
+    parser.add_argument("--output-dir", default="docs/snapshots")
     parser.add_argument(
         "--github-repo", default="arnthorsnaer/HeimDallur",
         help="owner/repo slug — used for absolute image URLs in ui-snapshots.md",
@@ -528,11 +528,11 @@ def main() -> None:
     )
     parser.add_argument(
         "--pr-only", action="store_true",
-        help="Skip TUI screenshot generation; only regenerate status/report text and ui-snapshots.md",
+        help="Skip TUI snapshot generation; only regenerate status/report text and ui-snapshots.md",
     )
     parser.add_argument(
         "--no-web", action="store_true",
-        help="Skip web (browser) screenshot generation",
+        help="Skip web (browser) snapshot generation",
     )
     fmt = parser.add_mutually_exclusive_group()
     fmt.add_argument("--png", dest="ext", action="store_const", const="png")
@@ -570,9 +570,9 @@ def main() -> None:
 
     t_start = time.monotonic()
 
-    # ── TUI screenshots ──────────────────────────────────────────
+    # ── TUI snapshots ────────────────────────────────────────────
     if not args.pr_only:
-        print(f"Generating {len(active_caps)} TUI screenshots → {out_dir}\n")
+        print(f"Generating {len(active_caps)} TUI snapshots → {out_dir}\n")
 
         for cap in active_caps:
             slug      = cap["slug"]
@@ -594,13 +594,13 @@ def main() -> None:
             else:
                 print(f"  SVG saved → {out_path.name}")
     else:
-        print("Skipping TUI screenshots (--pr-only)\n")
+        print("Skipping TUI snapshots (--pr-only)\n")
 
-    # ── Web (browser) screenshots ────────────────────────────────
+    # ── Web (browser) snapshots ──────────────────────────────────
     web_slugs: list[WebSlug] = []
     do_web = not args.no_web and args.ext == "png"
     if do_web and active_web:
-        print(f"\nGenerating {len(active_web)} web (browser) screenshots\n")
+        print(f"\nGenerating {len(active_web)} web (browser) snapshots\n")
         for idx, scen in enumerate(active_web):
             slug     = scen["slug"]
             title    = scen["title"]
@@ -612,14 +612,14 @@ def main() -> None:
             print(f"[{slug}] starting server on port {port} …", end=" ", flush=True)
             t0 = time.monotonic()
             try:
-                _capture_web_screenshot(scenario, png_path, port)
+                _capture_web_snapshot(scenario, png_path, port)
                 print(f"done ({time.monotonic()-t0:.1f}s) → {png_path.name}")
                 web_slugs.append((slug, title, name))
             except RuntimeError as exc:
                 print(f"SKIPPED — {exc}")
                 break  # same dependency missing for all; no point retrying
     elif args.no_web:
-        print("\nSkipping web screenshots (--no-web)\n")
+        print("\nSkipping web snapshots (--no-web)\n")
         # Still include web entries in docs if the PNGs already exist.
         for scen in active_web:
             slug = scen["slug"]
@@ -627,7 +627,7 @@ def main() -> None:
                 web_slugs.append((slug, scen["title"], scen["name"]))
     else:
         # SVG mode — skip browser capture (not supported).
-        print("\nSkipping web screenshots (SVG mode not supported for browser captures)\n")
+        print("\nSkipping web snapshots (SVG mode not supported for browser captures)\n")
 
     # ── Status text and markdown reports ────────────────────────
     print(f"\nGenerating {len(active_text)} status + report outputs\n")
@@ -666,7 +666,7 @@ def main() -> None:
     print(f"UI states updated  → docs/ui-states.md")
 
     elapsed = time.monotonic() - t_start
-    print(f"\nDone — {len(active_caps)} TUI screenshots + {len(web_slugs)} web screenshots"
+    print(f"\nDone — {len(active_caps)} TUI snapshots + {len(web_slugs)} web snapshots"
           f" + {len(active_text)} status/report pairs in {elapsed:.0f}s")
 
 
