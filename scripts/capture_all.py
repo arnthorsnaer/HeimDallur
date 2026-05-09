@@ -66,20 +66,23 @@ CAPTURES: list[dict] = [
 
 # ── Base network-state scenarios for status/report output ────────
 # One entry per distinct network state — no UI-specific keys or screens.
+# The "name" key is the short identifier used with --scenarios.
 TEXT_SCENARIOS: list[dict] = [
     {"slug": "01-status-healthy",           "title": "All healthy",
-     "scenario": "all_healthy.toml"},
+     "name": "all_healthy",       "scenario": "all_healthy.toml"},
     {"slug": "02-status-internet-degraded", "title": "Internet degraded",
-     "scenario": "internet_degraded.toml"},
+     "name": "internet_degraded", "scenario": "internet_degraded.toml"},
     {"slug": "03-status-internet-offline",  "title": "Internet offline",
-     "scenario": "internet_offline.toml"},
+     "name": "internet_offline",  "scenario": "internet_offline.toml"},
     {"slug": "04-status-router-offline",    "title": "Router offline",
-     "scenario": "router_offline.toml"},
+     "name": "router_offline",    "scenario": "router_offline.toml"},
     {"slug": "05-status-gateway-offline",   "title": "AP offline (Basement)",
-     "scenario": "gateway_offline.toml"},
+     "name": "gateway_offline",   "scenario": "gateway_offline.toml"},
     {"slug": "06-status-multiple-issues",   "title": "Multiple issues",
-     "scenario": "multiple_issues.toml"},
+     "name": "multiple_issues",   "scenario": "multiple_issues.toml"},
 ]
+
+_ALL_SCENARIO_NAMES = [s["name"] for s in TEXT_SCENARIOS]
 
 
 # ── TUI screenshot capture ───────────────────────────────────────
@@ -383,13 +386,38 @@ def main() -> None:
     parser.add_argument("--output-dir", default="docs/screenshots")
     parser.add_argument(
         "--github-repo", default="arnthorsnaer/HeimDallur",
-        help="owner/repo slug — used for absolute image URLs in pr-body.md (default: arnthorsnaer/HeimDallur)",
+        help="owner/repo slug — used for absolute image URLs in pr-body.md",
+    )
+    parser.add_argument(
+        "--scenarios",
+        help=(
+            "Comma-separated scenario names to capture (default: all). "
+            f"Available: {', '.join(_ALL_SCENARIO_NAMES)}"
+        ),
+    )
+    parser.add_argument(
+        "--pr-only", action="store_true",
+        help="Skip TUI screenshot generation; only regenerate status/report text and pr-body.md",
     )
     fmt = parser.add_mutually_exclusive_group()
     fmt.add_argument("--png", dest="ext", action="store_const", const="png")
     fmt.add_argument("--svg", dest="ext", action="store_const", const="svg")
     parser.set_defaults(ext="png")
     args = parser.parse_args()
+
+    # ── Scenario filter ──────────────────────────────────────────
+    if args.scenarios:
+        selected = {s.strip() for s in args.scenarios.split(",")}
+        unknown  = selected - set(_ALL_SCENARIO_NAMES)
+        if unknown:
+            sys.exit(f"Unknown scenario(s): {', '.join(sorted(unknown))}\n"
+                     f"Available: {', '.join(_ALL_SCENARIO_NAMES)}")
+    else:
+        selected = set(_ALL_SCENARIO_NAMES)
+
+    active_text = [s for s in TEXT_SCENARIOS if s["name"] in selected]
+    # For TUI captures, include entries whose scenario file matches the selection.
+    active_caps = [c for c in CAPTURES if Path(c["scenario"]).stem in selected]
 
     # Detect current git branch for absolute image URLs in the PR body.
     try:
@@ -404,37 +432,41 @@ def main() -> None:
     out_dir = (_REPO / args.output_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # ── TUI screenshots ──────────────────────────────────────────
-    print(f"Generating {len(CAPTURES)} TUI screenshots → {out_dir}\n")
     t_start = time.monotonic()
 
-    for cap in CAPTURES:
-        slug      = cap["slug"]
-        scenario  = _SCEN / cap["scenario"]
-        keys      = cap.get("keys", [])
-        extra_env = cap.get("env")
-        svg_path  = out_dir / f"{slug}.svg"
-        out_path  = out_dir / f"{slug}.{args.ext}"
+    # ── TUI screenshots ──────────────────────────────────────────
+    if not args.pr_only:
+        print(f"Generating {len(active_caps)} TUI screenshots → {out_dir}\n")
 
-        print(f"[{slug}]")
-        t0 = time.monotonic()
-        asyncio.run(_capture_svg(scenario, keys, svg_path, extra_env))
-        print(f"  SVG done ({time.monotonic()-t0:.1f}s)")
+        for cap in active_caps:
+            slug      = cap["slug"]
+            scenario  = _SCEN / cap["scenario"]
+            keys      = cap.get("keys", [])
+            extra_env = cap.get("env")
+            svg_path  = out_dir / f"{slug}.svg"
+            out_path  = out_dir / f"{slug}.{args.ext}"
 
-        if args.ext == "png":
-            _svg_to_png(svg_path, out_path)
-            svg_path.unlink()
-            print(f"  PNG saved → {out_path.name}")
-        else:
-            print(f"  SVG saved → {out_path.name}")
+            print(f"[{slug}]")
+            t0 = time.monotonic()
+            asyncio.run(_capture_svg(scenario, keys, svg_path, extra_env))
+            print(f"  SVG done ({time.monotonic()-t0:.1f}s)")
+
+            if args.ext == "png":
+                _svg_to_png(svg_path, out_path)
+                svg_path.unlink()
+                print(f"  PNG saved → {out_path.name}")
+            else:
+                print(f"  SVG saved → {out_path.name}")
+    else:
+        print("Skipping TUI screenshots (--pr-only)\n")
 
     # ── Status text and markdown reports ────────────────────────
-    print(f"\nGenerating {len(TEXT_SCENARIOS)} status + report outputs\n")
+    print(f"\nGenerating {len(active_text)} status + report outputs\n")
 
     text_results:   list[tuple[str, str, str]] = []
     report_results: list[tuple[str, str, str]] = []
 
-    for scen in TEXT_SCENARIOS:
+    for scen in active_text:
         slug     = scen["slug"]
         title    = scen["title"]
         scenario = _SCEN / scen["scenario"]
@@ -461,7 +493,7 @@ def main() -> None:
     print(f"PR body            → {pr_path.relative_to(_REPO)}")
 
     elapsed = time.monotonic() - t_start
-    print(f"\nDone — {len(CAPTURES)} screenshots + {len(TEXT_SCENARIOS)} status/report pairs"
+    print(f"\nDone — {len(active_caps)} screenshots + {len(active_text)} status/report pairs"
           f" in {elapsed:.0f}s")
 
 
