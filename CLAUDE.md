@@ -22,7 +22,7 @@ The PR description and `docs/` outputs are kept in sync manually. After changing
 
 ```bash
 PYTHONPATH=. python scripts/capture_all.py --output-dir docs/screenshots
-git add docs/screenshots/ docs/output-formats.md
+git add docs/screenshots/ docs/output-formats.md docs/pr-body.md
 ```
 
 `capture_all.py` produces three sets of artifacts:
@@ -32,6 +32,8 @@ git add docs/screenshots/ docs/output-formats.md
 | PNG screenshots | `docs/screenshots/*.png` | TUI in 15 distinct UI states |
 | Status text | embedded in `docs/output-formats.md` | `--mode status` output for 6 network scenarios |
 | Markdown reports | embedded in `docs/output-formats.md` | `--mode report` output for 6 network scenarios |
+
+It also writes `docs/pr-body.md` — a ready-to-use GitHub PR description with all three sections (screenshots, status output, markdown report) in collapsible `<details>` blocks. **When creating a pull request in this repo, use the contents of `docs/pr-body.md` as the PR body.**
 
 The full run takes ~90 s. It requires Python 3.12 and either `rsvg-convert` (librsvg2-bin) or `cairosvg` (`pip install cairosvg`) for PNG conversion.
 

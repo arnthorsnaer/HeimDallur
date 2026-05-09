@@ -302,6 +302,65 @@ def _write_output_formats_doc(
     return doc_path
 
 
+def _write_pr_body(
+    out_dir: Path,
+    text_results: list[tuple[str, str, str]],   # (slug, title, text)
+    report_results: list[tuple[str, str, str]],  # (slug, title, md)
+    img_ext: str,
+) -> Path:
+    """Generate docs/pr-body.md — a ready-to-paste GitHub PR description.
+
+    Three collapsible sections (screenshots / status / markdown report) for the
+    six base network-state scenarios. Use this as the PR body when opening a
+    pull request so reviewers see all output formats inline.
+    """
+    lines: list[str] = ["## Screenshots", ""]
+
+    for slug, title, _ in text_results:
+        img_path = f"docs/screenshots/{slug}.{img_ext}"
+        lines += [
+            "<details>",
+            f"<summary>{title}</summary>",
+            "",
+            f"![{title}]({img_path})",
+            "",
+            "</details>",
+            "",
+        ]
+
+    lines += ["---", "", "## Status Output (`--mode status`)", ""]
+
+    for slug, title, text in text_results:
+        lines += [
+            "<details>",
+            f"<summary>{title}</summary>",
+            "",
+            "```text",
+            text.rstrip(),
+            "```",
+            "",
+            "</details>",
+            "",
+        ]
+
+    lines += ["---", "", "## Markdown Report (`--mode report`)", ""]
+
+    for slug, title, md in report_results:
+        lines += [
+            "<details>",
+            f"<summary>{title}</summary>",
+            "",
+            md.strip(),
+            "",
+            "</details>",
+            "",
+        ]
+
+    pr_body_path = out_dir.parent / "pr-body.md"
+    pr_body_path.write_text("\n".join(lines), encoding="utf-8")
+    return pr_body_path
+
+
 # ── Main ─────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -364,9 +423,11 @@ def main() -> None:
         print(f"done ({time.monotonic()-t0:.1f}s)")
         report_results.append((slug, title, md))
 
-    # ── Output-formats doc ───────────────────────────────────────
+    # ── Output-formats doc + PR body ────────────────────────────
     doc_path = _write_output_formats_doc(out_dir, text_results, report_results, args.ext)
+    pr_path  = _write_pr_body(out_dir, text_results, report_results, args.ext)
     print(f"\nOutput-formats doc → {doc_path.relative_to(_REPO)}")
+    print(f"PR body            → {pr_path.relative_to(_REPO)}")
 
     elapsed = time.monotonic() - t_start
     print(f"\nDone — {len(CAPTURES)} screenshots + {len(TEXT_SCENARIOS)} status/report pairs"
