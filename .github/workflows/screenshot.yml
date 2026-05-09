@@ -59,7 +59,7 @@ jobs:
         run: pip install -e . cairosvg
 
       - name: Generate all screenshots
-        run: python scripts/capture_all.py --output-dir docs/screenshots
+        run: python scripts/capture_all.py --output-dir docs/screenshots --no-web
         env:
           NETWATCH_MOCK: "1"
 

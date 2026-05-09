@@ -201,7 +201,17 @@ def _capture_web_screenshot(
         # Give the aiohttp server time to bind and the app subprocess time to start.
         time.sleep(_WEB_SETTLE)
 
-        from playwright.sync_api import sync_playwright
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError:
+            raise RuntimeError(
+                "playwright is not installed — run: pip install playwright"
+            )
+        if not Path(_CHROMIUM).exists():
+            raise RuntimeError(
+                f"Chromium not found at {_CHROMIUM}\n"
+                "Run: playwright install chromium"
+            )
         with sync_playwright() as pw:
             browser = pw.chromium.launch(executable_path=_CHROMIUM)
             try:
@@ -593,9 +603,13 @@ def main() -> None:
 
             print(f"[{slug}] starting server on port {port} …", end=" ", flush=True)
             t0 = time.monotonic()
-            _capture_web_screenshot(scenario, png_path, port)
-            print(f"done ({time.monotonic()-t0:.1f}s) → {png_path.name}")
-            web_slugs.append((slug, title))
+            try:
+                _capture_web_screenshot(scenario, png_path, port)
+                print(f"done ({time.monotonic()-t0:.1f}s) → {png_path.name}")
+                web_slugs.append((slug, title))
+            except RuntimeError as exc:
+                print(f"SKIPPED — {exc}")
+                break  # same dependency missing for all; no point retrying
     elif args.no_web:
         print("\nSkipping web screenshots (--no-web)\n")
         # Still include web entries in docs if the PNGs already exist.
