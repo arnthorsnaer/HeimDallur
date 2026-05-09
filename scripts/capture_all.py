@@ -310,12 +310,16 @@ def _write_pr_body(
 ) -> Path:
     """Generate docs/pr-body.md — a ready-to-paste GitHub PR description.
 
-    Three collapsible sections (screenshots / status / markdown report) for the
-    six base network-state scenarios. Use this as the PR body when opening a
-    pull request so reviewers see all output formats inline.
+    Three top-level collapsed sections (screenshots / status / markdown report),
+    each containing per-scenario collapsed sub-sections.
     """
-    lines: list[str] = ["## Screenshots", ""]
+    def _scenario_block(items: list[str]) -> list[str]:
+        return items
 
+    lines: list[str] = []
+
+    # ── Screenshots ──────────────────────────────────────────────
+    lines += ["<details>", "<summary><strong>Screenshots</strong></summary>", ""]
     for slug, title, _ in text_results:
         img_path = f"docs/screenshots/{slug}.{img_ext}"
         lines += [
@@ -327,9 +331,10 @@ def _write_pr_body(
             "</details>",
             "",
         ]
+    lines += ["</details>", "", "---", ""]
 
-    lines += ["---", "", "## Status Output (`--mode status`)", ""]
-
+    # ── Status output ────────────────────────────────────────────
+    lines += ["<details>", "<summary><strong>Status Output (<code>--mode status</code>)</strong></summary>", ""]
     for slug, title, text in text_results:
         lines += [
             "<details>",
@@ -342,9 +347,10 @@ def _write_pr_body(
             "</details>",
             "",
         ]
+    lines += ["</details>", "", "---", ""]
 
-    lines += ["---", "", "## Markdown Report (`--mode report`)", ""]
-
+    # ── Markdown report ──────────────────────────────────────────
+    lines += ["<details>", "<summary><strong>Markdown Report (<code>--mode report</code>)</strong></summary>", ""]
     for slug, title, md in report_results:
         lines += [
             "<details>",
@@ -355,6 +361,7 @@ def _write_pr_body(
             "</details>",
             "",
         ]
+    lines += ["</details>", ""]
 
     pr_body_path = out_dir.parent / "pr-body.md"
     pr_body_path.write_text("\n".join(lines), encoding="utf-8")
