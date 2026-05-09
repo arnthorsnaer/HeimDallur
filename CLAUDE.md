@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Commit message rules
+
+**Never** append a Claude session URL or any `https://claude.ai/...` link to commit messages. Commit messages must contain only the subject line and, if needed, a body describing the change — nothing else.
+
 ## Commands
 
 ```bash
