@@ -1,0 +1,75 @@
+name: UI Snapshots
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write        # push snapshot commits to PR branch
+
+jobs:
+  check-ui-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      ui_changed: ${{ steps.check.outputs.ui_changed }}
+    steps:
+      - name: Check for UI file changes
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 100,
+            });
+            const patterns = [
+              /^heimdallur\/tui\//,
+              /^heimdallur\/mock\//,
+              /^scripts\/snapshot\.py$/,
+              /^scripts\/capture_all\.py$/,
+            ];
+            const changed = files.some(f => patterns.some(p => p.test(f.filename)));
+            core.setOutput('ui_changed', changed ? 'true' : 'false');
+            core.info(`UI files changed: ${changed}`);
+
+  snapshots:
+    needs: check-ui-changes
+    if: needs.check-ui-changes.outputs.ui_changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install system dependencies
+        run: sudo apt-get install -y librsvg2-bin
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: pip install -e . cairosvg
+
+      - name: Generate all snapshots
+        run: python scripts/capture_all.py --output-dir docs/snapshots --no-web
+        env:
+          NETWATCH_MOCK: "1"
+
+      - name: Commit snapshots to PR branch
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add docs/snapshots/ docs/output-formats.md docs/ui-states.md
+          if git diff --staged --quiet; then
+            echo "Snapshots unchanged, skipping commit."
+          else
+            git commit -m "chore: update UI snapshots [skip ci]"
+            git push
+          fi

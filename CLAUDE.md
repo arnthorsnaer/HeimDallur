@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commit message rules
 
-**Never** append a Claude session URL or any `https://claude.ai/...` link to commit messages. Commit messages must contain only the subject line and, if needed, a body describing the change — nothing else.
+**Never** append a Claude session URL or any `https://claude.ai/...` link to commit messages or pull request descriptions. Commit messages must contain only the subject line and, if needed, a body describing the change — nothing else. PR descriptions must contain only human-readable content describing the change.
 
 ## Commands
 
@@ -20,33 +20,32 @@ make logs          # tail systemd journal on the Pi
 
 There are no automated tests. Validate changes by running `make mock` and visually confirming the TUI behaves correctly.
 
-## After any change — regenerate screenshots and output samples
+## After any change — regenerate UI state snapshots
 
-The PR description and `docs/` outputs are kept in sync manually. After changing anything in `heimdallur/tui/`, `heimdallur/mock/`, `heimdallur/status/`, or `heimdallur/core/report.py`, regenerate and commit:
+The `docs/` outputs are kept in sync manually. After changing anything in `heimdallur/tui/`, `heimdallur/mock/`, `heimdallur/status/`, or `heimdallur/core/report.py`, regenerate and commit:
 
 ```bash
-PYTHONPATH=. python scripts/capture_all.py --output-dir docs/screenshots
-git add docs/screenshots/ docs/output-formats.md docs/pr-body.md
+PYTHONPATH=. python scripts/capture_all.py --output-dir docs/snapshots
+git add docs/snapshots/ docs/output-formats.md docs/ui-states.md
 ```
 
-`capture_all.py` produces three sets of artifacts:
+`capture_all.py` produces two sets of artifacts:
 
 | Artifact | Location | What it shows |
 |---|---|---|
-| PNG screenshots | `docs/screenshots/*.png` | TUI in 15 distinct UI states |
-| Status text | embedded in `docs/output-formats.md` | `--mode status` output for 6 network scenarios |
-| Markdown reports | embedded in `docs/output-formats.md` | `--mode report` output for 6 network scenarios |
+| PNG snapshots | `docs/snapshots/*.png` | TUI in 15 distinct UI states |
+| Output-formats doc | `docs/output-formats.md` | All 4 output modes per scenario, organised by state |
 
-It also writes `docs/pr-body.md` — a ready-to-use GitHub PR description with all three sections (screenshots, status output, markdown report) in collapsible `<details>` blocks. **When creating a pull request in this repo, use the contents of `docs/pr-body.md` as the PR body.**
+It also injects Web UI / status / report samples into the marker sections of `docs/ui-states.md`.
 
 The full run takes ~90 s. It requires Python 3.12 and either `rsvg-convert` (librsvg2-bin) or `cairosvg` (`pip install cairosvg`) for PNG conversion.
 
 ### Selecting relevant scenarios for a PR
 
-Instead of regenerating all 6 scenarios (90 s), use `--scenarios` to capture only the states affected by the change (~2–10 s). Use `--pr-only` to skip TUI screenshot regeneration when the TUI itself didn't change.
+Instead of regenerating all 6 scenarios (90 s), use `--scenarios` to capture only the states affected by the change (~2–10 s). Use `--pr-only` to skip TUI snapshot regeneration when the TUI itself didn't change.
 
 ```bash
-# Only regenerate what's relevant, then use docs/pr-body.md as the PR body:
+# Only regenerate what's relevant:
 python scripts/capture_all.py --pr-only --scenarios internet_degraded,internet_offline
 ```
 
@@ -98,7 +97,7 @@ heimdallur/mock/scenarios/
 
 Failure modes per IP or alias (`"ont"`, `"router"`): `"down"` | `"slow"` | `"intermittent"`.
 
-`NETWATCH_SCREENSHOT_DB` sets a custom SQLite path, used by the screenshot scripts to avoid lock contention between sequential runs.
+`NETWATCH_SNAPSHOT_DB` sets a custom SQLite path, used by the snapshot scripts to avoid lock contention between sequential runs.
 
 ### Fault cascade logic
 
@@ -113,8 +112,8 @@ Offline states cascade: router offline → all gateways and devices shown as `UN
 | `heimdallur/tui/status_view.py` | All status-screen widgets. Colour palette and semantic status colours defined at the top. |
 | `heimdallur/tui/app.py` | App entry point, probe/speed loops, history accumulation |
 | `heimdallur/mock/network.py` | `MockProber` and `MockNetwork` — fake probe results, router stats, speed tests |
-| `scripts/capture_all.py` | Generates screenshots + status/report text samples; writes `docs/output-formats.md` |
-| `scripts/screenshot.py` | Single-capture helper — `--scenario PATH`, `--keys KEY,...` |
+| `scripts/capture_all.py` | Generates snapshots + status/report text samples; writes `docs/output-formats.md` |
+| `scripts/snapshot.py` | Single-capture helper — `--scenario PATH`, `--keys KEY,...` |
 
 ### TUI panels
 

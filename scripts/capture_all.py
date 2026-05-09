@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate screenshots and text outputs for every meaningful state of Heimdallur.
+"""Generate snapshots and text outputs for every meaningful state of Heimdallur.
 
 Runs all captures in a single process, one asyncio event loop per capture,
 so there is no subprocess overhead and no SQLite lock contention.
@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -29,7 +30,7 @@ NAV     = 0.6   # seconds — pause after navigation keypresses
 # Chromium headless shell bundled with the system playwright installation.
 _CHROMIUM = "/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell"
 
-# ── TUI screenshot captures ─────────────────────────────────────
+# ── TUI snapshot captures ───────────────────────────────────────
 CAPTURES: list[dict] = [
     # Status screen variants
     {"slug": "01-status-healthy",           "title": "Status — all healthy",
@@ -87,7 +88,7 @@ TEXT_SCENARIOS: list[dict] = [
 
 _ALL_SCENARIO_NAMES = [s["name"] for s in TEXT_SCENARIOS]
 
-# Web screenshots mirror the 6 base scenarios (one browser capture each).
+# Web snapshots mirror the 6 base scenarios (one browser capture each).
 WEB_SCENARIOS: list[dict] = [
     {"slug": "web-01-status-healthy",           "title": "Web UI — all healthy",
      "name": "all_healthy",       "scenario": "all_healthy.toml"},
@@ -104,7 +105,7 @@ WEB_SCENARIOS: list[dict] = [
 ]
 
 
-# ── TUI screenshot capture ───────────────────────────────────────
+# ── TUI snapshot capture ────────────────────────────────────────
 
 async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path,
                        extra_env: dict[str, str] | None = None) -> None:
@@ -115,7 +116,7 @@ async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path,
 
     os.environ["NETWATCH_MOCK"] = "1"
     os.environ["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
-    os.environ["NETWATCH_SCREENSHOT_DB"] = tmp_db
+    os.environ["NETWATCH_SNAPSHOT_DB"] = tmp_db
     if extra_env:
         os.environ.update(extra_env)
 
@@ -166,18 +167,18 @@ def _svg_to_png(svg_path: Path, png_path: Path) -> None:
         )
 
 
-# ── Web (browser) screenshot capture ────────────────────────────
+# ── Web (browser) snapshot capture ──────────────────────────────
 
 _WEB_SETTLE   = 8.0   # seconds — wait for server + app to render in browser
 _WEB_PORT_BASE = 18080  # start port; incremented per capture to avoid conflicts
 
-def _capture_web_screenshot(
+def _capture_web_snapshot(
     scenario_path: Path,
     png_path: Path,
     port: int,
     extra_env: dict[str, str] | None = None,
 ) -> None:
-    """Start textual-serve for the given scenario, take a browser screenshot, stop."""
+    """Start textual-serve for the given scenario, take a browser snapshot, stop."""
     env = os.environ.copy()
     env["NETWATCH_MOCK"] = "1"
     env["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
@@ -290,13 +291,69 @@ async def _capture_report_md(scenario_path: Path,
     return content
 
 
+# ── Shared helpers for per-state collapsed sections ──────────────
+
+# (slug, title, name, text/md)
+TextResult = tuple[str, str, str, str]
+# (slug, title, name)
+WebSlug = tuple[str, str, str]
+
+
+def _state_sections(
+    slug: str,
+    title: str,
+    name: str,
+    text: str,
+    report: str,
+    web_by_name: dict[str, str],  # name → web slug
+    img_url_fn,                   # callable(slug) → URL string
+    img_tag_fn,                   # callable(alt, url) → markdown image string
+) -> list[str]:
+    """Return the collapsed detail sections for one network state."""
+    lines: list[str] = []
+
+    if name in web_by_name:
+        web_slug = web_by_name[name]
+        web_url  = img_url_fn(web_slug)
+        lines += [
+            "<details>",
+            "<summary>Web UI (<code>make web</code>)</summary>",
+            "",
+            img_tag_fn(f"Web UI — {title}", web_url),
+            "",
+            "</details>",
+            "",
+        ]
+
+    lines += [
+        "<details>",
+        "<summary>Status output (<code>--mode status</code>)</summary>",
+        "",
+        "```text",
+        text.rstrip(),
+        "```",
+        "",
+        "</details>",
+        "",
+        "<details>",
+        "<summary>Markdown report (<code>--mode report</code>)</summary>",
+        "",
+        report.strip(),
+        "",
+        "</details>",
+        "",
+    ]
+
+    return lines
+
+
 # ── Output-formats doc generation ────────────────────────────────
 
 def _write_output_formats_doc(
     out_dir: Path,
-    text_results: list[tuple[str, str, str]],   # (slug, title, text)
-    report_results: list[tuple[str, str, str]],  # (slug, title, md)
-    web_slugs: list[tuple[str, str]],            # (slug, title) captured web screenshots
+    text_results: list[TextResult],
+    report_results: list[TextResult],
+    web_slugs: list[WebSlug],
     img_ext: str,
 ) -> Path:
     lines: list[str] = [
@@ -304,7 +361,7 @@ def _write_output_formats_doc(
         "",
         "> Auto-generated by `scripts/capture_all.py` — do not edit manually.",
         "",
-        "Heimdallur has three output modes:",
+        "Heimdallur has four output modes:",
         "",
         "| Mode | Command | Description |",
         "|------|---------|-------------|",
@@ -320,186 +377,84 @@ def _write_output_formats_doc(
         "",
     ]
 
-    # ── TUI Screenshots ──────────────────────────────────────────
-    lines += [
-        "## TUI Screenshots (`--mode tui`)",
-        "",
-        "The interactive dashboard. Press `i` / `n` to expand panels,",
-        "`h` for history, `d` for devices, `q` to quit.",
-        "",
-    ]
-    for slug, title, _ in text_results:
-        img_path = f"screenshots/{slug}.{img_ext}"
+    web_by_name    = {name: slug for slug, _, name in web_slugs}
+    report_by_name = {name: md   for _, _, name, md in report_results}
+
+    def _rel_url(slug: str) -> str:
+        return f"snapshots/{slug}.{img_ext}"
+
+    def _img_tag(alt: str, url: str) -> str:
+        return f"| ![{alt}]({url}) |\n|:---:|"
+
+    for slug, title, name, text in text_results:
+        img_url = _rel_url(slug)
         lines += [
-            f"### {title}",
+            f"## {title}",
             "",
-            f"| ![{title}]({img_path}) |",
+            f"| ![{title}]({img_url}) |",
             "|:---:|",
             "",
         ]
-
-    lines += ["---", ""]
-
-    # ── Web UI Screenshots ────────────────────────────────────────
-    if web_slugs:
-        lines += [
-            "## Web UI (`make web`)",
-            "",
-            "The same TUI served in a browser via textual-serve + xterm.js.",
-            "Open `http://heimdallur.local:8080` from any device on the local network.",
-            "",
-        ]
-        for slug, title in web_slugs:
-            img_path = f"screenshots/{slug}.{img_ext}"
-            lines += [
-                f"### {title}",
-                "",
-                f"| ![{title}]({img_path}) |",
-                "|:---:|",
-                "",
-            ]
+        lines += _state_sections(
+            slug, title, name, text, report_by_name.get(name, ""),
+            web_by_name, _rel_url, _img_tag,
+        )
         lines += ["---", ""]
-
-    # ── Status text ──────────────────────────────────────────────
-    lines += [
-        "## Status Output (`--mode status`)",
-        "",
-        "Single-pass Rich console render — no TUI, no file written. Useful for",
-        "scripts, cron jobs, or a quick terminal check.",
-        "",
-        "```",
-        "NETWATCH_MOCK=1 heimdallur --mode status",
-        "```",
-        "",
-    ]
-    for slug, title, text in text_results:
-        lines += [
-            f"### {title}",
-            "",
-            "```text",
-            text.rstrip(),
-            "```",
-            "",
-        ]
-
-    lines += ["---", ""]
-
-    # ── Markdown reports ─────────────────────────────────────────
-    lines += [
-        "## Markdown Report (`--mode report`)",
-        "",
-        "Self-contained markdown snapshot. Written to",
-        "`~/.local/share/heimdallur/status.md` and printed to stdout.",
-        "The TUI also rewrites this file after every probe cycle.",
-        "",
-        "```",
-        "NETWATCH_MOCK=1 heimdallur --mode report",
-        "```",
-        "",
-    ]
-    for slug, title, md in report_results:
-        lines += [
-            f"<details>",
-            f"<summary><strong>{title}</strong></summary>",
-            "",
-            md.strip(),
-            "",
-            "</details>",
-            "",
-        ]
 
     doc_path = out_dir.parent / "output-formats.md"
     doc_path.write_text("\n".join(lines), encoding="utf-8")
     return doc_path
 
 
-def _write_pr_body(
+# ── ui-states.md marker injection ───────────────────────────────
+
+def _update_ui_states_doc(
     out_dir: Path,
-    text_results: list[tuple[str, str, str]],   # (slug, title, text)
-    report_results: list[tuple[str, str, str]],  # (slug, title, md)
-    web_slugs: list[tuple[str, str]],            # (slug, title) captured web screenshots
+    text_results: list[TextResult],
+    report_results: list[TextResult],
+    web_slugs: list[WebSlug],
     img_ext: str,
-    github_repo: str | None = None,
-    branch: str | None = None,
-) -> Path:
-    """Generate docs/pr-body.md — a ready-to-paste GitHub PR description.
+) -> None:
+    """Inject generated collapsed sections into docs/ui-states.md.
 
-    Four top-level collapsed sections (TUI screenshots / web UI screenshots /
-    status / markdown report), each containing per-scenario collapsed sub-sections.
-
-    When github_repo and branch are provided, screenshot URLs are absolute
-    raw.githubusercontent.com links so images render in the PR description.
+    Finds <!-- generated:NAME:start --> … <!-- generated:NAME:end --> marker
+    pairs and replaces the content between them with current Web UI / status /
+    report sections for each base scenario.
     """
-    def _img_url(slug: str) -> str:
-        rel = f"docs/screenshots/{slug}.{img_ext}"
-        if github_repo and branch:
-            return f"https://raw.githubusercontent.com/{github_repo}/{branch}/{rel}"
-        return rel
+    ui_states_path = out_dir.parent / "ui-states.md"
+    if not ui_states_path.exists():
+        return
 
-    lines: list[str] = []
+    content = ui_states_path.read_text(encoding="utf-8")
 
-    # ── TUI Screenshots ──────────────────────────────────────────
-    lines += ["<details>", "<summary><strong>TUI Screenshots</strong></summary>", ""]
-    for slug, title, _ in text_results:
-        lines += [
-            "<details>",
-            f"<summary>{title}</summary>",
-            "",
-            f"![{title}]({_img_url(slug)})",
-            "",
-            "</details>",
-            "",
-        ]
-    lines += ["</details>", "", "---", ""]
+    web_by_name    = {name: slug for slug, _, name in web_slugs}
+    report_by_name = {name: md   for _, _, name, md in report_results}
 
-    # ── Web UI Screenshots ────────────────────────────────────────
-    if web_slugs:
-        lines += ["<details>", "<summary><strong>Web UI Screenshots (<code>make web</code>)</strong></summary>", ""]
-        for slug, title in web_slugs:
-            lines += [
-                "<details>",
-                f"<summary>{title}</summary>",
-                "",
-                f"![{title}]({_img_url(slug)})",
-                "",
-                "</details>",
-                "",
-            ]
-        lines += ["</details>", "", "---", ""]
+    def _rel_url(slug: str) -> str:
+        return f"snapshots/{slug}.{img_ext}"
 
-    # ── Status output ────────────────────────────────────────────
-    lines += ["<details>", "<summary><strong>Status Output (<code>--mode status</code>)</strong></summary>", ""]
-    for slug, title, text in text_results:
-        lines += [
-            "<details>",
-            f"<summary>{title}</summary>",
-            "",
-            "```text",
-            text.rstrip(),
-            "```",
-            "",
-            "</details>",
-            "",
-        ]
-    lines += ["</details>", "", "---", ""]
+    def _img_tag(alt: str, url: str) -> str:
+        return f"| ![{alt}]({url}) |\n|:---:|"
 
-    # ── Markdown report ──────────────────────────────────────────
-    lines += ["<details>", "<summary><strong>Markdown Report (<code>--mode report</code>)</strong></summary>", ""]
-    for slug, title, md in report_results:
-        lines += [
-            "<details>",
-            f"<summary>{title}</summary>",
-            "",
-            md.strip(),
-            "",
-            "</details>",
-            "",
-        ]
-    lines += ["</details>", ""]
+    for slug, title, name, text in text_results:
+        start_marker = f"<!-- generated:{name}:start -->"
+        end_marker   = f"<!-- generated:{name}:end -->"
 
-    pr_body_path = out_dir.parent / "pr-body.md"
-    pr_body_path.write_text("\n".join(lines), encoding="utf-8")
-    return pr_body_path
+        generated = _state_sections(
+            slug, title, name, text, report_by_name.get(name, ""),
+            web_by_name, _rel_url, _img_tag,
+        )
+        replacement = (
+            start_marker + "\n"
+            + "\n".join(generated)
+            + end_marker
+        )
+
+        pattern = re.escape(start_marker) + r".*?" + re.escape(end_marker)
+        if re.search(pattern, content, flags=re.DOTALL):
+            content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+
+    ui_states_path.write_text(content, encoding="utf-8")
 
 
 # ── Main ─────────────────────────────────────────────────────────
@@ -507,11 +462,7 @@ def _write_pr_body(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--output-dir", default="docs/screenshots")
-    parser.add_argument(
-        "--github-repo", default="arnthorsnaer/HeimDallur",
-        help="owner/repo slug — used for absolute image URLs in pr-body.md",
-    )
+    parser.add_argument("--output-dir", default="docs/snapshots")
     parser.add_argument(
         "--scenarios",
         help=(
@@ -521,11 +472,11 @@ def main() -> None:
     )
     parser.add_argument(
         "--pr-only", action="store_true",
-        help="Skip TUI screenshot generation; only regenerate status/report text and pr-body.md",
+        help="Skip TUI snapshot generation; only regenerate status/report text and docs",
     )
     parser.add_argument(
         "--no-web", action="store_true",
-        help="Skip web (browser) screenshot generation",
+        help="Skip web (browser) snapshot generation",
     )
     fmt = parser.add_mutually_exclusive_group()
     fmt.add_argument("--png", dest="ext", action="store_const", const="png")
@@ -548,24 +499,14 @@ def main() -> None:
     # For TUI captures, include entries whose scenario file matches the selection.
     active_caps = [c for c in CAPTURES if Path(c["scenario"]).stem in selected]
 
-    # Detect current git branch for absolute image URLs in the PR body.
-    try:
-        import subprocess as _sp
-        _branch = _sp.check_output(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            cwd=_REPO, text=True, stderr=_sp.DEVNULL,
-        ).strip()
-    except Exception:
-        _branch = None
-
     out_dir = (_REPO / args.output_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     t_start = time.monotonic()
 
-    # ── TUI screenshots ──────────────────────────────────────────
+    # ── TUI snapshots ────────────────────────────────────────────
     if not args.pr_only:
-        print(f"Generating {len(active_caps)} TUI screenshots → {out_dir}\n")
+        print(f"Generating {len(active_caps)} TUI snapshots → {out_dir}\n")
 
         for cap in active_caps:
             slug      = cap["slug"]
@@ -587,16 +528,17 @@ def main() -> None:
             else:
                 print(f"  SVG saved → {out_path.name}")
     else:
-        print("Skipping TUI screenshots (--pr-only)\n")
+        print("Skipping TUI snapshots (--pr-only)\n")
 
-    # ── Web (browser) screenshots ────────────────────────────────
-    web_slugs: list[tuple[str, str]] = []
+    # ── Web (browser) snapshots ──────────────────────────────────
+    web_slugs: list[WebSlug] = []
     do_web = not args.no_web and args.ext == "png"
     if do_web and active_web:
-        print(f"\nGenerating {len(active_web)} web (browser) screenshots\n")
+        print(f"\nGenerating {len(active_web)} web (browser) snapshots\n")
         for idx, scen in enumerate(active_web):
             slug     = scen["slug"]
             title    = scen["title"]
+            name     = scen["name"]
             scenario = _SCEN / scen["scenario"]
             port     = _WEB_PORT_BASE + idx
             png_path = out_dir / f"{slug}.png"
@@ -604,57 +546,56 @@ def main() -> None:
             print(f"[{slug}] starting server on port {port} …", end=" ", flush=True)
             t0 = time.monotonic()
             try:
-                _capture_web_screenshot(scenario, png_path, port)
+                _capture_web_snapshot(scenario, png_path, port)
                 print(f"done ({time.monotonic()-t0:.1f}s) → {png_path.name}")
-                web_slugs.append((slug, title))
+                web_slugs.append((slug, title, name))
             except RuntimeError as exc:
                 print(f"SKIPPED — {exc}")
                 break  # same dependency missing for all; no point retrying
     elif args.no_web:
-        print("\nSkipping web screenshots (--no-web)\n")
+        print("\nSkipping web snapshots (--no-web)\n")
         # Still include web entries in docs if the PNGs already exist.
         for scen in active_web:
             slug = scen["slug"]
             if (out_dir / f"{slug}.png").exists():
-                web_slugs.append((slug, scen["title"]))
+                web_slugs.append((slug, scen["title"], scen["name"]))
     else:
         # SVG mode — skip browser capture (not supported).
-        print("\nSkipping web screenshots (SVG mode not supported for browser captures)\n")
+        print("\nSkipping web snapshots (SVG mode not supported for browser captures)\n")
 
     # ── Status text and markdown reports ────────────────────────
     print(f"\nGenerating {len(active_text)} status + report outputs\n")
 
-    text_results:   list[tuple[str, str, str]] = []
-    report_results: list[tuple[str, str, str]] = []
+    text_results:   list[TextResult] = []
+    report_results: list[TextResult] = []
 
     for scen in active_text:
         slug     = scen["slug"]
         title    = scen["title"]
+        name     = scen["name"]
         scenario = _SCEN / scen["scenario"]
 
         print(f"[{slug}] status …", end=" ", flush=True)
         t0 = time.monotonic()
         text = asyncio.run(_capture_status_text(scenario))
         print(f"done ({time.monotonic()-t0:.1f}s)")
-        text_results.append((slug, title, text))
+        text_results.append((slug, title, name, text))
 
         print(f"[{slug}] report …", end=" ", flush=True)
         t0 = time.monotonic()
         md = asyncio.run(_capture_report_md(scenario))
         print(f"done ({time.monotonic()-t0:.1f}s)")
-        report_results.append((slug, title, md))
+        report_results.append((slug, title, name, md))
 
-    # ── Output-formats doc + PR body ────────────────────────────
+    # ── Write docs ───────────────────────────────────────────────
     doc_path = _write_output_formats_doc(out_dir, text_results, report_results, web_slugs, args.ext)
-    pr_path  = _write_pr_body(
-        out_dir, text_results, report_results, web_slugs, args.ext,
-        github_repo=args.github_repo, branch=_branch,
-    )
+    _update_ui_states_doc(out_dir, text_results, report_results, web_slugs, args.ext)
+
     print(f"\nOutput-formats doc → {doc_path.relative_to(_REPO)}")
-    print(f"PR body            → {pr_path.relative_to(_REPO)}")
+    print(f"UI states updated  → docs/ui-states.md")
 
     elapsed = time.monotonic() - t_start
-    print(f"\nDone — {len(active_caps)} TUI screenshots + {len(web_slugs)} web screenshots"
+    print(f"\nDone — {len(active_caps)} TUI snapshots + {len(web_slugs)} web snapshots"
           f" + {len(active_text)} status/report pairs in {elapsed:.0f}s")
 
 

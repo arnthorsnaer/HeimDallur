@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generate a single UI screenshot of Heimdallur running in mock mode.
+"""Generate a single UI snapshot of Heimdallur running in mock mode.
 
 Usage:
-    python scripts/screenshot.py OUTPUT [--scenario TOML] [--keys KEY,...]
+    python scripts/snapshot.py OUTPUT [--scenario TOML] [--keys KEY,...]
 
     OUTPUT          destination file (.svg keeps SVG; anything else triggers
                     SVG→PNG via rsvg-convert / librsvg2-bin)
@@ -87,8 +87,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("output", nargs="?",
-                        default="docs/screenshot.png",
-                        help="Output file path (default: docs/screenshot.png)")
+                        default="docs/snapshot.png",
+                        help="Output file path (default: docs/snapshot.png)")
     parser.add_argument("--scenario", default=str(_DEFAULT_SCENARIO),
                         help="Path to scenario TOML (default: all_healthy.toml)")
     parser.add_argument("--keys", default="",

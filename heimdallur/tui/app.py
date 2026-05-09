@@ -61,7 +61,7 @@ class HeimdallurApp(App):
         super().__init__()
         self._config: NetworkConfig = load_config()
 
-        # Allow screenshot/demo scripts to inject a recipient email without
+        # Allow snapshot/demo scripts to inject a recipient email without
         # editing network.toml — set NETWATCH_DEMO_EMAIL to any address.
         if _demo_email := os.getenv("NETWATCH_DEMO_EMAIL"):
             import dataclasses as _dc
@@ -78,7 +78,7 @@ class HeimdallurApp(App):
                 ),
             )
         from pathlib import Path as _Path
-        _db = os.getenv("NETWATCH_SCREENSHOT_DB")
+        _db = os.getenv("NETWATCH_SNAPSHOT_DB")
         self._store = Store(_Path(_db)) if _db else Store()
         self._start_time = time.time()
 
@@ -155,7 +155,7 @@ class HeimdallurApp(App):
         for v in _walk(38.0, 24.0, 58.0, 3.0):
             self._mem.append(v)
 
-        # Seed a realistic speed result so screenshots show real data immediately
+        # Seed a realistic speed result so snapshots show real data immediately
         for v in _walk(310.0, 180.0, 480.0, 40.0):
             self._dl.append(v)
         self._speed_result = SpeedResult(

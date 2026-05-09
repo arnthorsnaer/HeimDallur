@@ -6,7 +6,7 @@ A terminal-based network health monitor designed to run on a Raspberry Pi with a
 
 Heimdallur gives you a persistent, at-a-glance view of your entire home network — ideal for households with many smart home devices where quickly understanding the current state of the network matters.
 
-![Heimdallur status screen — all healthy](docs/screenshots/01-status-healthy.png)
+![Heimdallur status screen — all healthy](docs/snapshots/01-status-healthy.png)
 
 ## What it does
 
@@ -19,7 +19,7 @@ Heimdallur gives you a persistent, at-a-glance view of your entire home network 
 
 Faults cascade correctly: if an access point goes offline, its downstream devices are shown as affected rather than individually failed, keeping the signal-to-noise ratio low.
 
-![Heimdallur status screen — multiple issues detected](docs/screenshots/06-status-multiple-issues.png)
+![Heimdallur status screen — multiple issues detected](docs/snapshots/06-status-multiple-issues.png)
 
 ## Intended use
 
@@ -91,7 +91,7 @@ To generate a Gmail app password: **Google Account → Security → 2-Step Verif
 
 The footer shows whether notifications are configured — `✉ you@example.com` when active, `✉  no email configured` when not. Emails fire on recovery, not during the outage, so a full internet outage will still trigger a report once connectivity is restored.
 
-![Heimdallur — email notifications configured](docs/screenshots/01b-status-email-configured.png)
+![Heimdallur — email notifications configured](docs/snapshots/01b-status-email-configured.png)
 
 ## Deploying to a Raspberry Pi
 
