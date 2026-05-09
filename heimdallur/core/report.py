@@ -171,8 +171,10 @@ def render_markdown(
         lines.append("**Speed test:** not yet run")
     lines += ["", "---", ""]
 
-    # ── Router ───────────────────────────────────────────────────────────
-    lines.append("## Router")
+    # ── Home Network ─────────────────────────────────────────────────────
+    lines.append("## Home Network")
+    lines.append("")
+    lines.append("### Router")
     lines.append("")
     rtr = state.router_result
     if rtr:
@@ -185,10 +187,10 @@ def render_markdown(
             f"**CPU:** {rs.cpu_pct:.0f}%  |  **Memory:** {rs.memory_pct:.0f}%  |  "
             f"**Uptime:** {_uptime_str(rs.uptime_seconds)}"
         )
-    lines += ["", "---", ""]
+    lines.append("")
 
     # ── Groups ───────────────────────────────────────────────────────────
-    lines.append("## Groups")
+    lines.append("### Groups")
     lines.append("")
     for group in config.groups:
         band_info = ""
@@ -201,7 +203,7 @@ def render_markdown(
             if parts:
                 band_info = "  |  " + "  ".join(parts)
 
-        lines.append(f"### {group.name}{band_info}")
+        lines.append(f"#### {group.name}{band_info}")
         lines.append("")
 
         if group.gateway_ip:
@@ -240,7 +242,7 @@ def render_markdown(
                 lines.append(f"| {d.name} | `{d.ip}` | {row_icon} {row_status} | {row_lat} |")
             lines.append("")
 
-    lines += ["---", ""]
+    lines += ["", "---", ""]
 
     # ── All devices flat table ────────────────────────────────────────────
     lines.append("## All Devices")
