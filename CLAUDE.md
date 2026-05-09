@@ -16,16 +16,49 @@ make logs          # tail systemd journal on the Pi
 
 There are no automated tests. Validate changes by running `make mock` and visually confirming the TUI behaves correctly.
 
-## After any TUI change — regenerate screenshots
+## After any change — regenerate screenshots and output samples
 
-The PR description and `docs/screenshots/` are kept in sync manually. After changing anything in `heimdallur/tui/` or `heimdallur/mock/`, regenerate all screenshots and commit them:
+The PR description and `docs/` outputs are kept in sync manually. After changing anything in `heimdallur/tui/`, `heimdallur/mock/`, `heimdallur/status/`, or `heimdallur/core/report.py`, regenerate and commit:
 
 ```bash
 PYTHONPATH=. python scripts/capture_all.py --output-dir docs/screenshots
-git add docs/screenshots/
+git add docs/screenshots/ docs/output-formats.md docs/pr-body.md
 ```
 
-`capture_all.py` runs 10 scenarios (all-healthy, internet degraded/offline, router offline, AP offline, multiple issues, both panels expanded, history screen, devices screen). Each capture takes ~6 s; the full run takes ~60 s. It requires Python 3.12 and either `rsvg-convert` (librsvg2-bin) or `cairosvg` (`pip install cairosvg`) for PNG conversion.
+`capture_all.py` produces three sets of artifacts:
+
+| Artifact | Location | What it shows |
+|---|---|---|
+| PNG screenshots | `docs/screenshots/*.png` | TUI in 15 distinct UI states |
+| Status text | embedded in `docs/output-formats.md` | `--mode status` output for 6 network scenarios |
+| Markdown reports | embedded in `docs/output-formats.md` | `--mode report` output for 6 network scenarios |
+
+It also writes `docs/pr-body.md` — a ready-to-use GitHub PR description with all three sections (screenshots, status output, markdown report) in collapsible `<details>` blocks. **When creating a pull request in this repo, use the contents of `docs/pr-body.md` as the PR body.**
+
+The full run takes ~90 s. It requires Python 3.12 and either `rsvg-convert` (librsvg2-bin) or `cairosvg` (`pip install cairosvg`) for PNG conversion.
+
+### Selecting relevant scenarios for a PR
+
+Instead of regenerating all 6 scenarios (90 s), use `--scenarios` to capture only the states affected by the change (~2–10 s). Use `--pr-only` to skip TUI screenshot regeneration when the TUI itself didn't change.
+
+```bash
+# Only regenerate what's relevant, then use docs/pr-body.md as the PR body:
+python scripts/capture_all.py --pr-only --scenarios internet_degraded,internet_offline
+```
+
+**Which scenarios to pick** — look at `git diff --name-only main...HEAD` and apply this mapping:
+
+| Changed area | Relevant scenarios |
+|---|---|
+| `heimdallur/status/render.py` | all (status output changed for every state) |
+| `heimdallur/core/report.py` | all (markdown report format changed) |
+| `heimdallur/core/internet_probe.py` · `InternetPanel` | `all_healthy`, `internet_degraded`, `internet_offline` |
+| Router display / `RouterPanel` | `all_healthy`, `router_offline` |
+| Gateway / AP logic · `GroupsPanel` | `gateway_offline`, `multiple_issues` |
+| `MockProber` · mock scenarios | whichever scenarios the mock change affects |
+| General TUI layout / colours | all (use full run without `--pr-only`) |
+
+Available scenario names: `all_healthy`, `internet_degraded`, `internet_offline`, `router_offline`, `gateway_offline`, `multiple_issues`.
 
 ## Architecture
 
@@ -76,7 +109,7 @@ Offline states cascade: router offline → all gateways and devices shown as `UN
 | `heimdallur/tui/status_view.py` | All status-screen widgets. Colour palette and semantic status colours defined at the top. |
 | `heimdallur/tui/app.py` | App entry point, probe/speed loops, history accumulation |
 | `heimdallur/mock/network.py` | `MockProber` and `MockNetwork` — fake probe results, router stats, speed tests |
-| `scripts/capture_all.py` | Generates all 10 UI-state screenshots using `asyncio.run()` per capture |
+| `scripts/capture_all.py` | Generates screenshots + status/report text samples; writes `docs/output-formats.md` |
 | `scripts/screenshot.py` | Single-capture helper — `--scenario PATH`, `--keys KEY,...` |
 
 ### TUI panels
