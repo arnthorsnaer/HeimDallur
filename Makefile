@@ -1,4 +1,4 @@
-.PHONY: mock dev status-render install clean deploy logs pi-status
+.PHONY: mock dev status-render web install clean deploy logs pi-status
 
 # Development — live reload on Python/TOML changes via watchfiles
 dev:
@@ -11,6 +11,14 @@ mock:
 # Single-pass rich status render (no TUI)
 status-render:
 	NETWATCH_MOCK=1 uv run python -m heimdallur --mode status
+
+# Serve the TUI in a browser via xterm.js (http://localhost:8080)
+web:
+	uv run python scripts/web_serve.py
+
+# Mock mode web server (no real pings)
+web-mock:
+	NETWATCH_MOCK=1 uv run python scripts/web_serve.py
 
 install:
 	uv sync

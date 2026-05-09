@@ -26,6 +26,9 @@ ROWS    = 20
 SETTLE  = 5.0   # seconds — long enough for probe + speed-test mock to fire
 NAV     = 0.6   # seconds — pause after navigation keypresses
 
+# Chromium headless shell bundled with the system playwright installation.
+_CHROMIUM = "/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell"
+
 # ── TUI screenshot captures ─────────────────────────────────────
 CAPTURES: list[dict] = [
     # Status screen variants
@@ -83,6 +86,22 @@ TEXT_SCENARIOS: list[dict] = [
 ]
 
 _ALL_SCENARIO_NAMES = [s["name"] for s in TEXT_SCENARIOS]
+
+# Web screenshots mirror the 6 base scenarios (one browser capture each).
+WEB_SCENARIOS: list[dict] = [
+    {"slug": "web-01-status-healthy",           "title": "Web UI — all healthy",
+     "name": "all_healthy",       "scenario": "all_healthy.toml"},
+    {"slug": "web-02-status-internet-degraded", "title": "Web UI — internet degraded",
+     "name": "internet_degraded", "scenario": "internet_degraded.toml"},
+    {"slug": "web-03-status-internet-offline",  "title": "Web UI — internet offline",
+     "name": "internet_offline",  "scenario": "internet_offline.toml"},
+    {"slug": "web-04-status-router-offline",    "title": "Web UI — router offline",
+     "name": "router_offline",    "scenario": "router_offline.toml"},
+    {"slug": "web-05-status-gateway-offline",   "title": "Web UI — AP offline (Basement)",
+     "name": "gateway_offline",   "scenario": "gateway_offline.toml"},
+    {"slug": "web-06-status-multiple-issues",   "title": "Web UI — multiple issues",
+     "name": "multiple_issues",   "scenario": "multiple_issues.toml"},
+]
 
 
 # ── TUI screenshot capture ───────────────────────────────────────
@@ -145,6 +164,73 @@ def _svg_to_png(svg_path: Path, png_path: Path) -> None:
             "  macOS:         brew install librsvg\n"
             "  Any platform:  pip install cairosvg"
         )
+
+
+# ── Web (browser) screenshot capture ────────────────────────────
+
+_WEB_SETTLE   = 8.0   # seconds — wait for server + app to render in browser
+_WEB_PORT_BASE = 18080  # start port; incremented per capture to avoid conflicts
+
+def _capture_web_screenshot(
+    scenario_path: Path,
+    png_path: Path,
+    port: int,
+    extra_env: dict[str, str] | None = None,
+) -> None:
+    """Start textual-serve for the given scenario, take a browser screenshot, stop."""
+    env = os.environ.copy()
+    env["NETWATCH_MOCK"] = "1"
+    env["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
+    if extra_env:
+        env.update(extra_env)
+
+    # Inline server-start script — inherits the full env above.
+    server_script = (
+        "import sys; sys.path.insert(0, {repo!r}); "
+        "from textual_serve.server import Server; "
+        "Server('python -m heimdallur --mode tui', host='127.0.0.1', port={port}).serve()"
+    ).format(repo=str(_REPO), port=port)
+
+    proc = subprocess.Popen(
+        [sys.executable, "-c", server_script],
+        env=env,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    try:
+        # Give the aiohttp server time to bind and the app subprocess time to start.
+        time.sleep(_WEB_SETTLE)
+
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError:
+            raise RuntimeError(
+                "playwright is not installed — run: pip install playwright"
+            )
+        if not Path(_CHROMIUM).exists():
+            raise RuntimeError(
+                f"Chromium not found at {_CHROMIUM}\n"
+                "Run: playwright install chromium"
+            )
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(executable_path=_CHROMIUM)
+            try:
+                # 1200×750 gives a generous viewport; the xterm.js terminal
+                # fills the page width and the TUI content sits at the top.
+                page = browser.new_page(viewport={"width": 1200, "height": 750})
+                page.goto(f"http://127.0.0.1:{port}/", wait_until="networkidle")
+                # Extra pause: xterm.js needs a moment to render the first frame.
+                page.wait_for_timeout(3000)
+                png_path.parent.mkdir(parents=True, exist_ok=True)
+                page.screenshot(path=str(png_path), full_page=False)
+            finally:
+                browser.close()
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
 
 
 # ── Status text capture (`--mode status`) ───────────────────────
@@ -210,6 +296,7 @@ def _write_output_formats_doc(
     out_dir: Path,
     text_results: list[tuple[str, str, str]],   # (slug, title, text)
     report_results: list[tuple[str, str, str]],  # (slug, title, md)
+    web_slugs: list[tuple[str, str]],            # (slug, title) captured web screenshots
     img_ext: str,
 ) -> Path:
     lines: list[str] = [
@@ -222,6 +309,7 @@ def _write_output_formats_doc(
         "| Mode | Command | Description |",
         "|------|---------|-------------|",
         "| `tui` | `heimdallur` | Interactive Textual dashboard (default) |",
+        "| `web` | `make web` | Same TUI served in a browser via xterm.js |",
         "| `status` | `heimdallur --mode status` | Single-pass Rich console output |",
         "| `report` | `heimdallur --mode report` | Markdown snapshot written to `~/.local/share/heimdallur/status.md` |",
         "",
@@ -251,6 +339,26 @@ def _write_output_formats_doc(
         ]
 
     lines += ["---", ""]
+
+    # ── Web UI Screenshots ────────────────────────────────────────
+    if web_slugs:
+        lines += [
+            "## Web UI (`make web`)",
+            "",
+            "The same TUI served in a browser via textual-serve + xterm.js.",
+            "Open `http://heimdallur.local:8080` from any device on the local network.",
+            "",
+        ]
+        for slug, title in web_slugs:
+            img_path = f"screenshots/{slug}.{img_ext}"
+            lines += [
+                f"### {title}",
+                "",
+                f"| ![{title}]({img_path}) |",
+                "|:---:|",
+                "",
+            ]
+        lines += ["---", ""]
 
     # ── Status text ──────────────────────────────────────────────
     lines += [
@@ -309,14 +417,15 @@ def _write_pr_body(
     out_dir: Path,
     text_results: list[tuple[str, str, str]],   # (slug, title, text)
     report_results: list[tuple[str, str, str]],  # (slug, title, md)
+    web_slugs: list[tuple[str, str]],            # (slug, title) captured web screenshots
     img_ext: str,
     github_repo: str | None = None,
     branch: str | None = None,
 ) -> Path:
     """Generate docs/pr-body.md — a ready-to-paste GitHub PR description.
 
-    Three top-level collapsed sections (screenshots / status / markdown report),
-    each containing per-scenario collapsed sub-sections.
+    Four top-level collapsed sections (TUI screenshots / web UI screenshots /
+    status / markdown report), each containing per-scenario collapsed sub-sections.
 
     When github_repo and branch are provided, screenshot URLs are absolute
     raw.githubusercontent.com links so images render in the PR description.
@@ -329,8 +438,8 @@ def _write_pr_body(
 
     lines: list[str] = []
 
-    # ── Screenshots ──────────────────────────────────────────────
-    lines += ["<details>", "<summary><strong>Screenshots</strong></summary>", ""]
+    # ── TUI Screenshots ──────────────────────────────────────────
+    lines += ["<details>", "<summary><strong>TUI Screenshots</strong></summary>", ""]
     for slug, title, _ in text_results:
         lines += [
             "<details>",
@@ -342,6 +451,21 @@ def _write_pr_body(
             "",
         ]
     lines += ["</details>", "", "---", ""]
+
+    # ── Web UI Screenshots ────────────────────────────────────────
+    if web_slugs:
+        lines += ["<details>", "<summary><strong>Web UI Screenshots (<code>make web</code>)</strong></summary>", ""]
+        for slug, title in web_slugs:
+            lines += [
+                "<details>",
+                f"<summary>{title}</summary>",
+                "",
+                f"![{title}]({_img_url(slug)})",
+                "",
+                "</details>",
+                "",
+            ]
+        lines += ["</details>", "", "---", ""]
 
     # ── Status output ────────────────────────────────────────────
     lines += ["<details>", "<summary><strong>Status Output (<code>--mode status</code>)</strong></summary>", ""]
@@ -399,6 +523,10 @@ def main() -> None:
         "--pr-only", action="store_true",
         help="Skip TUI screenshot generation; only regenerate status/report text and pr-body.md",
     )
+    parser.add_argument(
+        "--no-web", action="store_true",
+        help="Skip web (browser) screenshot generation",
+    )
     fmt = parser.add_mutually_exclusive_group()
     fmt.add_argument("--png", dest="ext", action="store_const", const="png")
     fmt.add_argument("--svg", dest="ext", action="store_const", const="svg")
@@ -416,6 +544,7 @@ def main() -> None:
         selected = set(_ALL_SCENARIO_NAMES)
 
     active_text = [s for s in TEXT_SCENARIOS if s["name"] in selected]
+    active_web  = [s for s in WEB_SCENARIOS  if s["name"] in selected]
     # For TUI captures, include entries whose scenario file matches the selection.
     active_caps = [c for c in CAPTURES if Path(c["scenario"]).stem in selected]
 
@@ -460,6 +589,38 @@ def main() -> None:
     else:
         print("Skipping TUI screenshots (--pr-only)\n")
 
+    # ── Web (browser) screenshots ────────────────────────────────
+    web_slugs: list[tuple[str, str]] = []
+    do_web = not args.no_web and args.ext == "png"
+    if do_web and active_web:
+        print(f"\nGenerating {len(active_web)} web (browser) screenshots\n")
+        for idx, scen in enumerate(active_web):
+            slug     = scen["slug"]
+            title    = scen["title"]
+            scenario = _SCEN / scen["scenario"]
+            port     = _WEB_PORT_BASE + idx
+            png_path = out_dir / f"{slug}.png"
+
+            print(f"[{slug}] starting server on port {port} …", end=" ", flush=True)
+            t0 = time.monotonic()
+            try:
+                _capture_web_screenshot(scenario, png_path, port)
+                print(f"done ({time.monotonic()-t0:.1f}s) → {png_path.name}")
+                web_slugs.append((slug, title))
+            except RuntimeError as exc:
+                print(f"SKIPPED — {exc}")
+                break  # same dependency missing for all; no point retrying
+    elif args.no_web:
+        print("\nSkipping web screenshots (--no-web)\n")
+        # Still include web entries in docs if the PNGs already exist.
+        for scen in active_web:
+            slug = scen["slug"]
+            if (out_dir / f"{slug}.png").exists():
+                web_slugs.append((slug, scen["title"]))
+    else:
+        # SVG mode — skip browser capture (not supported).
+        print("\nSkipping web screenshots (SVG mode not supported for browser captures)\n")
+
     # ── Status text and markdown reports ────────────────────────
     print(f"\nGenerating {len(active_text)} status + report outputs\n")
 
@@ -484,17 +645,17 @@ def main() -> None:
         report_results.append((slug, title, md))
 
     # ── Output-formats doc + PR body ────────────────────────────
-    doc_path = _write_output_formats_doc(out_dir, text_results, report_results, args.ext)
+    doc_path = _write_output_formats_doc(out_dir, text_results, report_results, web_slugs, args.ext)
     pr_path  = _write_pr_body(
-        out_dir, text_results, report_results, args.ext,
+        out_dir, text_results, report_results, web_slugs, args.ext,
         github_repo=args.github_repo, branch=_branch,
     )
     print(f"\nOutput-formats doc → {doc_path.relative_to(_REPO)}")
     print(f"PR body            → {pr_path.relative_to(_REPO)}")
 
     elapsed = time.monotonic() - t_start
-    print(f"\nDone — {len(active_caps)} screenshots + {len(active_text)} status/report pairs"
-          f" in {elapsed:.0f}s")
+    print(f"\nDone — {len(active_caps)} TUI screenshots + {len(web_slugs)} web screenshots"
+          f" + {len(active_text)} status/report pairs in {elapsed:.0f}s")
 
 
 if __name__ == "__main__":
