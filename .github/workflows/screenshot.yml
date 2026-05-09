@@ -1,11 +1,11 @@
-name: UI Screenshots
+name: UI Snapshots
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: write        # push screenshot commits to PR branch
+  contents: write        # push snapshot commits to PR branch
   pull-requests: write   # update PR description
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
             core.setOutput('ui_changed', changed ? 'true' : 'false');
             core.info(`UI files changed: ${changed}`);
 
-  screenshots:
+  snapshots:
     needs: check-ui-changes
     if: needs.check-ui-changes.outputs.ui_changed == 'true'
     runs-on: ubuntu-latest
@@ -58,24 +58,24 @@ jobs:
       - name: Install package
         run: pip install -e . cairosvg
 
-      - name: Generate all screenshots
+      - name: Generate all snapshots
         run: python scripts/capture_all.py --output-dir docs/screenshots --no-web
         env:
           NETWATCH_MOCK: "1"
 
-      - name: Commit screenshots to PR branch
+      - name: Commit snapshots to PR branch
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           git add docs/screenshots/
           if git diff --staged --quiet; then
-            echo "Screenshots unchanged, skipping commit."
+            echo "Snapshots unchanged, skipping commit."
           else
-            git commit -m "chore: update UI screenshots [skip ci]"
+            git commit -m "chore: update UI snapshots [skip ci]"
             git push
           fi
 
-      - name: Update PR description with screenshot gallery
+      - name: Update PR description with snapshot gallery
         uses: actions/github-script@v7
         with:
           script: |
@@ -110,7 +110,7 @@ jobs:
             const section = [
               "",
               "---",
-              "## UI Screenshots",
+              "## UI Snapshots",
               "",
               rows,
               "",
@@ -121,7 +121,7 @@ jobs:
               owner, repo, pull_number: prNum,
             });
 
-            const marker = "\n---\n## UI Screenshots";
+            const marker = "\n---\n## UI Snapshots";
             let body = pr.body ?? "";
             body = body.includes(marker)
               ? body.slice(0, body.indexOf(marker)) + section
@@ -131,15 +131,15 @@ jobs:
               owner, repo, pull_number: prNum, body,
             });
 
-            core.info(`PR #${prNum} updated with ${captures.length} screenshots.`);
+            core.info(`PR #${prNum} updated with ${captures.length} snapshots.`);
 
-  note-no-screenshots:
+  note-no-snapshots:
     needs: check-ui-changes
     if: needs.check-ui-changes.outputs.ui_changed == 'false'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Note no UI changes in PR description
+      - name: Note no UI changes in PR description (no snapshots)
         uses: actions/github-script@v7
         with:
           script: |
@@ -150,9 +150,9 @@ jobs:
             const section = [
               "",
               "---",
-              "## UI Screenshots",
+              "## UI Snapshots",
               "",
-              "_No changes to TUI or mock files in this PR — screenshots not generated._",
+              "_No changes to TUI or mock files in this PR — snapshots not generated._",
               "",
             ].join("\n");
 
@@ -160,7 +160,7 @@ jobs:
               owner, repo, pull_number: prNum,
             });
 
-            const marker = "\n---\n## UI Screenshots";
+            const marker = "\n---\n## UI Snapshots";
             let body = pr.body ?? "";
             body = body.includes(marker)
               ? body.slice(0, body.indexOf(marker)) + section
@@ -170,4 +170,4 @@ jobs:
               owner, repo, pull_number: prNum, body,
             });
 
-            core.info(`PR #${prNum} updated with no-screenshots note.`);
+            core.info(`PR #${prNum} updated with no-snapshots note.`);
