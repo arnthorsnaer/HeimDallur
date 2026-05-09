@@ -29,6 +29,7 @@ Mount or place a Raspberry Pi with a small display next to your ONT or router. H
 
 - Python 3.12
 - [Textual](https://github.com/Textualize/textual) — TUI framework
+- [textual-serve](https://github.com/Textualize/textual-serve) — serve TUI in browser via xterm.js
 - [aiosqlite](https://github.com/omnilib/aiosqlite) — async SQLite for history
 - [httpx](https://github.com/encode/httpx) — speed tests
 - [uv](https://github.com/astral-sh/uv) — package management
@@ -44,7 +45,30 @@ make mock
 
 # Run with hot reload during development
 make dev
+
+# Serve in the browser (mock mode) — opens at http://localhost:8080
+make web-mock
 ```
+
+## Web UI
+
+Heimdallur can be served in any browser on the local network via
+[textual-serve](https://github.com/Textualize/textual-serve), which renders
+the full interactive TUI as an xterm.js terminal in the browser. No code
+changes are needed — the same app runs both on the Pi display and in the
+browser.
+
+```bash
+# On the Pi — serves on all interfaces at port 8080
+make web          # production (real probes)
+make web-mock     # mock mode  (no real pings)
+```
+
+Open `http://heimdallur.local:8080` from any device on the local network.
+All keyboard shortcuts (`i`, `r`, `n`, `h`, `d`, `q`) work in the browser.
+
+> **Note:** textual-serve renders a terminal in the browser, not a native
+> web page. It works well on desktop browsers; mobile support is limited.
 
 ## Configuration
 
