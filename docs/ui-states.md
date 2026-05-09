@@ -1,6 +1,6 @@
-# UI Screenshots
+# UI States
 
-All screenshots are generated from mock data via `scripts/capture_all.py` and committed to `docs/screenshots/`.
+All screenshots are generated from mock data via `scripts/capture_all.py` and committed to `docs/screenshots/`. The Web UI, status output, and markdown report samples for each base network state are injected automatically by the same script.
 
 ---
 
@@ -16,6 +16,9 @@ Everything reachable — internet, router, access points, and all devices. The s
 
 | ![Status — all healthy](screenshots/01-status-healthy.png) |
 |:---:|
+
+<!-- generated:all_healthy:start -->
+<!-- generated:all_healthy:end -->
 
 ---
 
@@ -35,6 +38,9 @@ Latency is elevated and packet loss is intermittent, but connectivity is maintai
 | ![Status — internet degraded](screenshots/02-status-internet-degraded.png) |
 |:---:|
 
+<!-- generated:internet_degraded:start -->
+<!-- generated:internet_degraded:end -->
+
 ---
 
 ### Internet offline
@@ -43,6 +49,9 @@ Complete loss of internet connectivity — IP, DNS, and HTTP checks all failing.
 
 | ![Status — internet offline](screenshots/03-status-internet-offline.png) |
 |:---:|
+
+<!-- generated:internet_offline:start -->
+<!-- generated:internet_offline:end -->
 
 ---
 
@@ -53,6 +62,9 @@ The router is unreachable. Because all downstream devices depend on the router, 
 | ![Status — router offline](screenshots/04-status-router-offline.png) |
 |:---:|
 
+<!-- generated:router_offline:start -->
+<!-- generated:router_offline:end -->
+
 ---
 
 ### AP offline
@@ -62,6 +74,9 @@ One access point (Basement) is down. Its nine downstream devices are suppressed 
 | ![Status — AP offline](screenshots/05-status-gateway-offline.png) |
 |:---:|
 
+<!-- generated:gateway_offline:start -->
+<!-- generated:gateway_offline:end -->
+
 ---
 
 ### Multiple issues
@@ -70,6 +85,9 @@ A compound failure: an access point is offline, internet connectivity is degrade
 
 | ![Status — multiple issues](screenshots/06-status-multiple-issues.png) |
 |:---:|
+
+<!-- generated:multiple_issues:start -->
+<!-- generated:multiple_issues:end -->
 
 ---
 

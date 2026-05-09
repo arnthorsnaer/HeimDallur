@@ -20,13 +20,13 @@ make logs          # tail systemd journal on the Pi
 
 There are no automated tests. Validate changes by running `make mock` and visually confirming the TUI behaves correctly.
 
-## After any change — regenerate screenshots and output samples
+## After any change — regenerate UI state snapshots
 
-The PR description and `docs/` outputs are kept in sync manually. After changing anything in `heimdallur/tui/`, `heimdallur/mock/`, `heimdallur/status/`, or `heimdallur/core/report.py`, regenerate and commit:
+The `docs/` outputs are kept in sync manually. After changing anything in `heimdallur/tui/`, `heimdallur/mock/`, `heimdallur/status/`, or `heimdallur/core/report.py`, regenerate and commit:
 
 ```bash
 PYTHONPATH=. python scripts/capture_all.py --output-dir docs/screenshots
-git add docs/screenshots/ docs/output-formats.md docs/pr-body.md
+git add docs/screenshots/ docs/output-formats.md docs/ui-snapshots.md docs/ui-states.md
 ```
 
 `capture_all.py` produces three sets of artifacts:
@@ -34,10 +34,12 @@ git add docs/screenshots/ docs/output-formats.md docs/pr-body.md
 | Artifact | Location | What it shows |
 |---|---|---|
 | PNG screenshots | `docs/screenshots/*.png` | TUI in 15 distinct UI states |
-| Status text | embedded in `docs/output-formats.md` | `--mode status` output for 6 network scenarios |
-| Markdown reports | embedded in `docs/output-formats.md` | `--mode report` output for 6 network scenarios |
+| Output-formats doc | `docs/output-formats.md` | All 4 output modes per scenario, organised by state |
+| UI snapshots appendix | `docs/ui-snapshots.md` | Same content, formatted for appending to a PR description |
 
-It also writes `docs/pr-body.md` — a ready-to-use GitHub PR description with all three sections (screenshots, status output, markdown report) in collapsible `<details>` blocks. **When creating a pull request in this repo, use the contents of `docs/pr-body.md` as the PR body.**
+It also injects Web UI / status / report samples into the marker sections of `docs/ui-states.md`.
+
+**When creating a pull request in this repo, write the PR description normally, then append the contents of `docs/ui-snapshots.md` to the PR body.**
 
 The full run takes ~90 s. It requires Python 3.12 and either `rsvg-convert` (librsvg2-bin) or `cairosvg` (`pip install cairosvg`) for PNG conversion.
 
@@ -46,7 +48,7 @@ The full run takes ~90 s. It requires Python 3.12 and either `rsvg-convert` (lib
 Instead of regenerating all 6 scenarios (90 s), use `--scenarios` to capture only the states affected by the change (~2–10 s). Use `--pr-only` to skip TUI screenshot regeneration when the TUI itself didn't change.
 
 ```bash
-# Only regenerate what's relevant, then use docs/pr-body.md as the PR body:
+# Only regenerate what's relevant, then append docs/ui-snapshots.md to the PR body:
 python scripts/capture_all.py --pr-only --scenarios internet_degraded,internet_offline
 ```
 
