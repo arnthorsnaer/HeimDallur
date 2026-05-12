@@ -3,5 +3,5 @@
 # Values: "down" | "intermittent" | "slow"
 
 [failures]
-"192.168.1.45" = "down"          # Lower AP offline  → 9 devices suppressed
-"192.168.1.219" = "intermittent" # Kaffivél flapping
+"192.0.2.23" = "down"         # Lower Floor AP offline -> 9 devices suppressed
+"192.0.2.120" = "intermittent" # Coffee Maker flapping

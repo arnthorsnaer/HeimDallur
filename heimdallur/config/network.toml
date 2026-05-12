@@ -1,31 +1,31 @@
 [contacts]
-network_admin       = "Addi"
+network_admin       = "Network Admin"
 home_network_admin_email = ""   # recipient address for incident report emails
-isp_name            = "Hringdu"
+isp_name            = "Demo ISP"
 
 # Gmail account used to send incident report emails.
-# Use a dedicated Gmail app password (Google Account → Security → App passwords).
+# Use a dedicated Gmail app password (Google Account -> Security -> App passwords).
 # Leave both fields empty to disable email notifications.
 [notification_email_gmail]
-sender_email = ""   # e.g. "heimdallur.alerts@gmail.com"
+sender_email = ""   # e.g. "heimdallur.alerts@example.com"
 app_password = ""   # 16-character Gmail app password
 
 [network]
 ont_check_host              = "8.8.8.8"
-router_ip                   = "192.168.1.1"
+router_ip                   = "192.0.2.1"
 probe_interval_seconds      = 30
 speed_test_interval_seconds = 300
 
-# ── Device Groups ──────────────────────────────────────────────
-# type = "wifi"  → gateway_ip is a WiFi AP (probed; signal/clients shown)
-# type = "lan"   → gateway_ip is a managed switch (probed) or "" (unmanaged, not probed)
+# -- Device Groups ----------------------------------------------------------
+# type = "wifi" -> gateway_ip is a WiFi AP (probed; signal/clients shown)
+# type = "lan"  -> gateway_ip is a managed switch (probed) or "" (unmanaged, not probed)
 # If gateway_ip = "" the group only cascades on router failure.
 
 [[groups]]
 id            = "wifi-garage"
 name          = "WiFi Garage"
 type          = "wifi"
-gateway_ip    = "192.168.1.95"
+gateway_ip    = "192.0.2.25"
 gateway_name  = "Garage AP"
 gateway_model = "U6 Lite"
 channel       = 11
@@ -33,10 +33,10 @@ band          = "2.4GHz"
 
 [[groups]]
 id            = "wifi-main"
-name          = "WiFi Living Room"
+name          = "WiFi Main Floor"
 type          = "wifi"
-gateway_ip    = "192.168.1.44"
-gateway_name  = "Main AP"
+gateway_ip    = "192.0.2.21"
+gateway_name  = "Main Floor AP"
 gateway_model = "U6 Pro"
 channel       = 36
 band          = "5GHz"
@@ -45,32 +45,32 @@ band          = "5GHz"
 id            = "wifi-upper"
 name          = "WiFi Upper Floor"
 type          = "wifi"
-gateway_ip    = "192.168.1.43"
-gateway_name  = "Upper AP"
+gateway_ip    = "192.0.2.22"
+gateway_name  = "Upper Floor AP"
 gateway_model = "U6 Pro"
 channel       = 44
 band          = "5GHz"
 
 [[groups]]
 id            = "wifi-lower"
-name          = "WiFi Basement"
+name          = "WiFi Lower Floor"
 type          = "wifi"
-gateway_ip    = "192.168.1.45"
-gateway_name  = "Lower AP"
+gateway_ip    = "192.0.2.23"
+gateway_name  = "Lower Floor AP"
 gateway_model = "U6 Lite"
 channel       = 6
 band          = "2.4GHz"
 
 [[groups]]
-id           = "lan-studio"
-name         = "LAN Studio"
+id           = "lan-office"
+name         = "LAN Office"
 type         = "lan"
-gateway_ip   = ""          # unmanaged switch — cascade only on router failure
+gateway_ip   = ""          # unmanaged switch - cascade only on router failure
 gateway_name = ""
 
 [[groups]]
-id           = "lan-theater"
-name         = "LAN Home Theater"
+id           = "lan-media"
+name         = "LAN Media"
 type         = "lan"
 gateway_ip   = ""
 gateway_name = ""
@@ -79,185 +79,184 @@ gateway_name = ""
 id           = "lan-router"
 name         = "LAN Router"
 type         = "lan"
-gateway_ip   = ""          # directly on router — cascade only on router failure
+gateway_ip   = ""          # directly on router - cascade only on router failure
 gateway_name = ""
 
-# ── Garage WiFi devices (4) ────────────────────────────────────
+# -- Garage WiFi devices (4) -----------------------------------------------
 [[devices]]
-name  = "Rafmagnsmaelir 1-fasa"
-ip    = "192.168.1.100"
-group = "wifi-garage"
-type  = "sensor"
-
-[[devices]]
-name  = "Rafmagnsmaelir 3-fasa"
-ip    = "192.168.1.101"
-group = "wifi-garage"
-type  = "sensor"
-
-[[devices]]
-name  = "Bílskúrshurð"
-ip    = "192.168.1.102"
+name  = "Garage Door Controller"
+ip    = "192.0.2.100"
 group = "wifi-garage"
 type  = "smart_switch"
 
 [[devices]]
-name  = "Bílskúrsljós"
-ip    = "192.168.1.103"
+name  = "Garage Light"
+ip    = "192.0.2.101"
 group = "wifi-garage"
 type  = "light"
 
-# ── Living Room WiFi devices (11) ──────────────────────────────
 [[devices]]
-name  = "Inngangur ljós"
-ip    = "192.168.1.110"
+name  = "Utility Meter"
+ip    = "192.0.2.102"
+group = "wifi-garage"
+type  = "sensor"
+
+[[devices]]
+name  = "Workbench Plug"
+ip    = "192.0.2.103"
+group = "wifi-garage"
+type  = "smart_plug"
+
+# -- Main Floor WiFi devices (11) ------------------------------------------
+[[devices]]
+name  = "Entry Light"
+ip    = "192.0.2.110"
 group = "wifi-main"
 type  = "light"
 
 [[devices]]
-name  = "Gestasnyrtingur ljós"
-ip    = "192.168.1.111"
+name  = "Kitchen Ceiling Light"
+ip    = "192.0.2.111"
 group = "wifi-main"
 type  = "light"
 
 [[devices]]
-name  = "Eldhús efri ljós"
-ip    = "192.168.1.112"
+name  = "Kitchen Counter Light"
+ip    = "192.0.2.112"
 group = "wifi-main"
 type  = "light"
 
 [[devices]]
-name  = "Eldhús neðri ljós"
-ip    = "192.168.1.113"
+name  = "Dining Room Light"
+ip    = "192.0.2.113"
 group = "wifi-main"
 type  = "light"
 
 [[devices]]
-name  = "Stofa ljós 1"
-ip    = "192.168.1.114"
+name  = "Living Room Light 1"
+ip    = "192.0.2.114"
 group = "wifi-main"
 type  = "light"
 
 [[devices]]
-name  = "Stofa ljós 2"
-ip    = "192.168.1.115"
+name  = "Living Room Light 2"
+ip    = "192.0.2.115"
 group = "wifi-main"
 type  = "light"
 
 [[devices]]
-name  = "Stofa ljós 3"
-ip    = "192.168.1.116"
+name  = "Living Room Light 3"
+ip    = "192.0.2.116"
 group = "wifi-main"
 type  = "light"
 
 [[devices]]
-name  = "Kjallaragang ljós"
-ip    = "192.168.1.117"
+name  = "Hallway Light"
+ip    = "192.0.2.117"
 group = "wifi-main"
 type  = "light"
 
 [[devices]]
-name  = "Útiljós framhlið"
-ip    = "192.168.1.118"
+name  = "Porch Light"
+ip    = "192.0.2.118"
 group = "wifi-main"
 type  = "light"
 
 [[devices]]
-name  = "Plöntuljós"
-ip    = "192.168.1.119"
+name  = "Plant Light"
+ip    = "192.0.2.119"
 group = "wifi-main"
 type  = "light"
 
 [[devices]]
-name  = "Kaffivél"
-ip    = "192.168.1.219"
+name  = "Coffee Maker"
+ip    = "192.0.2.120"
 group = "wifi-main"
 type  = "smart_plug"
 
-# ── Upper Floor WiFi devices (2 — rest moved to LAN Studio) ────
+# -- Upper Floor WiFi devices (2) ------------------------------------------
 [[devices]]
-name  = "Baðherbergi LED"
-ip    = "192.168.1.130"
+name  = "Bathroom LED"
+ip    = "192.0.2.130"
 group = "wifi-upper"
 type  = "light"
 
 [[devices]]
-name  = "Gólfahitun"
-ip    = "192.168.1.131"
+name  = "Thermostat"
+ip    = "192.0.2.131"
 group = "wifi-upper"
 type  = "sensor"
 
-# ── LAN Studio devices ─────────────────────────────────────────
-# These are wired — move others here as needed
+# -- LAN Office devices -----------------------------------------------------
 [[devices]]
-name  = "Stúdíóbúnaður"
-ip    = "192.168.1.132"
-group = "lan-studio"
+name  = "Office Workstation"
+ip    = "192.0.2.132"
+group = "lan-office"
 type  = "generic"
 
 [[devices]]
-name  = "Home Assistant"
-ip    = "192.168.1.64"
-group = "lan-studio"
+name  = "Automation Server"
+ip    = "192.0.2.64"
+group = "lan-office"
 type  = "server"
 
 [[devices]]
-name  = "Unifi Controller"
-ip    = "192.168.1.151"
+name  = "Network Controller"
+ip    = "192.0.2.151"
 group = "lan-router"
 type  = "server"
 
-# ── Basement WiFi devices (9) ──────────────────────────────────
+# -- Lower Floor WiFi devices (9) ------------------------------------------
 [[devices]]
-name  = "Svefnherbergi ljós 1"
-ip    = "192.168.1.140"
+name  = "Bedroom Light 1"
+ip    = "192.0.2.140"
 group = "wifi-lower"
 type  = "light"
 
 [[devices]]
-name  = "Svefnherbergi ljós 2"
-ip    = "192.168.1.141"
+name  = "Bedroom Light 2"
+ip    = "192.0.2.141"
 group = "wifi-lower"
 type  = "light"
 
 [[devices]]
-name  = "Baðherbergi ljós"
-ip    = "192.168.1.142"
+name  = "Lower Bathroom Light"
+ip    = "192.0.2.142"
 group = "wifi-lower"
 type  = "light"
 
 [[devices]]
-name  = "Kvikmyndaherbergi"
-ip    = "192.168.1.143"
+name  = "Media Room Light"
+ip    = "192.0.2.143"
 group = "wifi-lower"
 type  = "light"
 
 [[devices]]
-name  = "Þvottavél blásari"
-ip    = "192.168.1.144"
+name  = "Laundry Fan"
+ip    = "192.0.2.144"
 group = "wifi-lower"
 type  = "smart_switch"
 
 [[devices]]
-name  = "Þvottaherbergi ljós"
-ip    = "192.168.1.145"
+name  = "Laundry Room Light"
+ip    = "192.0.2.145"
 group = "wifi-lower"
 type  = "light"
 
 [[devices]]
-name  = "Geymsla ljós"
-ip    = "192.168.1.146"
+name  = "Storage Room Light"
+ip    = "192.0.2.146"
 group = "wifi-lower"
 type  = "light"
 
 [[devices]]
-name  = "Garðljós"
-ip    = "192.168.1.214"
+name  = "Patio Light"
+ip    = "192.0.2.147"
 group = "wifi-lower"
 type  = "light"
 
 [[devices]]
-name  = "Garðtenglar"
-ip    = "192.168.1.148"
+name  = "Patio Outlet"
+ip    = "192.0.2.148"
 group = "wifi-lower"
 type  = "smart_plug"
