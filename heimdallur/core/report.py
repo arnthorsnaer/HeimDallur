@@ -67,6 +67,12 @@ def _ago(ts: float) -> str:
     return f"{h}h {m}m ago" if m else f"{h}h ago"
 
 
+def _latency_qualifier(avg_ms: float) -> str:
+    if avg_ms < 50:  return "excellent"
+    if avg_ms < 100: return "elevated"
+    return "degraded"
+
+
 def _uptime_str(seconds: float) -> str:
     d = int(seconds // 86400)
     h = int((seconds % 86400) // 3600)
@@ -122,7 +128,8 @@ def render_markdown(
         icon = _icon(ont.status.value)
         avg = _avg_ms(snapshot.ont_lat)
         loss = _loss_pct(snapshot.ont_loss)
-        lines.append(f"**Status:** {icon} {ont.status.value.upper()}  |  **Latency (ONT):** {avg} avg  |  **Loss:** {loss}")
+        qualifier = f" ({_latency_qualifier(mean(snapshot.ont_lat))})" if snapshot.ont_lat else ""
+        lines.append(f"**Status:** {icon} {ont.status.value.upper()}  |  **Latency (ONT):** {avg} avg{qualifier}  |  **Loss:** {loss}")
     else:
         lines.append("**Status:** ❓ unknown")
     lines.append("")
@@ -193,28 +200,14 @@ def render_markdown(
     lines.append("### Groups")
     lines.append("")
     for group in config.groups:
-        band_info = ""
-        if group.type == "wifi":
-            parts = []
-            if group.band:
-                parts.append(group.band)
-            if group.channel:
-                parts.append(f"ch {group.channel}")
-            if parts:
-                band_info = "  |  " + "  ".join(parts)
-
-        lines.append(f"#### {group.name}{band_info}")
+        lines.append(f"#### {group.name}")
         lines.append("")
 
         if group.gateway_ip:
             gw_r = state.gateway_results.get(group.gateway_ip)
             gw_icon = _icon(gw_r.status.value if gw_r else "unknown")
             gw_lat = _ms(gw_r.response_ms if gw_r else None)
-            enr = enriched.gw_enrichment.get(group.gateway_ip)
-            enr_parts = [f"**Gateway `{group.gateway_ip}`:** {gw_icon} {gw_lat}"]
-            if enr and enr.client_count is not None:
-                enr_parts.append(f"**Clients:** {enr.client_count}")
-            lines.append("  |  ".join(enr_parts))
+            lines.append(f"**Gateway `{group.gateway_ip}`:** {gw_icon} {gw_lat}")
             lines.append("")
 
         devices = config.devices_in_group(group.id)
