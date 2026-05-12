@@ -1,9 +1,9 @@
 # Multiple simultaneous problems — exercises the amber warning state
 # and the STATUS panel's issue-summary expansion.
-#   • Basement AP fully offline  → 9 devices suppressed
-#   • Garage AP degraded (slow)  → amber, shown in group panel
-#   • Kaffivél flapping          → intermittent device in Living Room
+#   • Lower Floor AP fully offline -> 9 devices suppressed
+#   • Garage AP degraded (slow)    -> amber, shown in group panel
+#   • Coffee Maker flapping        -> intermittent device on Main Floor
 [failures]
-"192.168.1.45"  = "down"         # Basement AP offline
-"192.168.1.95"  = "slow"         # Garage AP degraded
-"192.168.1.219" = "intermittent" # Kaffivél (coffee machine) flapping
+"192.0.2.23"  = "down"         # Lower Floor AP offline
+"192.0.2.25"  = "slow"         # Garage AP degraded
+"192.0.2.120" = "intermittent" # Coffee Maker flapping
