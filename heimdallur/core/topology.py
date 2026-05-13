@@ -29,9 +29,6 @@ class Group:
     type: str           # "wifi" | "lan"
     gateway_ip: str     # empty string = no probed gateway (unmanaged switch / direct router)
     gateway_name: str = ""
-    gateway_model: str = ""
-    channel: int = 0
-    band: str = ""
 
 
 @dataclass
