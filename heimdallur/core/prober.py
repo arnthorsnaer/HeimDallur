@@ -1,32 +1,43 @@
 from __future__ import annotations
 import asyncio
+import re
 import sys
 import time
 from heimdallur.core.topology import (
     NetworkConfig, NetworkState, ProbeResult, ProbeStatus,
 )
 
-_HEALTHY_MS  = 10
-_DEGRADED_MS = 100
+_HEALTHY_MS = 100
+
+_PING_STATS_RE = re.compile(
+    r"(?:round-trip|rtt) min/avg/max/(?:stddev|mdev) = "
+    r"[\d.]+/([\d.]+)/[\d.]+/[\d.]+"
+)
+
+
+def _parse_ping_ms(output: bytes) -> float | None:
+    text = output.decode("utf-8", errors="replace")
+    if match := _PING_STATS_RE.search(text):
+        return float(match.group(1))
+    return None
 
 
 async def _ping(ip: str, timeout: float = 2.0) -> tuple[bool, float | None]:
     cmd = (
-        ["ping", "-c", "1", "-W", "2000", ip]
+        ["ping", "-n", "-q", "-c", "1", "-W", "2000", ip]
         if sys.platform == "darwin"
-        else ["ping", "-c", "1", "-W", "2", ip]
+        else ["ping", "-n", "-q", "-c", "1", "-W", "2", ip]
     )
-    start = time.monotonic()
     proc = None
     try:
         proc = await asyncio.create_subprocess_exec(
             *cmd,
-            stdout=asyncio.subprocess.DEVNULL,
+            stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.DEVNULL,
         )
-        await asyncio.wait_for(proc.wait(), timeout=timeout + 0.5)
-        elapsed = (time.monotonic() - start) * 1000
-        return proc.returncode == 0, elapsed if proc.returncode == 0 else None
+        stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=timeout + 0.5)
+        ms = _parse_ping_ms(stdout)
+        return proc.returncode == 0, ms if proc.returncode == 0 else None
     except (asyncio.TimeoutError, OSError):
         if proc:
             try: proc.kill()
@@ -37,8 +48,7 @@ async def _ping(ip: str, timeout: float = 2.0) -> tuple[bool, float | None]:
 def _classify(ms: float | None) -> ProbeStatus:
     if ms is None: return ProbeStatus.UNREACHABLE
     if ms < _HEALTHY_MS: return ProbeStatus.HEALTHY
-    if ms < _DEGRADED_MS: return ProbeStatus.DEGRADED
-    return ProbeStatus.UNREACHABLE
+    return ProbeStatus.DEGRADED
 
 
 async def probe_ip(ip: str) -> ProbeResult:
