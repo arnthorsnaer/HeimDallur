@@ -72,11 +72,22 @@ All keyboard shortcuts (`i`, `r`, `n`, `h`, `d`, `q`) work in the browser.
 
 ## Configuration
 
-All devices and groups are defined in `heimdallur/config/network.toml`. Edit this file to match your network topology — groups, access points, and devices.
+The tracked demo topology lives in `heimdallur/config/default-network.toml`.
+For a real local network, copy it to `heimdallur/config/user-network.toml`
+and edit that file instead:
+
+```bash
+cp heimdallur/config/default-network.toml heimdallur/config/user-network.toml
+python scripts/validate-config.py heimdallur/config/user-network.toml
+```
+
+`user-network.toml` is gitignored. When it exists, normal Heimdallur runs use
+it automatically. Screenshot generation always forces `default-network.toml`
+so docs and release images keep using the demo dataset.
 
 ## Notifications
 
-When an outage ends — internet or home network going from offline back to online — Heimdallur can automatically email an incident report to the home network admin. Add the following to `network.toml`:
+When an outage ends — internet or home network going from offline back to online — Heimdallur can automatically email an incident report to the home network admin. Add the following to your network TOML:
 
 ```toml
 [contacts]
@@ -170,14 +181,16 @@ The footer shows the running version as `v0.5.0+20260513.d40c034` — date and g
 
 ### Updating device configuration
 
-All devices and groups are defined in `heimdallur/config/network.toml`. On a live Pi you can edit this file directly (or copy a new version over SSH) and then restart the service:
+All devices and groups are defined in the network TOML. On a live Pi you can
+edit `heimdallur/config/user-network.toml` directly, or copy a new version over
+SSH and then restart the service:
 
 ```bash
 # Validate before applying
 python /opt/heimdallur/scripts/validate-config.py /path/to/new-network.toml
 
 # Apply
-cp /path/to/new-network.toml /opt/heimdallur/heimdallur/config/network.toml
+cp /path/to/new-network.toml /opt/heimdallur/heimdallur/config/user-network.toml
 sudo systemctl restart heimdallur
 ```
 

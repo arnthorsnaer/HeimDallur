@@ -13,6 +13,7 @@ Usage:
 Environment:
     NETWATCH_MOCK=1            always set by this script
     NETWATCH_MOCK_SCENARIO     path forwarded to MockProber (set via --scenario)
+    HEIMDALLUR_CONFIG          forced to the tracked default config
 """
 from __future__ import annotations
 
@@ -34,6 +35,7 @@ NAV_PAUSE = 0.6
 
 _SCENARIOS_DIR = Path(__file__).parent.parent / "heimdallur" / "mock" / "scenarios"
 _DEFAULT_SCENARIO = _SCENARIOS_DIR / "all_healthy.toml"
+_DEFAULT_CONFIG = Path(__file__).parent.parent / "heimdallur" / "config" / "default-network.toml"
 
 
 async def _capture(svg_path: Path, keys: list[str]) -> None:
@@ -102,6 +104,7 @@ def main() -> None:
 
     os.environ["NETWATCH_MOCK"] = "1"
     os.environ["NETWATCH_MOCK_SCENARIO"] = args.scenario
+    os.environ["HEIMDALLUR_CONFIG"] = str(_DEFAULT_CONFIG)
 
     asyncio.run(_capture(svg_path, keys))
 

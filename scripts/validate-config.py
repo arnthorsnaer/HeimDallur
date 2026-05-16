@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate heimdallur/config/network.toml before applying it to production.
+"""Validate a Heimdallur network TOML before applying it to production.
 
 Usage:
     python scripts/validate-config.py                          # validates the default config
@@ -12,7 +12,7 @@ import sys
 import tomllib
 from pathlib import Path
 
-_DEFAULT = Path(__file__).parent.parent / "heimdallur" / "config" / "network.toml"
+_DEFAULT = Path(__file__).parent.parent / "heimdallur" / "config" / "default-network.toml"
 _REQUIRED_GROUP_TYPES = {"wifi", "lan"}
 _REQUIRED_DEVICE_TYPES = {"generic", "light", "sensor", "smart_plug", "smart_switch", "server", "ap"}
 

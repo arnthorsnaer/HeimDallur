@@ -21,6 +21,7 @@ from pathlib import Path
 
 _REPO  = Path(__file__).parent.parent
 _SCEN  = _REPO / "heimdallur" / "mock" / "scenarios"
+_DEFAULT_CONFIG = _REPO / "heimdallur" / "config" / "default-network.toml"
 
 COLUMNS = 66
 ROWS    = 20
@@ -117,6 +118,7 @@ async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path,
     os.environ["NETWATCH_MOCK"] = "1"
     os.environ["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
     os.environ["NETWATCH_SNAPSHOT_DB"] = tmp_db
+    os.environ["HEIMDALLUR_CONFIG"] = str(_DEFAULT_CONFIG)
     if extra_env:
         os.environ.update(extra_env)
 
@@ -182,6 +184,7 @@ def _capture_web_snapshot(
     env = os.environ.copy()
     env["NETWATCH_MOCK"] = "1"
     env["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
+    env["HEIMDALLUR_CONFIG"] = str(_DEFAULT_CONFIG)
     if extra_env:
         env.update(extra_env)
 
@@ -243,6 +246,7 @@ async def _capture_status_text(scenario_path: Path,
 
     os.environ["NETWATCH_MOCK"] = "1"
     os.environ["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
+    os.environ["HEIMDALLUR_CONFIG"] = str(_DEFAULT_CONFIG)
     if extra_env:
         os.environ.update(extra_env)
 
@@ -257,6 +261,7 @@ async def _capture_status_text(scenario_path: Path,
     if extra_env:
         for k in extra_env:
             os.environ.pop(k, None)
+    os.environ.pop("HEIMDALLUR_CONFIG", None)
 
     return text
 
@@ -269,6 +274,7 @@ async def _capture_report_md(scenario_path: Path,
 
     os.environ["NETWATCH_MOCK"] = "1"
     os.environ["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
+    os.environ["HEIMDALLUR_CONFIG"] = str(_DEFAULT_CONFIG)
     if extra_env:
         os.environ.update(extra_env)
 
@@ -287,6 +293,7 @@ async def _capture_report_md(scenario_path: Path,
     if extra_env:
         for k in extra_env:
             os.environ.pop(k, None)
+    os.environ.pop("HEIMDALLUR_CONFIG", None)
 
     return content
 

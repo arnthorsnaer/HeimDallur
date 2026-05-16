@@ -101,6 +101,8 @@ Failure modes per IP or alias (`"ont"`, `"router"`): `"down"` | `"slow"` | `"int
 
 `NETWATCH_SNAPSHOT_DB` sets a custom SQLite path, used by the snapshot scripts to avoid lock contention between sequential runs.
 
+`HEIMDALLUR_CONFIG` can point at an explicit network TOML. Without it, normal runs use `heimdallur/config/user-network.toml` when present, otherwise `heimdallur/config/default-network.toml`. Snapshot scripts force `HEIMDALLUR_CONFIG` to the default config so private local topology does not affect generated docs.
+
 ### Fault cascade logic
 
 Offline states cascade: router offline → all gateways and devices shown as `UNKNOWN` (not individually failed). Gateway offline → its downstream devices shown as `UNKNOWN`. This keeps signal-to-noise low — only the root cause is highlighted. Implemented in `MockProber.probe_all()` and reflected in `NetworkState.problems()`.
@@ -109,7 +111,8 @@ Offline states cascade: router offline → all gateways and devices shown as `UN
 
 | File | Purpose |
 |---|---|
-| `heimdallur/config/network.toml` | Network topology — groups, APs, devices. Edit to match your network. |
+| `heimdallur/config/default-network.toml` | Tracked demo network topology used for screenshots and docs. |
+| `heimdallur/config/user-network.toml` | Gitignored local network topology used automatically for normal runs when present. |
 | `heimdallur/core/topology.py` | All data models: `ProbeResult`, `NetworkState`, `RouterStats`, `SpeedResult`, `NetworkConfig` |
 | `heimdallur/tui/status_view.py` | All status-screen widgets. Colour palette and semantic status colours defined at the top. |
 | `heimdallur/tui/app.py` | App entry point, probe/speed loops, history accumulation |
