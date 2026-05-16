@@ -10,3 +10,4 @@ dist/
 *.egg-info/
 .env
 take_screenshot.py
+heimdallur/config/user-network.toml

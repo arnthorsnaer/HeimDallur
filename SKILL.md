@@ -112,8 +112,11 @@ ssh pi@heimdallur.local "cd /opt/heimdallur && git log -1 --oneline"
 All monitored devices and network groups are defined in:
 
 ```
-/opt/heimdallur/heimdallur/config/network.toml
+/opt/heimdallur/heimdallur/config/user-network.toml
 ```
+
+If `user-network.toml` does not exist, Heimdallur falls back to the tracked
+demo config at `/opt/heimdallur/heimdallur/config/default-network.toml`.
 
 ### Schema
 
@@ -150,7 +153,7 @@ type  = "generic"               # generic | light | sensor | smart_plug | smart_
 
 **Step 1 — Read current config:**
 ```bash
-ssh pi@heimdallur.local "cat /opt/heimdallur/heimdallur/config/network.toml"
+ssh pi@heimdallur.local "cat /opt/heimdallur/heimdallur/config/user-network.toml"
 ```
 
 **Step 2 — Write new config to a temp file and validate:**
@@ -165,7 +168,7 @@ Exits 0 on success, 1 on any error. Do not proceed if it exits 1.
 
 **Step 3 — Apply and restart:**
 ```bash
-ssh pi@heimdallur.local "cp /tmp/devices-new.toml /opt/heimdallur/heimdallur/config/network.toml && sudo systemctl restart heimdallur"
+ssh pi@heimdallur.local "cp /tmp/devices-new.toml /opt/heimdallur/heimdallur/config/user-network.toml && sudo systemctl restart heimdallur"
 ```
 
 **Step 4 — Verify:**
@@ -184,7 +187,7 @@ network going offline then back online). Emails are sent on recovery — not
 during the outage — so a full internet outage will still produce a report once
 connectivity is restored.
 
-### Configure in `network.toml`
+### Configure in `user-network.toml`
 
 Add or update these two sections:
 
@@ -203,7 +206,7 @@ Generate one named "Heimdallur" and copy the 16-character code.
 
 **Step 2 — Edit and validate:**
 ```bash
-ssh pi@heimdallur.local "cat /opt/heimdallur/heimdallur/config/network.toml"
+ssh pi@heimdallur.local "cat /opt/heimdallur/heimdallur/config/user-network.toml"
 # Edit locally, then:
 scp network.toml pi@heimdallur.local:/tmp/network-new.toml
 ssh pi@heimdallur.local "python3 /opt/heimdallur/scripts/validate-config.py /tmp/network-new.toml"
@@ -211,7 +214,7 @@ ssh pi@heimdallur.local "python3 /opt/heimdallur/scripts/validate-config.py /tmp
 
 **Step 3 — Apply:**
 ```bash
-ssh pi@heimdallur.local "cp /tmp/network-new.toml /opt/heimdallur/heimdallur/config/network.toml && sudo systemctl restart heimdallur"
+ssh pi@heimdallur.local "cp /tmp/network-new.toml /opt/heimdallur/heimdallur/config/user-network.toml && sudo systemctl restart heimdallur"
 ```
 
 **Step 4 — Verify:**
@@ -281,7 +284,7 @@ ssh pi@heimdallur.local "journalctl -u heimdallur -n 50 --no-pager"
 
 Common causes:
 - Python or uv not on PATH for the service user → check `ExecStart` in the unit file
-- `network.toml` syntax error → run `validate-config.py` and fix before restarting
+- Network TOML syntax error → run `validate-config.py` and fix before restarting
 - Display not available (headless Pi) → the TUI requires a terminal; use `--mode status` instead for headless use
 
 ### status.md not being updated
@@ -353,7 +356,7 @@ ssh pi@heimdallur.local "cd /opt/heimdallur && sudo git fetch origin main && sud
 | Read network status | `ssh pi@heimdallur.local "cat ~/.local/share/heimdallur/status.md"` |
 | Force fresh probe | `ssh pi@heimdallur.local "cd /opt/heimdallur && uv run python -m heimdallur --mode report"` |
 | Validate new config | `ssh pi@heimdallur.local "python3 /opt/heimdallur/scripts/validate-config.py /tmp/devices-new.toml"` |
-| Apply config + restart | `ssh pi@heimdallur.local "cp /tmp/devices-new.toml /opt/heimdallur/heimdallur/config/network.toml && sudo systemctl restart heimdallur"` |
+| Apply config + restart | `ssh pi@heimdallur.local "cp /tmp/devices-new.toml /opt/heimdallur/heimdallur/config/user-network.toml && sudo systemctl restart heimdallur"` |
 | Trigger immediate update | `ssh pi@heimdallur.local "sudo systemctl start heimdallur-update"` |
 | Check running version | `ssh pi@heimdallur.local "cd /opt/heimdallur && git log -1 --oneline"` |
 | View service logs | `ssh pi@heimdallur.local "journalctl -u heimdallur -n 50 --no-pager"` |

@@ -1,12 +1,25 @@
 import tomllib
+import os
 from pathlib import Path
 from heimdallur.core.topology import Contacts, Device, GmailNotificationConfig, Group, NetworkConfig
 
-_DEFAULT_PATH = Path(__file__).parent / "network.toml"
+_CONFIG_DIR = Path(__file__).parent
+_DEFAULT_PATH = _CONFIG_DIR / "default-network.toml"
+_USER_PATH = _CONFIG_DIR / "user-network.toml"
+
+
+def resolve_config_path(path: Path | None = None) -> Path:
+    if path is not None:
+        return path
+    if env_path := os.getenv("HEIMDALLUR_CONFIG"):
+        return Path(env_path).expanduser()
+    if _USER_PATH.exists():
+        return _USER_PATH
+    return _DEFAULT_PATH
 
 
 def load_config(path: Path | None = None) -> NetworkConfig:
-    config_path = path or _DEFAULT_PATH
+    config_path = resolve_config_path(path)
     with open(config_path, "rb") as f:
         data = tomllib.load(f)
 

@@ -62,7 +62,7 @@ class HeimdallurApp(App):
         self._config: NetworkConfig = load_config()
 
         # Allow snapshot/demo scripts to inject a recipient email without
-        # editing network.toml — set NETWATCH_DEMO_EMAIL to any address.
+        # editing the network TOML — set NETWATCH_DEMO_EMAIL to any address.
         if _demo_email := os.getenv("NETWATCH_DEMO_EMAIL"):
             import dataclasses as _dc
             self._config = _dc.replace(
