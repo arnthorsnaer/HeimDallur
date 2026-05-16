@@ -27,9 +27,6 @@ name          = "WiFi Garage"
 type          = "wifi"
 gateway_ip    = "192.0.2.25"
 gateway_name  = "Garage AP"
-gateway_model = "U6 Lite"
-channel       = 11
-band          = "2.4GHz"
 
 [[groups]]
 id            = "wifi-main"
@@ -37,9 +34,6 @@ name          = "WiFi Main Floor"
 type          = "wifi"
 gateway_ip    = "192.0.2.21"
 gateway_name  = "Main Floor AP"
-gateway_model = "U6 Pro"
-channel       = 36
-band          = "5GHz"
 
 [[groups]]
 id            = "wifi-upper"
@@ -47,9 +41,6 @@ name          = "WiFi Upper Floor"
 type          = "wifi"
 gateway_ip    = "192.0.2.22"
 gateway_name  = "Upper Floor AP"
-gateway_model = "U6 Pro"
-channel       = 44
-band          = "5GHz"
 
 [[groups]]
 id            = "wifi-lower"
@@ -57,9 +48,6 @@ name          = "WiFi Lower Floor"
 type          = "wifi"
 gateway_ip    = "192.0.2.23"
 gateway_name  = "Lower Floor AP"
-gateway_model = "U6 Lite"
-channel       = 6
-band          = "2.4GHz"
 
 [[groups]]
 id           = "lan-office"

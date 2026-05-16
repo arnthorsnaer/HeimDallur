@@ -30,9 +30,6 @@ def load_config(path: Path | None = None) -> NetworkConfig:
             type=g["type"],
             gateway_ip=g.get("gateway_ip", ""),
             gateway_name=g.get("gateway_name", ""),
-            gateway_model=g.get("gateway_model", ""),
-            channel=g.get("channel", 0),
-            band=g.get("band", ""),
         )
         for g in data.get("groups", [])
     ]
