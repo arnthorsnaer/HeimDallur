@@ -7,7 +7,7 @@ from heimdallur.core.topology import (
     NetworkConfig, NetworkState, ProbeResult, ProbeStatus,
 )
 
-_HEALTHY_MS = 100
+_HEALTHY_MS = 200
 
 _PING_STATS_RE = re.compile(
     r"(?:round-trip|rtt) min/avg/max/(?:stddev|mdev) = "

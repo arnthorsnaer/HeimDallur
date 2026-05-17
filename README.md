@@ -179,6 +179,57 @@ The footer shows the running version as `v0.5.0+20260513.d40c034` — date and g
 
 ---
 
+### Publishing a release
+
+Releases are created from `main` after the version bump has already been
+reviewed and merged. The usual flow is:
+
+1. Open a PR that updates `pyproject.toml` to the next version.
+2. Merge that PR to `main`.
+3. Check out the updated `main` locally.
+4. Run `scripts/create-release.sh`.
+
+By default, the script reads the version from `pyproject.toml`, creates an
+annotated `vX.Y.Z` tag at `HEAD`, pushes the tag to `origin`, and creates a
+GitHub Release using generated release notes.
+
+Prerequisites:
+
+- Run from the repository root on a clean `main` checkout.
+- Install and authenticate the GitHub CLI with release permissions:
+  `gh auth login`.
+
+Prepare the local checkout:
+
+```bash
+git switch main
+git pull --ff-only
+```
+
+Preview the actions without changing tags or releases:
+
+```bash
+DRY_RUN=1 scripts/create-release.sh
+```
+
+Create the tag and GitHub release:
+
+```bash
+scripts/create-release.sh
+```
+
+You can also pass a version explicitly:
+
+```bash
+scripts/create-release.sh 0.6.0
+```
+
+Set `NOTES_FILE=path/to/notes.md` to provide hand-written release notes instead
+of GitHub-generated notes. Set `REMOTE=<name>` if tags should be pushed
+somewhere other than `origin`.
+
+---
+
 ### Updating device configuration
 
 All devices and groups are defined in the network TOML. On a live Pi you can
