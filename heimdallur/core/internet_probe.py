@@ -29,7 +29,7 @@ HTTP_TARGETS: list[tuple[str, str, str, int]] = [
     # (url, label, short_path, expected_status)
     ("https://www.cloudflare.com/cdn-cgi/trace",       "Cloudflare", "/cdn-cgi/trace", 200),
     ("https://www.google.com/generate_204",             "Google",     "/generate_204",  204),
-    ("https://www.msftconnecttest.com/connecttest.txt", "Microsoft",  "/connecttest",   200),
+    ("http://www.msftconnecttest.com/connecttest.txt",  "Microsoft",  "/connecttest",   200),
 ]
 
 _HTTP_TIMEOUT = 10.0
@@ -100,13 +100,31 @@ async def _measure_tcp_tls(host: str, port: int) -> tuple[Optional[float], Optio
     return tcp_ms, tls_ms
 
 
+async def _measure_tcp(host: str, port: int) -> Optional[float]:
+    loop = asyncio.get_running_loop()
+    t_tcp = time.monotonic()
+    try:
+        transport, _ = await asyncio.wait_for(
+            loop.create_connection(asyncio.Protocol, host=host, port=port),
+            timeout=_CONNECT_TIMEOUT,
+        )
+    except Exception:
+        return None
+    tcp_ms = (time.monotonic() - t_tcp) * 1000
+    transport.close()
+    return tcp_ms
+
+
 async def _probe_http(url: str, label: str, short_path: str, expected_status: int) -> HttpResult:
     import urllib.parse
     parsed = urllib.parse.urlparse(url)
     host = parsed.hostname or ""
     port = parsed.port or (443 if parsed.scheme == "https" else 80)
 
-    tcp_ms, tls_ms = await _measure_tcp_tls(host, port)
+    if parsed.scheme == "https":
+        tcp_ms, tls_ms = await _measure_tcp_tls(host, port)
+    else:
+        tcp_ms, tls_ms = await _measure_tcp(host, port), None
 
     t0 = time.monotonic()
     ttfb_ms: Optional[float] = None
@@ -126,7 +144,7 @@ async def _probe_http(url: str, label: str, short_path: str, expected_status: in
                 async for _ in resp.aiter_bytes():
                     pass
                 total_ms = (time.monotonic() - t0) * 1000
-                success = True
+                success = status_code == expected_status
     except Exception:
         total_ms = (time.monotonic() - t0) * 1000
 
