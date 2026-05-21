@@ -3,250 +3,28 @@ import time
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
-from textual.message import Message
 from textual.screen import Screen
 from textual.widget import Widget
-from textual.widgets import Label, Sparkline, Static
+from textual.widgets import Label, Sparkline
 
-from heimdallur.version import __version__
 from heimdallur.core.topology import (
     Device, Group, NetworkConfig, NetworkState, ProbeStatus,
-    GatewayEnrichment, RouterStats, SpeedResult,
-    InternetQuality, RawIpResult, DnsResult, HttpResult,
+    GatewayEnrichment, SpeedResult,
+    InternetQuality, HttpResult,
 )
 
-# ── Colour palette ─────────────────────────────────────────────
-# UI chrome uses neutral off-white so semantic green/red pop clearly
-UI_FG   = "#c9d1d9"   # off-white — labels, chrome, borders
-UI_DIM  = "#6e7681"   # dimmed — secondary text, units, IPs
-UI_BG   = "#0d1117"   # near-black background
-UI_BG2  = "#161b22"   # slightly lighter — panel backgrounds
-UI_BDR  = "#30363d"   # border colour
-
-# Semantic colours — reserved for status meaning only
-S_OK    = "#3fb950"   # green  — healthy / online
-S_WARN  = "#d29922"   # amber  — degraded / warning
-S_ERR   = "#f85149"   # red    — unreachable / error
-S_UNK   = "#6e7681"   # gray   — unknown / no data
-
-SPARK_OK_HI = "#3fb950"
-SPARK_OK_LO = "#0d3018"
-SPARK_ERR   = "#f85149"
-
-
-# ── Helpers ────────────────────────────────────────────────────
-def _sc(status: ProbeStatus | None) -> str:
-    if status is None: return S_UNK
-    return {ProbeStatus.HEALTHY: S_OK, ProbeStatus.DEGRADED: S_WARN,
-            ProbeStatus.UNREACHABLE: S_ERR, ProbeStatus.UNKNOWN: S_UNK}[status]
-
-def _status_word(status: ProbeStatus | None) -> str:
-    if status is None: return "—"
-    return {ProbeStatus.HEALTHY: "Online", ProbeStatus.DEGRADED: "Degraded",
-            ProbeStatus.UNREACHABLE: "Offline", ProbeStatus.UNKNOWN: "—"}[status]
-
-def _ms(v: float | None) -> str:
-    return f"{v:.0f}ms" if v is not None else "—"
-
-def _fmt_uptime(seconds: float) -> str:
-    h, r = divmod(int(seconds), 3600)
-    m, s = divmod(r, 60)
-    if h >= 24:
-        d, h = divmod(h, 24)
-        return f"{d}d {h}h {m:02d}m"
-    if h:
-        return f"{h}h {m:02d}m {s:02d}s"
-    if m:
-        return f"{m}m {s:02d}s"
-    return f"{s}s"
-
-def _issue_color(issue: str) -> str:
-    low = issue.lower()
-    if any(k in low for k in ("offline", "unreachable", "no ip connectivity", "outage")):
-        return S_ERR
-    return S_WARN
-
-def _rolling_avg(data: list[float], n: int = 10) -> float | None:
-    if not data:
-        return None
-    window = data[-n:]
-    return sum(window) / len(window)
-
-
-def _jitter(data: list[float]) -> float | None:
-    if len(data) < 2:
-        return None
-    mean = sum(data) / len(data)
-    variance = sum((x - mean) ** 2 for x in data) / len(data)
-    return variance ** 0.5
-
-
-def _p95(data: list[float]) -> float | None:
-    if not data:
-        return None
-    s = sorted(data)
-    idx = max(0, int(len(s) * 0.95) - 1)
-    return s[idx]
-
-
-def _speed_summary(speed: "SpeedResult | None") -> str:
-    if speed and speed.ok:
-        dl_c = S_OK if speed.download_mbps >= 50 else (S_WARN if speed.download_mbps >= 10 else S_ERR)
-        return f"  [{UI_DIM}]·  SPEED ↓[/] [{dl_c}]{speed.download_mbps:.0f} Mbps[/]"
-    return f"  [{UI_DIM}]·  SPEED —[/]"
-
-
-def _loss_pct(loss_flags: list[float]) -> float:
-    if not loss_flags:
-        return 0.0
-    return sum(loss_flags) / len(loss_flags) * 100.0
-
-
-def _internet_diagnosis(iq: "InternetQuality") -> tuple[str, str]:
-    """Return (color, message) summarising what the IQ data means."""
-    ip_ok    = sum(1 for r in iq.raw_ip if r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED))
-    ip_tot   = len(iq.raw_ip)
-    dns_ok   = sum(1 for r in iq.dns  if r.success)
-    dns_tot  = len(iq.dns)
-    http_ok  = sum(1 for r in iq.http if r.success)
-    http_tot = len(iq.http)
-
-    if ip_tot > 0 and ip_ok == 0:
-        return S_ERR,  "No IP connectivity — likely ISP outage"
-    if ip_ok == ip_tot and dns_tot > 0 and dns_ok == 0:
-        return S_WARN, "All DNS failing — ISP resolver issue — try manual DNS (8.8.8.8)"
-    if 0 < ip_ok < ip_tot:
-        return S_WARN, "Some IP paths degraded — routing or congestion issue"
-    if 0 < dns_ok < dns_tot:
-        return S_WARN, "Some DNS resolvers failing — upstream issue, not your line"
-    if http_tot > 0 and http_ok == 0 and ip_ok == ip_tot and dns_ok == dns_tot:
-        return S_WARN, "All HTTP failing with healthy IP/DNS — possible firewall issue"
-    if 0 < http_ok < http_tot:
-        return S_WARN, "Some HTTP checks failing — likely destination issue, not your connection"
-    return S_OK, "All paths healthy — no action needed"
-
-
-def _latency_qualifier(avg_ms: float) -> tuple[str, str]:
-    if avg_ms < 50:  return S_OK,   "excellent"
-    if avg_ms < 100: return S_WARN, "elevated"
-    return S_ERR, "degraded"
-
-
-def _iq_derived_status(iq: InternetQuality) -> ProbeStatus:
-    """Derive overall internet status from all three check categories."""
-    ok = (
-        sum(1 for r in iq.raw_ip if r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED))
-        + sum(1 for r in iq.dns  if r.success)
-        + sum(1 for r in iq.http if r.success)
-    )
-    total = len(iq.raw_ip) + len(iq.dns) + len(iq.http)
-    if total == 0:
-        return ProbeStatus.UNKNOWN
-    degraded_ip = sum(1 for r in iq.raw_ip if r.status == ProbeStatus.DEGRADED)
-    ratio = ok / total
-    if ratio == 1.0 and degraded_ip == 0:
-        return ProbeStatus.HEALTHY
-    if ratio >= 4 / 9:
-        return ProbeStatus.DEGRADED
-    return ProbeStatus.UNREACHABLE
-
-
-def _check_counts(iq: InternetQuality) -> tuple[int, int, int, int, int, int]:
-    """Return (ip_ok, ip_total, dns_ok, dns_total, http_ok, http_total)."""
-    ip_ok   = sum(1 for r in iq.raw_ip if r.status in (ProbeStatus.HEALTHY, ProbeStatus.DEGRADED))
-    dns_ok  = sum(1 for r in iq.dns    if r.success)
-    http_ok = sum(1 for r in iq.http   if r.success)
-    return ip_ok, len(iq.raw_ip), dns_ok, len(iq.dns), http_ok, len(iq.http)
-
-
-def _count_label(ok: int, total: int) -> str:
-    c = S_OK if ok == total else (S_WARN if ok > 0 else S_ERR)
-    return f"[{c}]{ok}/{total}[/]"
-
-
-# ── Nav button (touch + keyboard) ──────────────────────────────
-class NavButton(Static):
-    class Pressed(Message):
-        def __init__(self, action: str) -> None:
-            super().__init__()
-            self.action = action
-
-    DEFAULT_CSS = f"""
-    NavButton {{
-        width: auto; height: 1; padding: 0 2;
-        background: {UI_BDR};
-        color: {UI_DIM};
-    }}
-    NavButton:hover {{ background: #444c56; color: {UI_FG}; }}
-    """
-
-    def __init__(self, key: str, label: str, action: str) -> None:
-        super().__init__(f"[bold {UI_FG}]{key}[/]{label[1:]}")
-        self._action = action
-
-    def on_click(self) -> None:
-        self.post_message(NavButton.Pressed(self._action))
-
-
-# ── Header ─────────────────────────────────────────────────────
-class HeaderBar(Widget):
-    DEFAULT_CSS = f"""
-    HeaderBar {{
-        dock: top; height: 2;
-        background: {UI_BG2};
-        border-bottom: solid {UI_BDR};
-        layout: horizontal; padding: 0 2;
-    }}
-    #hdr-left    {{ width: 1fr; content-align: left middle; color: {UI_FG}; text-style: bold; }}
-    #hdr-version {{ width: 1fr; content-align: center middle; color: #52596b; }}
-    #hdr-right   {{ width: 1fr; content-align: right middle; color: {UI_DIM}; }}
-    """
-
-    def __init__(self, start_time: float) -> None:
-        super().__init__()
-        self._start_time = start_time
-
-    def compose(self) -> ComposeResult:
-        yield Label("HEIMDALLUR  Network Health Monitor", id="hdr-left")
-        yield Label(f"v{__version__}", id="hdr-version")
-        yield Label("", id="hdr-right")
-
-    def on_mount(self) -> None:
-        self.set_interval(1, self._tick)
-        self._tick()
-
-    def _tick(self) -> None:
-        from datetime import datetime
-        self.query_one("#hdr-right", Label).update(
-            f"UP {_fmt_uptime(time.time() - self._start_time)}"
-            f"   {datetime.now().strftime('%H:%M:%S')}"
-        )
-
-
-# ── Section toggle ─────────────────────────────────────────────
-class SectionToggle(Static):
-    """Tiny ≡ tap target that expands/collapses one detail sub-section."""
-
-    class Toggled(Message):
-        def __init__(self, section: str) -> None:
-            super().__init__()
-            self.section = section
-
-    DEFAULT_CSS = f"""
-    SectionToggle {{
-        width: 2; height: 1;
-        color: {UI_DIM};
-    }}
-    SectionToggle:hover {{ color: {UI_FG}; }}
-    """
-
-    def __init__(self, section: str) -> None:
-        super().__init__("≡")
-        self._section = section
-
-    def on_click(self, event) -> None:
-        event.stop()
-        self.post_message(SectionToggle.Toggled(self._section))
+from heimdallur.tui.theme import (
+    UI_FG, UI_DIM, UI_BG, UI_BG2, UI_BDR,
+    S_OK, S_WARN, S_ERR, S_UNK,
+    SPARK_OK_HI, SPARK_OK_LO, SPARK_ERR,
+)
+from heimdallur.tui.formatting import (
+    _sc, _status_word, _ms, _fmt_uptime, _issue_color,
+    _rolling_avg, _jitter, _p95, _speed_summary, _loss_pct,
+    _internet_diagnosis, _latency_qualifier, _iq_derived_status,
+    _check_counts, _count_label,
+)
+from heimdallur.tui.chrome import FooterBar, HeaderBar, NavButton, SectionToggle
 
 
 # ── Internet panel ─────────────────────────────────────────────
@@ -822,61 +600,6 @@ class GroupRow(Widget):
             f"[{count_c}]{online}/{total}[/]"
         )
 
-
-
-# ── Footer ─────────────────────────────────────────────────────
-class FooterBar(Widget):
-    DEFAULT_CSS = f"""
-    FooterBar {{
-        dock: bottom; height: 2;
-        background: {UI_BG2};
-        border-top: solid {UI_BDR};
-        layout: horizontal; padding: 0 1;
-        align: left middle;
-    }}
-    #ftr-summary {{ width: 1fr; color: {UI_DIM}; content-align: left middle; }}
-    #ftr-email   {{ width: 1fr; content-align: center middle; }}
-    #ftr-nav     {{ width: 1fr; layout: horizontal; align: right middle; }}
-    FooterBar NavButton {{ margin-left: 1; }}
-    """
-
-    def __init__(self, config: NetworkConfig) -> None:
-        super().__init__()
-        self._config = config
-
-    def compose(self) -> ComposeResult:
-        yield Label("", id="ftr-summary")
-        yield Label("", id="ftr-email")
-        with Horizontal(id="ftr-nav"):
-            yield NavButton("H", "History", "history")
-            yield NavButton("D", "Devices", "devices")
-            yield NavButton("Q", "Quit",    "quit")
-
-    def on_mount(self) -> None:
-        gm  = self._config.gmail_notification
-        rcpt = self._config.contacts.home_network_admin_email
-        enabled = bool(gm.sender_email and gm.app_password and rcpt)
-        if enabled:
-            self.query_one("#ftr-email", Label).update(
-                f"[{UI_DIM}]✉[/] [{UI_FG}]{rcpt}[/]"
-            )
-        else:
-            self.query_one("#ftr-email", Label).update(
-                f"[{UI_DIM}]✉  no email configured[/]"
-            )
-
-    def update(self, state: NetworkState, config: NetworkConfig) -> None:
-        total, ok, bad = state.summary(config)
-        unknown = total - ok - bad
-        age = int(time.time() - state.timestamp)
-        parts: list[str] = [f"[{S_OK}]{ok} OK[/]"]
-        if bad:
-            parts.append(f"[{S_ERR}]{bad} down[/]")
-        if unknown:
-            parts.append(f"[{UI_DIM}]{unknown} unknown[/]")
-        self.query_one("#ftr-summary", Label).update(
-            "  ·  ".join(parts) + f"  [{UI_DIM}]— {age}s ago[/]"
-        )
 
 
 # ── Status panel ───────────────────────────────────────────────
