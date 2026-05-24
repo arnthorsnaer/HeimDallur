@@ -6,19 +6,20 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Heimdallur network monitor")
     parser.add_argument(
         "--mode",
-        choices=["tui", "status", "report"],
+        choices=["tui", "view", "status", "report"],
         default="tui",
         help=(
-            "tui: interactive dashboard (default)  |  "
+            "tui: interactive dashboard + probe loop (default)  |  "
+            "view: dashboard fed from shared live state, no probes  |  "
             "status: single-pass rich output  |  "
             "report: write markdown snapshot to ~/.local/share/heimdallur/status.md and print it"
         ),
     )
     args = parser.parse_args()
 
-    if args.mode == "tui":
+    if args.mode in ("tui", "view"):
         from heimdallur.tui.app import HeimdallurApp
-        HeimdallurApp().run()
+        HeimdallurApp(viewer=args.mode == "view").run()
     elif args.mode == "status":
         from heimdallur.status.render import render_status
         asyncio.run(render_status())
