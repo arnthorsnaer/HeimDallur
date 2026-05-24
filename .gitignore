@@ -11,3 +11,5 @@ dist/
 .env
 take_screenshot.py
 heimdallur/config/user-network.toml
+AGENTS.md
+ops-private/

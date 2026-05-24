@@ -16,8 +16,37 @@ It probes all configured devices every 30 seconds and writes a markdown
 snapshot of the full network state to `~/.local/share/heimdallur/status.md`
 after each cycle — the primary way for agents to read current status.
 
-The application lives at `/opt/heimdallur/` on the Pi and runs as the
-`heimdallur` systemd service. Configuration is a single TOML file.
+The application usually lives at `/opt/heimdallur/` on the target host and is
+commonly supervised by systemd. Configuration is a single TOML file.
+
+Keep deployment-specific details — hostnames, usernames, passwords, private
+network topology, service overrides, and display preferences — outside this
+public skill. Store those in private, gitignored operator notes.
+
+### Display + web runtime model
+
+For low overhead, run only one probing instance:
+
+- primary display: `python -m heimdallur --mode tui`
+- web UI: `python scripts/web_serve.py --host <host-or-ip> --port <port>`
+
+By default the web server starts Heimdallur in viewer mode:
+
+```bash
+python -m heimdallur --mode view
+```
+
+Viewer mode reads the shared live-state file written by the primary TUI and
+does not run its own probes or speed tests. Use `--standalone` only if the web
+process should run a second independent prober.
+
+Default shared state path:
+
+```text
+~/.local/share/heimdallur/live-state.json
+```
+
+Override with `HEIMDALLUR_STATE_FILE` when needed.
 
 ---
 
