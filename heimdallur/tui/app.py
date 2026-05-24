@@ -57,8 +57,9 @@ class ProbeComplete(Message):
 class HeimdallurApp(App):
     CSS = """Screen { background: #0d1117; }"""
 
-    def __init__(self) -> None:
+    def __init__(self, *, viewer: bool = False) -> None:
         super().__init__()
+        self._viewer = viewer
         self._config: NetworkConfig = load_config()
 
         # Allow snapshot/demo scripts to inject a recipient email without
@@ -79,26 +80,28 @@ class HeimdallurApp(App):
             )
         from pathlib import Path as _Path
         _db = os.getenv("NETWATCH_SNAPSHOT_DB")
-        self._store = Store(_Path(_db)) if _db else Store()
+        self._store = None if viewer else (Store(_Path(_db)) if _db else Store())
         self._start_time = time.time()
+        self._state_mtime: float | None = None
 
-        if os.getenv("NETWATCH_MOCK"):
-            from heimdallur.mock.network import MockProber
-            from pathlib import Path as _Path
-            _scenario = os.getenv("NETWATCH_MOCK_SCENARIO")
-            self._prober = MockProber(
-                self._config,
-                scenario_path=_Path(_scenario) if _scenario else None,
-            )
-        else:
-            from heimdallur.core.prober import Prober
-            self._prober = Prober(self._config)
+        if not viewer:
+            if os.getenv("NETWATCH_MOCK"):
+                from heimdallur.mock.network import MockProber
+                from pathlib import Path as _Path
+                _scenario = os.getenv("NETWATCH_MOCK_SCENARIO")
+                self._prober = MockProber(
+                    self._config,
+                    scenario_path=_Path(_scenario) if _scenario else None,
+                )
+            else:
+                from heimdallur.core.prober import Prober
+                self._prober = Prober(self._config)
 
-        from heimdallur.core.internet_probe import InternetProber
-        self._inet_prober = InternetProber()
+            from heimdallur.core.internet_probe import InternetProber
+            self._inet_prober = InternetProber()
 
-        from heimdallur.core.notifier import IncidentNotifier
-        self._notifier = IncidentNotifier(self._config)
+            from heimdallur.core.notifier import IncidentNotifier
+            self._notifier = IncidentNotifier(self._config)
 
         # Rolling history — init loss with zeros so sparkline starts green not red
         self._lat:  dict[str, deque] = defaultdict(lambda: deque(maxlen=_HIST))
@@ -122,9 +125,14 @@ class HeimdallurApp(App):
 
     async def on_mount(self) -> None:
         from heimdallur.tui.status_view import StatusScreen
-        from heimdallur.mock.network import MockProber
-        await self._store.open()
         await self.push_screen(StatusScreen(self._config, self._start_time))
+        if self._viewer:
+            self._viewer_loop()
+            return
+
+        from heimdallur.mock.network import MockProber
+        assert self._store is not None
+        await self._store.open()
         if isinstance(self._prober, MockProber):
             self._seed_mock_history()
         self._probe_loop()
@@ -182,7 +190,8 @@ class HeimdallurApp(App):
                 self._inet_http_loss[url].append(0.0)
 
     async def on_unmount(self) -> None:
-        await self._store.close()
+        if self._store is not None:
+            await self._store.close()
 
     def _accumulate(self, state: NetworkState, enriched: EnrichedState) -> HistorySnapshot:
         def _upd(ip: str, r) -> None:
@@ -287,6 +296,9 @@ class HeimdallurApp(App):
             snapshot = self._accumulate(state, enriched)
             self.post_message(ProbeComplete(enriched, snapshot))
             asyncio.get_event_loop().run_in_executor(
+                None, self._write_live_state, enriched, snapshot
+            )
+            asyncio.get_event_loop().run_in_executor(
                 None, self._write_report, enriched, snapshot
             )
             asyncio.get_event_loop().run_in_executor(
@@ -307,6 +319,31 @@ class HeimdallurApp(App):
             self._speed_result = result
             await self._store.record_speed_test(result)
             await asyncio.sleep(self._config.speed_test_interval_seconds)
+
+    @work(exclusive=True, group="viewer")
+    async def _viewer_loop(self) -> None:
+        from heimdallur.core.shared_state import read_live_state, state_path
+
+        path = state_path()
+        while True:
+            try:
+                mtime = path.stat().st_mtime
+                if self._state_mtime != mtime:
+                    self._state_mtime = mtime
+                    enriched, snapshot = read_live_state(path)
+                    self.post_message(ProbeComplete(enriched, snapshot))
+            except FileNotFoundError:
+                pass
+            except Exception:
+                pass
+            await asyncio.sleep(2)
+
+    def _write_live_state(self, enriched: EnrichedState, snapshot: HistorySnapshot) -> None:
+        from heimdallur.core.shared_state import write_live_state
+        try:
+            write_live_state(enriched, snapshot)
+        except Exception:
+            pass
 
     def _write_report(self, enriched: EnrichedState, snapshot: HistorySnapshot) -> None:
         from heimdallur.core.report import render_markdown, write_report
