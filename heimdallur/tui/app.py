@@ -54,6 +54,13 @@ class ProbeComplete(Message):
         self.snapshot = snapshot
 
 
+class ViewerStateWarning(Message):
+    def __init__(self, reason: str, age_seconds: float | None = None) -> None:
+        super().__init__()
+        self.reason = reason
+        self.age_seconds = age_seconds
+
+
 class HeimdallurApp(App):
     CSS = """Screen { background: #0d1117; }"""
 
@@ -83,6 +90,7 @@ class HeimdallurApp(App):
         self._store = None if viewer else (Store(_Path(_db)) if _db else Store())
         self._start_time = time.time()
         self._state_mtime: float | None = None
+        self._viewer_warning: str | None = None
 
         if not viewer:
             if os.getenv("NETWATCH_MOCK"):
@@ -325,18 +333,29 @@ class HeimdallurApp(App):
         from heimdallur.core.shared_state import read_live_state, state_path
 
         path = state_path()
+        stale_after = max(60.0, self._config.probe_interval_seconds * 2.0)
         while True:
             try:
-                mtime = path.stat().st_mtime
+                stat = path.stat()
+                mtime = stat.st_mtime
+                age = time.time() - mtime
                 if self._state_mtime != mtime:
                     self._state_mtime = mtime
+                    self._viewer_warning = None
                     enriched, snapshot = read_live_state(path)
                     self.post_message(ProbeComplete(enriched, snapshot))
+                if age > stale_after:
+                    self._post_viewer_warning("stale", age)
             except FileNotFoundError:
-                pass
+                self._post_viewer_warning("missing", None)
             except Exception:
-                pass
+                self._post_viewer_warning("unreadable", None)
             await asyncio.sleep(2)
+
+    def _post_viewer_warning(self, reason: str, age_seconds: float | None) -> None:
+        if reason == "stale" or self._viewer_warning != reason:
+            self._viewer_warning = reason
+            self.post_message(ViewerStateWarning(reason, age_seconds))
 
     def _write_live_state(self, enriched: EnrichedState, snapshot: HistorySnapshot) -> None:
         from heimdallur.core.shared_state import write_live_state
@@ -360,3 +379,8 @@ class HeimdallurApp(App):
             self.screen.update_state(message.enriched, message.snapshot)
         elif isinstance(self.screen, DevicesScreen):
             self.screen.update_state(message.enriched.network)
+
+    def on_viewer_state_warning(self, message: ViewerStateWarning) -> None:
+        from heimdallur.tui.status_view import StatusScreen
+        if isinstance(self.screen, StatusScreen):
+            self.screen.update_viewer_warning(message.reason, message.age_seconds)

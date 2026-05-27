@@ -602,6 +602,27 @@ class GroupRow(Widget):
 
 
 
+def _notify_admin(config: NetworkConfig, *, urgent: bool = False) -> str:
+    action = "call" if urgent else "let"
+    suffix = "" if urgent else " know"
+    return f"{action} {config.contacts.network_admin}{suffix}"
+
+
+def _refresh_or_notify(config: NetworkConfig) -> str:
+    return f"refresh browser or {_notify_admin(config)}"
+
+
+def _fmt_age_brief(seconds: float) -> str:
+    seconds_i = max(0, int(seconds))
+    if seconds_i < 60:
+        return f"{seconds_i}s"
+    minutes = seconds_i // 60
+    if minutes < 60:
+        return f"{minutes}m"
+    hours = minutes // 60
+    return f"{hours}h"
+
+
 # ── Status panel ───────────────────────────────────────────────
 class StatusPanel(Widget):
     DEFAULT_CSS = f"""
@@ -649,6 +670,36 @@ class StatusPanel(Widget):
             f"[{UI_FG}]S[/][{UI_DIM}] {arrow}[/]"
         )
 
+    def update_viewer_warning(self, config: NetworkConfig, reason: str,
+                              age_seconds: float | None = None) -> None:
+        action = _refresh_or_notify(config)
+        if reason == "missing":
+            c, icon = S_ERR, "✗"
+            summary = f"Monitor is not sending updates · {action}"
+            detail = (
+                "Try refreshing the browser. If this message stays, the main "
+                "Heimdallur monitor may not be running. The information below may be old."
+            )
+        elif reason == "unreadable":
+            c, icon = S_ERR, "✗"
+            summary = f"Monitor updates cannot be read · {action}"
+            detail = (
+                "Try refreshing the browser. If this message stays, the web view "
+                "cannot read updates from the main monitor. The information below may be old."
+            )
+        else:
+            c, icon = S_WARN, "⚠"
+            age = _fmt_age_brief(age_seconds or 0.0)
+            summary = f"Monitor has not updated in {age} · {action}"
+            detail = (
+                "Try refreshing the browser. If this message stays, the main "
+                "Heimdallur monitor has not sent a recent update. The information below may be old."
+            )
+
+        self.query_one("#st-icon", Label).update(f"[{c}]{icon}[/]")
+        self.query_one("#st-msg", Label).update(f"[{c}]{summary}[/]")
+        self.query_one("#st-detail", Label).update(f"[{c}]{detail}[/]")
+
     def update(self, state: NetworkState, config: NetworkConfig,
                iq: "InternetQuality | None" = None) -> None:
         issues = state.problems(config)
@@ -671,11 +722,11 @@ class StatusPanel(Widget):
         contact_hint: str | None = None
         if ont_down:
             c, icon = S_ERR, "✗"
-            summary = f"Internet is down · call {admin}"
+            summary = f"Internet is down · {_notify_admin(config, urgent=True)}"
             contact_hint = f"→ {admin} will contact {isp} if the outage is on their end"
         elif rtr_down:
             c, icon = S_ERR, "✗"
-            summary = f"Home network down · call {admin}"
+            summary = f"Home network down · {_notify_admin(config, urgent=True)}"
         elif issues:
             c, icon = S_WARN, "⚠"
             net_issues = [i for i in issues if i != iq_issue]
@@ -685,7 +736,7 @@ class StatusPanel(Widget):
             if iq_issue:                        parts.append(iq_issue)
             if ap:  parts.append(f"{ap} access point{'s' if ap > 1 else ''} offline")
             if dev: parts.append(f"{dev} device{'s' if dev > 1 else ''} unreachable")
-            summary = (" · ".join(parts) if parts else issues[0]) + f" · let {admin} know"
+            summary = (" · ".join(parts) if parts else issues[0]) + f" · {_notify_admin(config)}"
         else:
             c, icon = S_OK, "●"
             summary = "All systems operational"
@@ -742,6 +793,9 @@ class StatusScreen(Screen):
         )
         self.query_one(HomeNetworkPanel).update(s, c, enriched.gw_enrichment)
         self.query_one(FooterBar).update(s, c)
+
+    def update_viewer_warning(self, reason: str, age_seconds: float | None = None) -> None:
+        self.query_one(StatusPanel).update_viewer_warning(self._config, reason, age_seconds)
 
     def action_toggle_status(self) -> None:
         self.query_one(StatusPanel).toggle()
