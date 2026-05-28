@@ -185,25 +185,26 @@ type  = "generic"               # generic | light | sensor | smart_plug | smart_
 ssh pi@heimdallur.local "cat /opt/heimdallur/heimdallur/config/user-network.toml"
 ```
 
-**Step 2 — Write new config to a temp file and validate:**
+**Step 2 — Write new config to a temp file and dry-run the safe apply helper:**
 ```bash
 scp network.toml pi@heimdallur.local:/tmp/devices-new.toml
-ssh pi@heimdallur.local "python3 /opt/heimdallur/scripts/validate-config.py /tmp/devices-new.toml"
+ssh pi@heimdallur.local "cd /opt/heimdallur && python scripts/apply-config.py /tmp/devices-new.toml --dry-run"
 ```
 
-The validator checks: TOML syntax, required fields, valid IPs, duplicate IPs,
-and that every `devices[].group` references a defined `groups[].id`.
-Exits 0 on success, 1 on any error. Do not proceed if it exits 1.
+The helper validates TOML syntax, required fields, valid IPs, duplicate IPs,
+and that every `devices[].group` references a defined `groups[].id`. It also
+shows a unified diff against the current production config.
 
-**Step 3 — Apply and restart:**
+**Step 3 — Apply, restart, and verify:**
 ```bash
-ssh pi@heimdallur.local "cp /tmp/devices-new.toml /opt/heimdallur/heimdallur/config/user-network.toml && sudo systemctl restart heimdallur"
+ssh pi@heimdallur.local "cd /opt/heimdallur && python scripts/apply-config.py /tmp/devices-new.toml --yes --restart-command 'sudo systemctl restart heimdallur' --verify"
 ```
 
-**Step 4 — Verify:**
+Use restart commands appropriate for the deployment. The helper backs up the
+current config before replacing it and prints a rollback command.
+
+**Step 4 — Confirm status:**
 ```bash
-ssh pi@heimdallur.local "systemctl is-active heimdallur"
-# Wait ~35s for the first probe, then read the snapshot:
 ssh pi@heimdallur.local "cat ~/.local/share/heimdallur/status.md"
 ```
 
@@ -233,17 +234,17 @@ app_password = "xxxx xxxx xxxx xxxx"           # 16-char Gmail app password
 Google Account → Security → 2-Step Verification → App passwords.
 Generate one named "Heimdallur" and copy the 16-character code.
 
-**Step 2 — Edit and validate:**
+**Step 2 — Edit and dry-run:**
 ```bash
 ssh pi@heimdallur.local "cat /opt/heimdallur/heimdallur/config/user-network.toml"
 # Edit locally, then:
 scp network.toml pi@heimdallur.local:/tmp/network-new.toml
-ssh pi@heimdallur.local "python3 /opt/heimdallur/scripts/validate-config.py /tmp/network-new.toml"
+ssh pi@heimdallur.local "cd /opt/heimdallur && python scripts/apply-config.py /tmp/network-new.toml --dry-run"
 ```
 
 **Step 3 — Apply:**
 ```bash
-ssh pi@heimdallur.local "cp /tmp/network-new.toml /opt/heimdallur/heimdallur/config/user-network.toml && sudo systemctl restart heimdallur"
+ssh pi@heimdallur.local "cd /opt/heimdallur && python scripts/apply-config.py /tmp/network-new.toml --yes --restart-command 'sudo systemctl restart heimdallur' --verify"
 ```
 
 **Step 4 — Verify:**
@@ -384,8 +385,8 @@ ssh pi@heimdallur.local "cd /opt/heimdallur && sudo git fetch origin main && sud
 |------|---------|
 | Read network status | `ssh pi@heimdallur.local "cat ~/.local/share/heimdallur/status.md"` |
 | Force fresh probe | `ssh pi@heimdallur.local "cd /opt/heimdallur && uv run python -m heimdallur --mode report"` |
-| Validate new config | `ssh pi@heimdallur.local "python3 /opt/heimdallur/scripts/validate-config.py /tmp/devices-new.toml"` |
-| Apply config + restart | `ssh pi@heimdallur.local "cp /tmp/devices-new.toml /opt/heimdallur/heimdallur/config/user-network.toml && sudo systemctl restart heimdallur"` |
+| Dry-run config apply | `ssh pi@heimdallur.local "cd /opt/heimdallur && python scripts/apply-config.py /tmp/devices-new.toml --dry-run"` |
+| Apply config + restart | `ssh pi@heimdallur.local "cd /opt/heimdallur && python scripts/apply-config.py /tmp/devices-new.toml --yes --restart-command 'sudo systemctl restart heimdallur' --verify"` |
 | Trigger immediate update | `ssh pi@heimdallur.local "sudo systemctl start heimdallur-update"` |
 | Check running version | `ssh pi@heimdallur.local "cd /opt/heimdallur && git log -1 --oneline"` |
 | View service logs | `ssh pi@heimdallur.local "journalctl -u heimdallur -n 50 --no-pager"` |

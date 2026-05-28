@@ -232,20 +232,32 @@ somewhere other than `origin`.
 
 ### Updating device configuration
 
-All devices and groups are defined in the network TOML. On a live Pi you can
-edit `heimdallur/config/user-network.toml` directly, or copy a new version over
-SSH and then restart the service:
+All devices and groups are defined in the network TOML. On a live Pi, copy a
+candidate config to a temporary path and use the safe apply helper from the
+Heimdallur checkout:
 
 ```bash
-# Validate before applying
-python /opt/heimdallur/scripts/validate-config.py /path/to/new-network.toml
+# Validate and show the diff without changing production
+python /opt/heimdallur/scripts/apply-config.py /tmp/new-network.toml --dry-run
 
-# Apply
-cp /path/to/new-network.toml /opt/heimdallur/heimdallur/config/user-network.toml
-sudo systemctl restart heimdallur
+# Apply after reviewing the diff; restart commands depend on your deployment
+python /opt/heimdallur/scripts/apply-config.py /tmp/new-network.toml --yes \
+  --restart-command 'sudo systemctl restart heimdallur' \
+  --verify
 ```
 
-The validator (`scripts/validate-config.py`) checks TOML syntax, required fields, IP address validity, duplicate IPs, and that every device references a defined group. It exits 0 on success, 1 on any error, so it is safe to use in automated workflows.
+The helper validates the candidate, shows a unified diff, backs up the current
+config, applies only with `--yes`, runs any restart commands you provide, and can
+verify that `status.md` is freshly rewritten. It prints a rollback command after
+applying.
+
+For validation only, use:
+
+```bash
+python /opt/heimdallur/scripts/validate-config.py /path/to/new-network.toml
+# or
+python -m heimdallur --mode validate-config /path/to/new-network.toml
+```
 
 ---
 
