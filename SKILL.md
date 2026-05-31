@@ -305,6 +305,18 @@ ssh pi@heimdallur.local "awk '/## Summary/{found=1} found && /^- /{print} found 
 
 ## 5. Troubleshooting
 
+### Run deployment doctor first
+
+Use the read-only doctor script for a quick production health check:
+
+```bash
+ssh pi@heimdallur.local "cd /opt/heimdallur && python scripts/pi-doctor.py --app-dir /opt/heimdallur"
+```
+
+It checks config validity, mock mode, status freshness, primary/web processes,
+systemd units, git state, network routes, web listener, and display basics.
+Warnings and failures include a `Next:` section with suggested commands.
+
 ### Service not running
 
 ```bash

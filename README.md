@@ -175,6 +175,17 @@ To trigger an immediate update without waiting for the timer:
 sudo systemctl start heimdallur-update
 ```
 
+To check a deployment without changing anything, run the doctor script from the
+Heimdallur checkout:
+
+```bash
+python scripts/pi-doctor.py --app-dir /opt/heimdallur
+```
+
+It checks config validity, status freshness, processes/services, git state,
+network routes, web listener, and display basics. Warnings and failures include
+suggested next commands for humans or agents.
+
 The footer shows the running version as `v0.5.0+20260513.d40c034` — date and git hash — so you can identify the exact commit at a glance and match it against the GitHub commit list without running any commands.
 
 ---
