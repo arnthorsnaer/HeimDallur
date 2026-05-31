@@ -7,12 +7,13 @@ not modify the system.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sqlite3
 import subprocess
 import sys
 import time
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from shutil import which
 
@@ -47,7 +48,7 @@ class Doctor:
     def add(self, check: Check) -> None:
         self.checks.append(check)
 
-    def run(self) -> int:
+    def run(self, *, print_report: bool = True) -> int:
         self.check_version()
         self.check_config()
         self.check_runtime_env()
@@ -58,7 +59,8 @@ class Doctor:
         self.check_git()
         self.check_network()
         self.check_display_optional()
-        self.print_report()
+        if print_report:
+            self.print_report()
         return 1 if any(c.status == FAIL for c in self.checks) else 0
 
     def check_version(self) -> None:
@@ -280,6 +282,18 @@ class Doctor:
         else:
             self.add(Check("console blanking", WARN, "not configured", why="Always-on displays may use more power and heat without blanking."))
 
+    def to_dict(self) -> dict:
+        failures = sum(1 for c in self.checks if c.status == FAIL)
+        warnings = sum(1 for c in self.checks if c.status == WARN)
+        return {
+            "failures": failures,
+            "warnings": warnings,
+            "checks": [asdict(check) for check in self.checks],
+        }
+
+    def print_json(self) -> None:
+        print(json.dumps(self.to_dict(), ensure_ascii=False))
+
     def print_report(self) -> None:
         print("HEIMDALLUR DOCTOR")
         print()
@@ -350,6 +364,7 @@ def main() -> None:
     parser.add_argument("--state-path", type=Path, default=Path.home() / ".local" / "share" / "heimdallur" / "live-state.json")
     parser.add_argument("--db-path", type=Path, default=Path.home() / ".local" / "share" / "heimdallur" / "events.db")
     parser.add_argument("--max-age", type=int, default=None, help="freshness threshold in seconds; default is max(60, 2x probe interval)")
+    parser.add_argument("--json", action="store_true", help="print machine-readable JSON")
     args = parser.parse_args()
 
     doctor = Doctor(
@@ -359,7 +374,10 @@ def main() -> None:
         db_path=args.db_path.expanduser(),
         max_age=args.max_age,
     )
-    raise SystemExit(doctor.run())
+    exit_code = doctor.run(print_report=not args.json)
+    if args.json:
+        doctor.print_json()
+    raise SystemExit(exit_code)
 
 
 if __name__ == "__main__":

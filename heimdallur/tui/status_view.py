@@ -701,8 +701,12 @@ class StatusPanel(Widget):
         self.query_one("#st-detail", Label).update(f"[{c}]{detail}[/]")
 
     def update(self, state: NetworkState, config: NetworkConfig,
-               iq: "InternetQuality | None" = None) -> None:
+               iq: "InternetQuality | None" = None,
+               doctor_checks: list[dict] | None = None) -> None:
         issues = state.problems(config)
+        doctor_checks = doctor_checks or []
+        doctor_failures = [c for c in doctor_checks if c.get("status") == "fail"]
+        doctor_warnings = [c for c in doctor_checks if c.get("status") == "warn"]
         admin = config.contacts.network_admin
         isp   = config.contacts.isp_name
         iq_issue: str | None = None
@@ -737,6 +741,12 @@ class StatusPanel(Widget):
             if ap:  parts.append(f"{ap} access point{'s' if ap > 1 else ''} offline")
             if dev: parts.append(f"{dev} device{'s' if dev > 1 else ''} unreachable")
             summary = (" · ".join(parts) if parts else issues[0]) + f" · {_notify_admin(config)}"
+        elif doctor_failures:
+            c, icon = S_ERR, "✗"
+            summary = f"Monitor has {len(doctor_failures)} system failure{'s' if len(doctor_failures) > 1 else ''} · {_notify_admin(config, urgent=True)}"
+        elif doctor_warnings:
+            c, icon = S_WARN, "⚠"
+            summary = f"Monitor has {len(doctor_warnings)} system warning{'s' if len(doctor_warnings) > 1 else ''} · {_notify_admin(config)}"
         else:
             c, icon = S_OK, "●"
             summary = "All systems operational"
@@ -749,7 +759,18 @@ class StatusPanel(Widget):
             if contact_hint:
                 lines.append(f"[{UI_DIM}]{contact_hint}[/]")
         else:
-            lines = [f"[{UI_DIM}]No issues detected[/]"]
+            lines = [f"[{UI_DIM}]No network issues detected[/]"]
+
+        if doctor_checks:
+            lines.append(f"[{UI_DIM}]Deployment doctor:[/]")
+            for check in doctor_checks:
+                dc = S_ERR if check.get("status") == "fail" else S_WARN
+                lines.append(f"[{dc}]{check.get('name', 'check')}: {check.get('summary', '')}[/]")
+                if check.get("why"):
+                    lines.append(f"[{UI_DIM}]  Why: {check['why']}[/]")
+                steps = check.get("next_steps") or []
+                if steps:
+                    lines.append(f"[{UI_DIM}]  Next: {steps[0]}[/]")
         self.query_one("#st-detail", Label).update("\n".join(lines))
 
 
@@ -786,7 +807,7 @@ class StatusScreen(Screen):
     def update_state(self, enriched, snapshot) -> None:
         s = enriched.network
         c = self._config
-        self.query_one(StatusPanel).update(s, c, enriched.internet_quality)
+        self.query_one(StatusPanel).update(s, c, enriched.internet_quality, enriched.doctor_checks)
         self.query_one(InternetPanel).update(
             s, c, snapshot.ont_lat, snapshot.ont_loss,
             enriched.speed_result, enriched.internet_quality, snapshot,

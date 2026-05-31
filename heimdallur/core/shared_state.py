@@ -101,6 +101,7 @@ def write_live_state(enriched: EnrichedState, snapshot: HistorySnapshot, path: P
             "gw_enrichment": {ip: asdict(enr) for ip, enr in enriched.gw_enrichment.items()},
             "speed_result": asdict(enriched.speed_result) if enriched.speed_result else None,
             "internet_quality": _internet_quality_to_dict(enriched.internet_quality),
+            "doctor_checks": enriched.doctor_checks,
         },
         "snapshot": asdict(snapshot),
     }
@@ -125,6 +126,7 @@ def read_live_state(path: Path | None = None) -> tuple[EnrichedState, HistorySna
         gw_enrichment={ip: GatewayEnrichment(**value) for ip, value in enriched_data.get("gw_enrichment", {}).items()},
         speed_result=SpeedResult(**enriched_data["speed_result"]) if enriched_data.get("speed_result") else None,
         internet_quality=_internet_quality_from_dict(enriched_data.get("internet_quality")),
+        doctor_checks=enriched_data.get("doctor_checks", []),
     )
     snapshot = HistorySnapshot(**payload["snapshot"])
     return enriched, snapshot

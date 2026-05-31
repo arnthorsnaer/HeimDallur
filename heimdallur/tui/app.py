@@ -1,9 +1,12 @@
 from __future__ import annotations
 import asyncio
+import json
 import os
+import subprocess
+import sys
 import time
 from collections import defaultdict, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from textual.app import App, ComposeResult
 from textual.message import Message
@@ -26,6 +29,7 @@ class EnrichedState:
     gw_enrichment: dict[str, GatewayEnrichment]   # gateway_ip -> enrichment
     speed_result: SpeedResult | None
     internet_quality: InternetQuality | None
+    doctor_checks: list[dict] = field(default_factory=list)
 
 
 @dataclass
@@ -127,6 +131,8 @@ class HeimdallurApp(App):
         self._inet_http_loss:  dict[str, deque] = defaultdict(lambda: deque([0.0, 0.0], maxlen=_HIST))
         self._speed_result: SpeedResult | None = None
         self._last_enriched: EnrichedState | None = None
+        self._doctor_checks: list[dict] = []
+        self._last_doctor_at: float = 0.0
 
     def compose(self) -> ComposeResult:
         return iter([])
@@ -294,12 +300,17 @@ class HeimdallurApp(App):
                     if g.gateway_ip:
                         gw_enrichment[g.gateway_ip] = enr
 
+            if not isinstance(self._prober, MockProber) and time.time() - self._last_doctor_at > 300:
+                self._doctor_checks = await asyncio.to_thread(self._run_doctor_checks)
+                self._last_doctor_at = time.time()
+
             enriched = EnrichedState(
                 network=state,
                 router_stats=router_stats,
                 gw_enrichment=gw_enrichment,
                 speed_result=self._speed_result,
                 internet_quality=iq,
+                doctor_checks=self._doctor_checks,
             )
             snapshot = self._accumulate(state, enriched)
             self.post_message(ProbeComplete(enriched, snapshot))
@@ -356,6 +367,32 @@ class HeimdallurApp(App):
         if reason == "stale" or self._viewer_warning != reason:
             self._viewer_warning = reason
             self.post_message(ViewerStateWarning(reason, age_seconds))
+
+    def _run_doctor_checks(self) -> list[dict]:
+        script = os.path.join(os.getcwd(), "scripts", "pi-doctor.py")
+        if not os.path.exists(script):
+            return []
+        try:
+            proc = subprocess.run(
+                [sys.executable, script, "--app-dir", os.getcwd(), "--json"],
+                text=True,
+                capture_output=True,
+                timeout=20,
+            )
+            data = json.loads(proc.stdout)
+            return [
+                check for check in data.get("checks", [])
+                if check.get("status") in {"warn", "fail"}
+                and check.get("name") not in {"status.md", "live-state.json"}
+            ]
+        except Exception as exc:
+            return [{
+                "name": "doctor",
+                "status": "warn",
+                "summary": f"doctor check failed: {exc}",
+                "why": "Deployment diagnostics could not run.",
+                "next_steps": ["Run scripts/pi-doctor.py manually."],
+            }]
 
     def _write_live_state(self, enriched: EnrichedState, snapshot: HistorySnapshot) -> None:
         from heimdallur.core.shared_state import write_live_state

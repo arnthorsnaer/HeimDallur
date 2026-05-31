@@ -118,6 +118,25 @@ def render_markdown(
         lines.append("")
         for p in problems:
             lines.append(f"- {p}")
+    doctor_checks = getattr(enriched, "doctor_checks", [])
+    if doctor_checks:
+        failures = sum(1 for c in doctor_checks if c.get("status") == "fail")
+        warnings = sum(1 for c in doctor_checks if c.get("status") == "warn")
+        lines.append("")
+        lines.append("### Deployment Doctor")
+        lines.append("")
+        lines.append(f"{'❌' if failures else '⚠️'} {failures} failure(s), {warnings} warning(s)")
+        lines.append("")
+        for check in doctor_checks:
+            icon = "❌" if check.get("status") == "fail" else "⚠️"
+            lines.append(f"- {icon} **{check.get('name', 'check')}:** {check.get('summary', '')}")
+            if check.get("why"):
+                lines.append(f"  - Why: {check['why']}")
+            steps = check.get("next_steps") or []
+            if steps:
+                lines.append("  - Next:")
+                for step in steps:
+                    lines.append(f"    - `{step}`")
     lines += ["", "---", ""]
 
     # ── Internet ─────────────────────────────────────────────────────────
