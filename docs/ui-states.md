@@ -31,19 +31,19 @@ Everything reachable — internet, router, access points, and all devices. The s
 
 ```text
 
-HEIMDALLUR  2026-06-19 17:56:57 UTC
+HEIMDALLUR  2026-06-19 17:59:43 UTC
 
-INTERNET  ✓ Online  38ms  excellent
+INTERNET  ✓ Online  32ms  excellent
   IP 3/3  ·  DNS 3/3  ·  HTTP 3/3
   All paths healthy
-  ↓ 365 Mbps  ·  ping 32 ms  (0s ago)
+  ↓ 300 Mbps  ·  ping 28 ms  (0s ago)
 
 HOME NETWORK
-  ROUTER  ✓ Online  2ms
+  ROUTER  ✓ Online  1ms
   ✓ Online  3ms  WiFi Garage
   ✓ Online  2ms  WiFi Main Floor
-  ✓ Online  3ms  WiFi Upper Floor
-  ✓ Online  3ms  WiFi Lower Floor
+  ✓ Online  4ms  WiFi Upper Floor
+  ✓ Online  4ms  WiFi Lower Floor
   LAN  LAN Office
   LAN  LAN Media
   LAN  LAN Router
@@ -60,7 +60,7 @@ All monitored devices OK
 
 # Heimdallur Network Status
 
-**Probed:** 2026-06-19 17:56:57 UTC  |  **Interval:** 30s
+**Probed:** 2026-06-19 17:59:43 UTC  |  **Interval:** 30s
 
 ## Summary
 
@@ -70,33 +70,33 @@ All monitored devices OK
 
 ## Internet
 
-**Status:** ✅ HEALTHY  |  **Latency (ONT):** 46 ms avg (excellent)  |  **Loss:** 0%
+**Status:** ✅ HEALTHY  |  **Latency (ONT):** 50 ms avg (excellent)  |  **Loss:** 0%
 
 ### IP Reachability
 
 | Target | Status | Latency |
 |--------|--------|---------|
-| Cloudflare (1.1.1.1) | ✅ healthy | 21 ms |
-| Google (8.8.8.8) | ✅ healthy | 19 ms |
-| Quad9 (9.9.9.9) | ✅ healthy | 24 ms |
+| Cloudflare (1.1.1.1) | ✅ healthy | 26 ms |
+| Google (8.8.8.8) | ✅ healthy | 22 ms |
+| Quad9 (9.9.9.9) | ✅ healthy | 12 ms |
 
 ### DNS
 
 | Resolver | Status | Lookup |
 |----------|--------|--------|
-| Cloudflare (cloudflare.com) | ✅ Online | 11 ms |
+| Cloudflare (cloudflare.com) | ✅ Online | 3 ms |
 | Google (google.com) | ✅ Online | 9 ms |
-| Quad9 (quad9.net) | ✅ Online | 6 ms |
+| Quad9 (quad9.net) | ✅ Online | 16 ms |
 
 ### HTTP
 
 | Endpoint | Status | TTFB | Total |
 |----------|--------|------|-------|
-| Cloudflare | ✅ Online | 70 ms | 82 ms |
-| Google | ✅ Online | 52 ms | 76 ms |
-| Microsoft | ✅ Online | 60 ms | 70 ms |
+| Cloudflare | ✅ Online | 48 ms | 59 ms |
+| Google | ✅ Online | 63 ms | 82 ms |
+| Microsoft | ✅ Online | 68 ms | 91 ms |
 
-**Speed test:** ↓ 424 Mbps  |  ping 31 ms  *(0s ago)*
+**Speed test:** ↓ 184 Mbps  |  ping 21 ms  *(0s ago)*
 
 ---
 
@@ -104,43 +104,43 @@ All monitored devices OK
 
 ### Router
 
-**Status:** ✅ HEALTHY  |  **Latency:** 3 ms
-**CPU:** 17%  |  **Memory:** 41%  |  **Uptime:** 3d
+**Status:** ✅ HEALTHY  |  **Latency:** 1 ms
+**CPU:** 21%  |  **Memory:** 33%  |  **Uptime:** 3d
 
 ### Groups
 
 #### WiFi Garage
 
-**Gateway `192.0.2.25`:** ✅ 1 ms
+**Gateway `192.0.2.25`:** ✅ 2 ms
 
 **Devices:** 4 / 4 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Garage Door Controller | `192.0.2.100` | ✅ healthy | 3 ms |
+| Garage Door Controller | `192.0.2.100` | ✅ healthy | 4 ms |
 | Garage Light | `192.0.2.101` | ✅ healthy | 1 ms |
-| Utility Meter | `192.0.2.102` | ✅ healthy | 2 ms |
-| Workbench Plug | `192.0.2.103` | ✅ healthy | 1 ms |
+| Utility Meter | `192.0.2.102` | ✅ healthy | 3 ms |
+| Workbench Plug | `192.0.2.103` | ✅ healthy | 2 ms |
 
 #### WiFi Main Floor
 
-**Gateway `192.0.2.21`:** ✅ 5 ms
+**Gateway `192.0.2.21`:** ✅ 2 ms
 
 **Devices:** 11 / 11 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Entry Light | `192.0.2.110` | ✅ healthy | 2 ms |
+| Entry Light | `192.0.2.110` | ✅ healthy | 5 ms |
 | Kitchen Ceiling Light | `192.0.2.111` | ✅ healthy | 3 ms |
-| Kitchen Counter Light | `192.0.2.112` | ✅ healthy | 5 ms |
-| Dining Room Light | `192.0.2.113` | ✅ healthy | 3 ms |
-| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 4 ms |
-| Living Room Light 2 | `192.0.2.115` | ✅ healthy | 4 ms |
-| Living Room Light 3 | `192.0.2.116` | ✅ healthy | 2 ms |
-| Hallway Light | `192.0.2.117` | ✅ healthy | 5 ms |
-| Porch Light | `192.0.2.118` | ✅ healthy | 5 ms |
+| Kitchen Counter Light | `192.0.2.112` | ✅ healthy | 4 ms |
+| Dining Room Light | `192.0.2.113` | ✅ healthy | 4 ms |
+| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 5 ms |
+| Living Room Light 2 | `192.0.2.115` | ✅ healthy | 3 ms |
+| Living Room Light 3 | `192.0.2.116` | ✅ healthy | 3 ms |
+| Hallway Light | `192.0.2.117` | ✅ healthy | 2 ms |
+| Porch Light | `192.0.2.118` | ✅ healthy | 4 ms |
 | Plant Light | `192.0.2.119` | ✅ healthy | 4 ms |
-| Coffee Maker | `192.0.2.120` | ✅ healthy | 2 ms |
+| Coffee Maker | `192.0.2.120` | ✅ healthy | 1 ms |
 
 #### WiFi Upper Floor
 
@@ -150,26 +150,26 @@ All monitored devices OK
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Bathroom LED | `192.0.2.130` | ✅ healthy | 1 ms |
-| Thermostat | `192.0.2.131` | ✅ healthy | 2 ms |
+| Bathroom LED | `192.0.2.130` | ✅ healthy | 3 ms |
+| Thermostat | `192.0.2.131` | ✅ healthy | 4 ms |
 
 #### WiFi Lower Floor
 
-**Gateway `192.0.2.23`:** ✅ 2 ms
+**Gateway `192.0.2.23`:** ✅ 5 ms
 
 **Devices:** 9 / 9 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Bedroom Light 1 | `192.0.2.140` | ✅ healthy | 3 ms |
+| Bedroom Light 1 | `192.0.2.140` | ✅ healthy | 2 ms |
 | Bedroom Light 2 | `192.0.2.141` | ✅ healthy | 4 ms |
-| Lower Bathroom Light | `192.0.2.142` | ✅ healthy | 2 ms |
-| Media Room Light | `192.0.2.143` | ✅ healthy | 2 ms |
-| Laundry Fan | `192.0.2.144` | ✅ healthy | 3 ms |
-| Laundry Room Light | `192.0.2.145` | ✅ healthy | 3 ms |
-| Storage Room Light | `192.0.2.146` | ✅ healthy | 4 ms |
+| Lower Bathroom Light | `192.0.2.142` | ✅ healthy | 5 ms |
+| Media Room Light | `192.0.2.143` | ✅ healthy | 4 ms |
+| Laundry Fan | `192.0.2.144` | ✅ healthy | 5 ms |
+| Laundry Room Light | `192.0.2.145` | ✅ healthy | 1 ms |
+| Storage Room Light | `192.0.2.146` | ✅ healthy | 2 ms |
 | Patio Light | `192.0.2.147` | ✅ healthy | 2 ms |
-| Patio Outlet | `192.0.2.148` | ✅ healthy | 1 ms |
+| Patio Outlet | `192.0.2.148` | ✅ healthy | 4 ms |
 
 #### LAN Office
 
@@ -178,7 +178,7 @@ All monitored devices OK
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
 | Office Workstation | `192.0.2.132` | ✅ healthy | 4 ms |
-| Automation Server | `192.0.2.64` | ✅ healthy | 4 ms |
+| Automation Server | `192.0.2.64` | ✅ healthy | 5 ms |
 
 #### LAN Media
 
@@ -199,35 +199,35 @@ All monitored devices OK
 
 | Device | IP | Group | Status | Latency |
 |--------|----|-------|--------|---------|
-| Garage Door Controller | `192.0.2.100` | WiFi Garage | ✅ healthy | 3 ms |
+| Garage Door Controller | `192.0.2.100` | WiFi Garage | ✅ healthy | 4 ms |
 | Garage Light | `192.0.2.101` | WiFi Garage | ✅ healthy | 1 ms |
-| Utility Meter | `192.0.2.102` | WiFi Garage | ✅ healthy | 2 ms |
-| Workbench Plug | `192.0.2.103` | WiFi Garage | ✅ healthy | 1 ms |
-| Entry Light | `192.0.2.110` | WiFi Main Floor | ✅ healthy | 2 ms |
+| Utility Meter | `192.0.2.102` | WiFi Garage | ✅ healthy | 3 ms |
+| Workbench Plug | `192.0.2.103` | WiFi Garage | ✅ healthy | 2 ms |
+| Entry Light | `192.0.2.110` | WiFi Main Floor | ✅ healthy | 5 ms |
 | Kitchen Ceiling Light | `192.0.2.111` | WiFi Main Floor | ✅ healthy | 3 ms |
-| Kitchen Counter Light | `192.0.2.112` | WiFi Main Floor | ✅ healthy | 5 ms |
-| Dining Room Light | `192.0.2.113` | WiFi Main Floor | ✅ healthy | 3 ms |
-| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Living Room Light 2 | `192.0.2.115` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Living Room Light 3 | `192.0.2.116` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Hallway Light | `192.0.2.117` | WiFi Main Floor | ✅ healthy | 5 ms |
-| Porch Light | `192.0.2.118` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Kitchen Counter Light | `192.0.2.112` | WiFi Main Floor | ✅ healthy | 4 ms |
+| Dining Room Light | `192.0.2.113` | WiFi Main Floor | ✅ healthy | 4 ms |
+| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Living Room Light 2 | `192.0.2.115` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Living Room Light 3 | `192.0.2.116` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Hallway Light | `192.0.2.117` | WiFi Main Floor | ✅ healthy | 2 ms |
+| Porch Light | `192.0.2.118` | WiFi Main Floor | ✅ healthy | 4 ms |
 | Plant Light | `192.0.2.119` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Coffee Maker | `192.0.2.120` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 1 ms |
-| Thermostat | `192.0.2.131` | WiFi Upper Floor | ✅ healthy | 2 ms |
+| Coffee Maker | `192.0.2.120` | WiFi Main Floor | ✅ healthy | 1 ms |
+| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 3 ms |
+| Thermostat | `192.0.2.131` | WiFi Upper Floor | ✅ healthy | 4 ms |
 | Office Workstation | `192.0.2.132` | LAN Office | ✅ healthy | 4 ms |
-| Automation Server | `192.0.2.64` | LAN Office | ✅ healthy | 4 ms |
+| Automation Server | `192.0.2.64` | LAN Office | ✅ healthy | 5 ms |
 | Network Controller | `192.0.2.151` | LAN Router | ✅ healthy | 4 ms |
-| Bedroom Light 1 | `192.0.2.140` | WiFi Lower Floor | ✅ healthy | 3 ms |
+| Bedroom Light 1 | `192.0.2.140` | WiFi Lower Floor | ✅ healthy | 2 ms |
 | Bedroom Light 2 | `192.0.2.141` | WiFi Lower Floor | ✅ healthy | 4 ms |
-| Lower Bathroom Light | `192.0.2.142` | WiFi Lower Floor | ✅ healthy | 2 ms |
-| Media Room Light | `192.0.2.143` | WiFi Lower Floor | ✅ healthy | 2 ms |
-| Laundry Fan | `192.0.2.144` | WiFi Lower Floor | ✅ healthy | 3 ms |
-| Laundry Room Light | `192.0.2.145` | WiFi Lower Floor | ✅ healthy | 3 ms |
-| Storage Room Light | `192.0.2.146` | WiFi Lower Floor | ✅ healthy | 4 ms |
+| Lower Bathroom Light | `192.0.2.142` | WiFi Lower Floor | ✅ healthy | 5 ms |
+| Media Room Light | `192.0.2.143` | WiFi Lower Floor | ✅ healthy | 4 ms |
+| Laundry Fan | `192.0.2.144` | WiFi Lower Floor | ✅ healthy | 5 ms |
+| Laundry Room Light | `192.0.2.145` | WiFi Lower Floor | ✅ healthy | 1 ms |
+| Storage Room Light | `192.0.2.146` | WiFi Lower Floor | ✅ healthy | 2 ms |
 | Patio Light | `192.0.2.147` | WiFi Lower Floor | ✅ healthy | 2 ms |
-| Patio Outlet | `192.0.2.148` | WiFi Lower Floor | ✅ healthy | 1 ms |
+| Patio Outlet | `192.0.2.148` | WiFi Lower Floor | ✅ healthy | 4 ms |
 
 ---
 
@@ -268,24 +268,25 @@ Latency is elevated and packet loss is intermittent, but connectivity is maintai
 
 ```text
 
-HEIMDALLUR  2026-06-19 17:56:57 UTC
+HEIMDALLUR  2026-06-19 17:59:43 UTC
 
-INTERNET  ~ Degraded  91ms  elevated
+INTERNET  ✗ Offline  118ms  degraded
   IP 0/3  ·  DNS 3/3  ·  HTTP 3/3
   No IP connectivity — likely ISP outage
-  ↓ 185 Mbps  ·  ping 23 ms  (0s ago)
+  ↓ 282 Mbps  ·  ping 27 ms  (0s ago)
 
 HOME NETWORK
-  ROUTER  ✓ Online  1ms
-  ✓ Online  4ms  WiFi Garage
+  ROUTER  ✓ Online  2ms
+  ✓ Online  2ms  WiFi Garage
   ✓ Online  4ms  WiFi Main Floor
-  ✓ Online  3ms  WiFi Upper Floor
-  ✓ Online  3ms  WiFi Lower Floor
+  ✓ Online  1ms  WiFi Upper Floor
+  ✓ Online  5ms  WiFi Lower Floor
   LAN  LAN Office
   LAN  LAN Media
   LAN  LAN Router
 
-All monitored devices OK
+PROBLEMS
+  ✗  Internet offline — full network unreachable
 
 33 monitored  ·  33 OK  ·  0 down
 ```
@@ -297,45 +298,43 @@ All monitored devices OK
 
 # Heimdallur Network Status
 
-**Probed:** 2026-06-19 17:56:57 UTC  |  **Interval:** 30s
+**Probed:** 2026-06-19 17:59:43 UTC  |  **Interval:** 30s
 
 ## Summary
 
-⚠️  1 issue(s) detected — 33 / 33 devices online
-
-- Internet offline — full network unreachable
+✅ All systems healthy — 33 / 33 devices online
 
 ---
 
 ## Internet
 
-**Status:** ❌ UNREACHABLE  |  **Latency (ONT):** 142 ms avg (degraded)  |  **Loss:** 0%
+**Status:** ⚠️ DEGRADED  |  **Latency (ONT):** 78 ms avg (elevated)  |  **Loss:** 0%
 
 ### IP Reachability
 
 | Target | Status | Latency |
 |--------|--------|---------|
-| Cloudflare (1.1.1.1) | ❌ unreachable | 100 ms |
-| Google (8.8.8.8) | ❌ unreachable | 142 ms |
-| Quad9 (9.9.9.9) | ❌ unreachable | 199 ms |
+| Cloudflare (1.1.1.1) | ❌ unreachable | 151 ms |
+| Google (8.8.8.8) | ❌ unreachable | 155 ms |
+| Quad9 (9.9.9.9) | ❌ unreachable | 112 ms |
 
 ### DNS
 
 | Resolver | Status | Lookup |
 |----------|--------|--------|
-| Cloudflare (cloudflare.com) | ✅ Online | 75 ms |
-| Google (google.com) | ✅ Online | 64 ms |
-| Quad9 (quad9.net) | ✅ Online | 109 ms |
+| Cloudflare (cloudflare.com) | ✅ Online | 122 ms |
+| Google (google.com) | ✅ Online | 118 ms |
+| Quad9 (quad9.net) | ✅ Online | 90 ms |
 
 ### HTTP
 
 | Endpoint | Status | TTFB | Total |
 |----------|--------|------|-------|
-| Cloudflare | ✅ Online | 287 ms | 342 ms |
-| Google | ✅ Online | 296 ms | 324 ms |
-| Microsoft | ✅ Online | 362 ms | 408 ms |
+| Cloudflare | ✅ Online | 327 ms | 359 ms |
+| Google | ✅ Online | 319 ms | 341 ms |
+| Microsoft | ✅ Online | 358 ms | 392 ms |
 
-**Speed test:** ↓ 184 Mbps  |  ping 20 ms  *(0s ago)*
+**Speed test:** ↓ 209 Mbps  |  ping 20 ms  *(0s ago)*
 
 ---
 
@@ -344,71 +343,71 @@ All monitored devices OK
 ### Router
 
 **Status:** ✅ HEALTHY  |  **Latency:** 1 ms
-**CPU:** 13%  |  **Memory:** 49%  |  **Uptime:** 3d
+**CPU:** 18%  |  **Memory:** 49%  |  **Uptime:** 3d
 
 ### Groups
 
 #### WiFi Garage
 
-**Gateway `192.0.2.25`:** ✅ 2 ms
+**Gateway `192.0.2.25`:** ✅ 5 ms
 
 **Devices:** 4 / 4 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Garage Door Controller | `192.0.2.100` | ✅ healthy | 2 ms |
-| Garage Light | `192.0.2.101` | ✅ healthy | 4 ms |
-| Utility Meter | `192.0.2.102` | ✅ healthy | 2 ms |
-| Workbench Plug | `192.0.2.103` | ✅ healthy | 4 ms |
+| Garage Door Controller | `192.0.2.100` | ✅ healthy | 3 ms |
+| Garage Light | `192.0.2.101` | ✅ healthy | 3 ms |
+| Utility Meter | `192.0.2.102` | ✅ healthy | 4 ms |
+| Workbench Plug | `192.0.2.103` | ✅ healthy | 5 ms |
 
 #### WiFi Main Floor
 
-**Gateway `192.0.2.21`:** ✅ 5 ms
+**Gateway `192.0.2.21`:** ✅ 3 ms
 
 **Devices:** 11 / 11 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Entry Light | `192.0.2.110` | ✅ healthy | 5 ms |
-| Kitchen Ceiling Light | `192.0.2.111` | ✅ healthy | 2 ms |
-| Kitchen Counter Light | `192.0.2.112` | ✅ healthy | 2 ms |
-| Dining Room Light | `192.0.2.113` | ✅ healthy | 3 ms |
-| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 4 ms |
+| Entry Light | `192.0.2.110` | ✅ healthy | 2 ms |
+| Kitchen Ceiling Light | `192.0.2.111` | ✅ healthy | 3 ms |
+| Kitchen Counter Light | `192.0.2.112` | ✅ healthy | 4 ms |
+| Dining Room Light | `192.0.2.113` | ✅ healthy | 5 ms |
+| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 1 ms |
 | Living Room Light 2 | `192.0.2.115` | ✅ healthy | 2 ms |
-| Living Room Light 3 | `192.0.2.116` | ✅ healthy | 4 ms |
-| Hallway Light | `192.0.2.117` | ✅ healthy | 1 ms |
+| Living Room Light 3 | `192.0.2.116` | ✅ healthy | 3 ms |
+| Hallway Light | `192.0.2.117` | ✅ healthy | 2 ms |
 | Porch Light | `192.0.2.118` | ✅ healthy | 4 ms |
-| Plant Light | `192.0.2.119` | ✅ healthy | 4 ms |
-| Coffee Maker | `192.0.2.120` | ✅ healthy | 2 ms |
+| Plant Light | `192.0.2.119` | ✅ healthy | 2 ms |
+| Coffee Maker | `192.0.2.120` | ✅ healthy | 3 ms |
 
 #### WiFi Upper Floor
 
-**Gateway `192.0.2.22`:** ✅ 2 ms
+**Gateway `192.0.2.22`:** ✅ 5 ms
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Bathroom LED | `192.0.2.130` | ✅ healthy | 4 ms |
-| Thermostat | `192.0.2.131` | ✅ healthy | 1 ms |
+| Bathroom LED | `192.0.2.130` | ✅ healthy | 2 ms |
+| Thermostat | `192.0.2.131` | ✅ healthy | 5 ms |
 
 #### WiFi Lower Floor
 
-**Gateway `192.0.2.23`:** ✅ 1 ms
+**Gateway `192.0.2.23`:** ✅ 2 ms
 
 **Devices:** 9 / 9 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Bedroom Light 1 | `192.0.2.140` | ✅ healthy | 1 ms |
-| Bedroom Light 2 | `192.0.2.141` | ✅ healthy | 2 ms |
-| Lower Bathroom Light | `192.0.2.142` | ✅ healthy | 3 ms |
-| Media Room Light | `192.0.2.143` | ✅ healthy | 1 ms |
-| Laundry Fan | `192.0.2.144` | ✅ healthy | 2 ms |
-| Laundry Room Light | `192.0.2.145` | ✅ healthy | 5 ms |
+| Bedroom Light 1 | `192.0.2.140` | ✅ healthy | 3 ms |
+| Bedroom Light 2 | `192.0.2.141` | ✅ healthy | 5 ms |
+| Lower Bathroom Light | `192.0.2.142` | ✅ healthy | 2 ms |
+| Media Room Light | `192.0.2.143` | ✅ healthy | 5 ms |
+| Laundry Fan | `192.0.2.144` | ✅ healthy | 3 ms |
+| Laundry Room Light | `192.0.2.145` | ✅ healthy | 2 ms |
 | Storage Room Light | `192.0.2.146` | ✅ healthy | 5 ms |
-| Patio Light | `192.0.2.147` | ✅ healthy | 1 ms |
-| Patio Outlet | `192.0.2.148` | ✅ healthy | 3 ms |
+| Patio Light | `192.0.2.147` | ✅ healthy | 4 ms |
+| Patio Outlet | `192.0.2.148` | ✅ healthy | 5 ms |
 
 #### LAN Office
 
@@ -416,8 +415,8 @@ All monitored devices OK
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Office Workstation | `192.0.2.132` | ✅ healthy | 5 ms |
-| Automation Server | `192.0.2.64` | ✅ healthy | 4 ms |
+| Office Workstation | `192.0.2.132` | ✅ healthy | 2 ms |
+| Automation Server | `192.0.2.64` | ✅ healthy | 3 ms |
 
 #### LAN Media
 
@@ -429,7 +428,7 @@ All monitored devices OK
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Network Controller | `192.0.2.151` | ✅ healthy | 5 ms |
+| Network Controller | `192.0.2.151` | ✅ healthy | 3 ms |
 
 
 ---
@@ -438,35 +437,35 @@ All monitored devices OK
 
 | Device | IP | Group | Status | Latency |
 |--------|----|-------|--------|---------|
-| Garage Door Controller | `192.0.2.100` | WiFi Garage | ✅ healthy | 2 ms |
-| Garage Light | `192.0.2.101` | WiFi Garage | ✅ healthy | 4 ms |
-| Utility Meter | `192.0.2.102` | WiFi Garage | ✅ healthy | 2 ms |
-| Workbench Plug | `192.0.2.103` | WiFi Garage | ✅ healthy | 4 ms |
-| Entry Light | `192.0.2.110` | WiFi Main Floor | ✅ healthy | 5 ms |
-| Kitchen Ceiling Light | `192.0.2.111` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Kitchen Counter Light | `192.0.2.112` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Dining Room Light | `192.0.2.113` | WiFi Main Floor | ✅ healthy | 3 ms |
-| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 4 ms |
+| Garage Door Controller | `192.0.2.100` | WiFi Garage | ✅ healthy | 3 ms |
+| Garage Light | `192.0.2.101` | WiFi Garage | ✅ healthy | 3 ms |
+| Utility Meter | `192.0.2.102` | WiFi Garage | ✅ healthy | 4 ms |
+| Workbench Plug | `192.0.2.103` | WiFi Garage | ✅ healthy | 5 ms |
+| Entry Light | `192.0.2.110` | WiFi Main Floor | ✅ healthy | 2 ms |
+| Kitchen Ceiling Light | `192.0.2.111` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Kitchen Counter Light | `192.0.2.112` | WiFi Main Floor | ✅ healthy | 4 ms |
+| Dining Room Light | `192.0.2.113` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 1 ms |
 | Living Room Light 2 | `192.0.2.115` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Living Room Light 3 | `192.0.2.116` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Hallway Light | `192.0.2.117` | WiFi Main Floor | ✅ healthy | 1 ms |
+| Living Room Light 3 | `192.0.2.116` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Hallway Light | `192.0.2.117` | WiFi Main Floor | ✅ healthy | 2 ms |
 | Porch Light | `192.0.2.118` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Plant Light | `192.0.2.119` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Coffee Maker | `192.0.2.120` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 4 ms |
-| Thermostat | `192.0.2.131` | WiFi Upper Floor | ✅ healthy | 1 ms |
-| Office Workstation | `192.0.2.132` | LAN Office | ✅ healthy | 5 ms |
-| Automation Server | `192.0.2.64` | LAN Office | ✅ healthy | 4 ms |
-| Network Controller | `192.0.2.151` | LAN Router | ✅ healthy | 5 ms |
-| Bedroom Light 1 | `192.0.2.140` | WiFi Lower Floor | ✅ healthy | 1 ms |
-| Bedroom Light 2 | `192.0.2.141` | WiFi Lower Floor | ✅ healthy | 2 ms |
-| Lower Bathroom Light | `192.0.2.142` | WiFi Lower Floor | ✅ healthy | 3 ms |
-| Media Room Light | `192.0.2.143` | WiFi Lower Floor | ✅ healthy | 1 ms |
-| Laundry Fan | `192.0.2.144` | WiFi Lower Floor | ✅ healthy | 2 ms |
-| Laundry Room Light | `192.0.2.145` | WiFi Lower Floor | ✅ healthy | 5 ms |
+| Plant Light | `192.0.2.119` | WiFi Main Floor | ✅ healthy | 2 ms |
+| Coffee Maker | `192.0.2.120` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 2 ms |
+| Thermostat | `192.0.2.131` | WiFi Upper Floor | ✅ healthy | 5 ms |
+| Office Workstation | `192.0.2.132` | LAN Office | ✅ healthy | 2 ms |
+| Automation Server | `192.0.2.64` | LAN Office | ✅ healthy | 3 ms |
+| Network Controller | `192.0.2.151` | LAN Router | ✅ healthy | 3 ms |
+| Bedroom Light 1 | `192.0.2.140` | WiFi Lower Floor | ✅ healthy | 3 ms |
+| Bedroom Light 2 | `192.0.2.141` | WiFi Lower Floor | ✅ healthy | 5 ms |
+| Lower Bathroom Light | `192.0.2.142` | WiFi Lower Floor | ✅ healthy | 2 ms |
+| Media Room Light | `192.0.2.143` | WiFi Lower Floor | ✅ healthy | 5 ms |
+| Laundry Fan | `192.0.2.144` | WiFi Lower Floor | ✅ healthy | 3 ms |
+| Laundry Room Light | `192.0.2.145` | WiFi Lower Floor | ✅ healthy | 2 ms |
 | Storage Room Light | `192.0.2.146` | WiFi Lower Floor | ✅ healthy | 5 ms |
-| Patio Light | `192.0.2.147` | WiFi Lower Floor | ✅ healthy | 1 ms |
-| Patio Outlet | `192.0.2.148` | WiFi Lower Floor | ✅ healthy | 3 ms |
+| Patio Light | `192.0.2.147` | WiFi Lower Floor | ✅ healthy | 4 ms |
+| Patio Outlet | `192.0.2.148` | WiFi Lower Floor | ✅ healthy | 5 ms |
 
 ---
 
@@ -498,19 +497,19 @@ Complete loss of internet connectivity — IP, DNS, and HTTP checks all failing.
 
 ```text
 
-HEIMDALLUR  2026-06-19 17:56:57 UTC
+HEIMDALLUR  2026-06-19 17:59:43 UTC
 
 INTERNET  ✗ Offline  timeout
   IP 0/3  ·  DNS 0/3  ·  HTTP 0/3
   No IP connectivity — likely ISP outage
-  ↓ 427 Mbps  ·  ping 15 ms  (0s ago)
+  ↓ 462 Mbps  ·  ping 31 ms  (0s ago)
 
 HOME NETWORK
   ROUTER  ✓ Online  1ms
   ✓ Online  2ms  WiFi Garage
   ✓ Online  4ms  WiFi Main Floor
-  ✓ Online  3ms  WiFi Upper Floor
-  ✓ Online  5ms  WiFi Lower Floor
+  ✓ Online  1ms  WiFi Upper Floor
+  ✓ Online  1ms  WiFi Lower Floor
   LAN  LAN Office
   LAN  LAN Media
   LAN  LAN Router
@@ -528,7 +527,7 @@ PROBLEMS
 
 # Heimdallur Network Status
 
-**Probed:** 2026-06-19 17:56:57 UTC  |  **Interval:** 30s
+**Probed:** 2026-06-19 17:59:43 UTC  |  **Interval:** 30s
 
 ## Summary
 
@@ -566,7 +565,7 @@ PROBLEMS
 | Google | ❌ Offline | — | — |
 | Microsoft | ❌ Offline | — | — |
 
-**Speed test:** ↓ 207 Mbps  |  ping 13 ms  *(0s ago)*
+**Speed test:** ↓ 376 Mbps  |  ping 27 ms  *(0s ago)*
 
 ---
 
@@ -575,22 +574,22 @@ PROBLEMS
 ### Router
 
 **Status:** ✅ HEALTHY  |  **Latency:** 1 ms
-**CPU:** 21%  |  **Memory:** 41%  |  **Uptime:** 3d
+**CPU:** 6%  |  **Memory:** 49%  |  **Uptime:** 3d
 
 ### Groups
 
 #### WiFi Garage
 
-**Gateway `192.0.2.25`:** ✅ 2 ms
+**Gateway `192.0.2.25`:** ✅ 3 ms
 
 **Devices:** 4 / 4 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Garage Door Controller | `192.0.2.100` | ✅ healthy | 2 ms |
-| Garage Light | `192.0.2.101` | ✅ healthy | 5 ms |
-| Utility Meter | `192.0.2.102` | ✅ healthy | 4 ms |
-| Workbench Plug | `192.0.2.103` | ✅ healthy | 1 ms |
+| Garage Door Controller | `192.0.2.100` | ✅ healthy | 4 ms |
+| Garage Light | `192.0.2.101` | ✅ healthy | 4 ms |
+| Utility Meter | `192.0.2.102` | ✅ healthy | 3 ms |
+| Workbench Plug | `192.0.2.103` | ✅ healthy | 2 ms |
 
 #### WiFi Main Floor
 
@@ -600,46 +599,46 @@ PROBLEMS
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Entry Light | `192.0.2.110` | ✅ healthy | 5 ms |
-| Kitchen Ceiling Light | `192.0.2.111` | ✅ healthy | 2 ms |
-| Kitchen Counter Light | `192.0.2.112` | ✅ healthy | 1 ms |
+| Entry Light | `192.0.2.110` | ✅ healthy | 3 ms |
+| Kitchen Ceiling Light | `192.0.2.111` | ✅ healthy | 5 ms |
+| Kitchen Counter Light | `192.0.2.112` | ✅ healthy | 3 ms |
 | Dining Room Light | `192.0.2.113` | ✅ healthy | 4 ms |
-| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 2 ms |
-| Living Room Light 2 | `192.0.2.115` | ✅ healthy | 3 ms |
+| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 3 ms |
+| Living Room Light 2 | `192.0.2.115` | ✅ healthy | 5 ms |
 | Living Room Light 3 | `192.0.2.116` | ✅ healthy | 1 ms |
-| Hallway Light | `192.0.2.117` | ✅ healthy | 5 ms |
-| Porch Light | `192.0.2.118` | ✅ healthy | 2 ms |
-| Plant Light | `192.0.2.119` | ✅ healthy | 2 ms |
+| Hallway Light | `192.0.2.117` | ✅ healthy | 2 ms |
+| Porch Light | `192.0.2.118` | ✅ healthy | 5 ms |
+| Plant Light | `192.0.2.119` | ✅ healthy | 1 ms |
 | Coffee Maker | `192.0.2.120` | ✅ healthy | 4 ms |
 
 #### WiFi Upper Floor
 
-**Gateway `192.0.2.22`:** ✅ 4 ms
+**Gateway `192.0.2.22`:** ✅ 1 ms
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Bathroom LED | `192.0.2.130` | ✅ healthy | 2 ms |
-| Thermostat | `192.0.2.131` | ✅ healthy | 3 ms |
+| Bathroom LED | `192.0.2.130` | ✅ healthy | 4 ms |
+| Thermostat | `192.0.2.131` | ✅ healthy | 4 ms |
 
 #### WiFi Lower Floor
 
-**Gateway `192.0.2.23`:** ✅ 3 ms
+**Gateway `192.0.2.23`:** ✅ 1 ms
 
 **Devices:** 9 / 9 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Bedroom Light 1 | `192.0.2.140` | ✅ healthy | 3 ms |
-| Bedroom Light 2 | `192.0.2.141` | ✅ healthy | 5 ms |
-| Lower Bathroom Light | `192.0.2.142` | ✅ healthy | 4 ms |
-| Media Room Light | `192.0.2.143` | ✅ healthy | 2 ms |
-| Laundry Fan | `192.0.2.144` | ✅ healthy | 5 ms |
-| Laundry Room Light | `192.0.2.145` | ✅ healthy | 3 ms |
-| Storage Room Light | `192.0.2.146` | ✅ healthy | 2 ms |
+| Bedroom Light 1 | `192.0.2.140` | ✅ healthy | 2 ms |
+| Bedroom Light 2 | `192.0.2.141` | ✅ healthy | 4 ms |
+| Lower Bathroom Light | `192.0.2.142` | ✅ healthy | 2 ms |
+| Media Room Light | `192.0.2.143` | ✅ healthy | 3 ms |
+| Laundry Fan | `192.0.2.144` | ✅ healthy | 2 ms |
+| Laundry Room Light | `192.0.2.145` | ✅ healthy | 2 ms |
+| Storage Room Light | `192.0.2.146` | ✅ healthy | 1 ms |
 | Patio Light | `192.0.2.147` | ✅ healthy | 4 ms |
-| Patio Outlet | `192.0.2.148` | ✅ healthy | 2 ms |
+| Patio Outlet | `192.0.2.148` | ✅ healthy | 3 ms |
 
 #### LAN Office
 
@@ -647,8 +646,8 @@ PROBLEMS
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Office Workstation | `192.0.2.132` | ✅ healthy | 4 ms |
-| Automation Server | `192.0.2.64` | ✅ healthy | 2 ms |
+| Office Workstation | `192.0.2.132` | ✅ healthy | 2 ms |
+| Automation Server | `192.0.2.64` | ✅ healthy | 3 ms |
 
 #### LAN Media
 
@@ -660,7 +659,7 @@ PROBLEMS
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Network Controller | `192.0.2.151` | ✅ healthy | 5 ms |
+| Network Controller | `192.0.2.151` | ✅ healthy | 3 ms |
 
 
 ---
@@ -669,35 +668,35 @@ PROBLEMS
 
 | Device | IP | Group | Status | Latency |
 |--------|----|-------|--------|---------|
-| Garage Door Controller | `192.0.2.100` | WiFi Garage | ✅ healthy | 2 ms |
-| Garage Light | `192.0.2.101` | WiFi Garage | ✅ healthy | 5 ms |
-| Utility Meter | `192.0.2.102` | WiFi Garage | ✅ healthy | 4 ms |
-| Workbench Plug | `192.0.2.103` | WiFi Garage | ✅ healthy | 1 ms |
-| Entry Light | `192.0.2.110` | WiFi Main Floor | ✅ healthy | 5 ms |
-| Kitchen Ceiling Light | `192.0.2.111` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Kitchen Counter Light | `192.0.2.112` | WiFi Main Floor | ✅ healthy | 1 ms |
+| Garage Door Controller | `192.0.2.100` | WiFi Garage | ✅ healthy | 4 ms |
+| Garage Light | `192.0.2.101` | WiFi Garage | ✅ healthy | 4 ms |
+| Utility Meter | `192.0.2.102` | WiFi Garage | ✅ healthy | 3 ms |
+| Workbench Plug | `192.0.2.103` | WiFi Garage | ✅ healthy | 2 ms |
+| Entry Light | `192.0.2.110` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Kitchen Ceiling Light | `192.0.2.111` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Kitchen Counter Light | `192.0.2.112` | WiFi Main Floor | ✅ healthy | 3 ms |
 | Dining Room Light | `192.0.2.113` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Living Room Light 2 | `192.0.2.115` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Living Room Light 2 | `192.0.2.115` | WiFi Main Floor | ✅ healthy | 5 ms |
 | Living Room Light 3 | `192.0.2.116` | WiFi Main Floor | ✅ healthy | 1 ms |
-| Hallway Light | `192.0.2.117` | WiFi Main Floor | ✅ healthy | 5 ms |
-| Porch Light | `192.0.2.118` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Plant Light | `192.0.2.119` | WiFi Main Floor | ✅ healthy | 2 ms |
+| Hallway Light | `192.0.2.117` | WiFi Main Floor | ✅ healthy | 2 ms |
+| Porch Light | `192.0.2.118` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Plant Light | `192.0.2.119` | WiFi Main Floor | ✅ healthy | 1 ms |
 | Coffee Maker | `192.0.2.120` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 2 ms |
-| Thermostat | `192.0.2.131` | WiFi Upper Floor | ✅ healthy | 3 ms |
-| Office Workstation | `192.0.2.132` | LAN Office | ✅ healthy | 4 ms |
-| Automation Server | `192.0.2.64` | LAN Office | ✅ healthy | 2 ms |
-| Network Controller | `192.0.2.151` | LAN Router | ✅ healthy | 5 ms |
-| Bedroom Light 1 | `192.0.2.140` | WiFi Lower Floor | ✅ healthy | 3 ms |
-| Bedroom Light 2 | `192.0.2.141` | WiFi Lower Floor | ✅ healthy | 5 ms |
-| Lower Bathroom Light | `192.0.2.142` | WiFi Lower Floor | ✅ healthy | 4 ms |
-| Media Room Light | `192.0.2.143` | WiFi Lower Floor | ✅ healthy | 2 ms |
-| Laundry Fan | `192.0.2.144` | WiFi Lower Floor | ✅ healthy | 5 ms |
-| Laundry Room Light | `192.0.2.145` | WiFi Lower Floor | ✅ healthy | 3 ms |
-| Storage Room Light | `192.0.2.146` | WiFi Lower Floor | ✅ healthy | 2 ms |
+| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 4 ms |
+| Thermostat | `192.0.2.131` | WiFi Upper Floor | ✅ healthy | 4 ms |
+| Office Workstation | `192.0.2.132` | LAN Office | ✅ healthy | 2 ms |
+| Automation Server | `192.0.2.64` | LAN Office | ✅ healthy | 3 ms |
+| Network Controller | `192.0.2.151` | LAN Router | ✅ healthy | 3 ms |
+| Bedroom Light 1 | `192.0.2.140` | WiFi Lower Floor | ✅ healthy | 2 ms |
+| Bedroom Light 2 | `192.0.2.141` | WiFi Lower Floor | ✅ healthy | 4 ms |
+| Lower Bathroom Light | `192.0.2.142` | WiFi Lower Floor | ✅ healthy | 2 ms |
+| Media Room Light | `192.0.2.143` | WiFi Lower Floor | ✅ healthy | 3 ms |
+| Laundry Fan | `192.0.2.144` | WiFi Lower Floor | ✅ healthy | 2 ms |
+| Laundry Room Light | `192.0.2.145` | WiFi Lower Floor | ✅ healthy | 2 ms |
+| Storage Room Light | `192.0.2.146` | WiFi Lower Floor | ✅ healthy | 1 ms |
 | Patio Light | `192.0.2.147` | WiFi Lower Floor | ✅ healthy | 4 ms |
-| Patio Outlet | `192.0.2.148` | WiFi Lower Floor | ✅ healthy | 2 ms |
+| Patio Outlet | `192.0.2.148` | WiFi Lower Floor | ✅ healthy | 3 ms |
 
 ---
 
@@ -729,19 +728,19 @@ The router is unreachable. Because all downstream devices depend on the router, 
 
 ```text
 
-HEIMDALLUR  2026-06-19 17:56:57 UTC
+HEIMDALLUR  2026-06-19 17:59:43 UTC
 
-INTERNET  ✓ Online  19ms  excellent
+INTERNET  ✓ Online  49ms  excellent
   IP 3/3  ·  DNS 3/3  ·  HTTP 3/3
   All paths healthy
-  ↓ 288 Mbps  ·  ping 17 ms  (0s ago)
+  ↓ 317 Mbps  ·  ping 24 ms  (0s ago)
 
 HOME NETWORK
   ROUTER  ✗ Offline  timeout
-  ✓ Online  5ms  WiFi Garage
-  ✓ Online  5ms  WiFi Main Floor
-  ✓ Online  4ms  WiFi Upper Floor
-  ✓ Online  5ms  WiFi Lower Floor
+  ✓ Online  3ms  WiFi Garage
+  ✓ Online  2ms  WiFi Main Floor
+  ✓ Online  2ms  WiFi Upper Floor
+  ✓ Online  1ms  WiFi Lower Floor
   LAN  LAN Office
   LAN  LAN Media
   LAN  LAN Router
@@ -759,7 +758,7 @@ PROBLEMS
 
 # Heimdallur Network Status
 
-**Probed:** 2026-06-19 17:56:57 UTC  |  **Interval:** 30s
+**Probed:** 2026-06-19 17:59:43 UTC  |  **Interval:** 30s
 
 ## Summary
 
@@ -771,33 +770,33 @@ PROBLEMS
 
 ## Internet
 
-**Status:** ✅ HEALTHY  |  **Latency (ONT):** 39 ms avg (excellent)  |  **Loss:** 0%
+**Status:** ✅ HEALTHY  |  **Latency (ONT):** 53 ms avg (elevated)  |  **Loss:** 0%
 
 ### IP Reachability
 
 | Target | Status | Latency |
 |--------|--------|---------|
-| Cloudflare (1.1.1.1) | ✅ healthy | 24 ms |
-| Google (8.8.8.8) | ✅ healthy | 29 ms |
-| Quad9 (9.9.9.9) | ✅ healthy | 13 ms |
+| Cloudflare (1.1.1.1) | ✅ healthy | 26 ms |
+| Google (8.8.8.8) | ✅ healthy | 28 ms |
+| Quad9 (9.9.9.9) | ✅ healthy | 25 ms |
 
 ### DNS
 
 | Resolver | Status | Lookup |
 |----------|--------|--------|
-| Cloudflare (cloudflare.com) | ✅ Online | 6 ms |
-| Google (google.com) | ✅ Online | 13 ms |
-| Quad9 (quad9.net) | ✅ Online | 17 ms |
+| Cloudflare (cloudflare.com) | ✅ Online | 8 ms |
+| Google (google.com) | ✅ Online | 14 ms |
+| Quad9 (quad9.net) | ✅ Online | 14 ms |
 
 ### HTTP
 
 | Endpoint | Status | TTFB | Total |
 |----------|--------|------|-------|
-| Cloudflare | ✅ Online | 62 ms | 69 ms |
-| Google | ✅ Online | 75 ms | 85 ms |
-| Microsoft | ✅ Online | 67 ms | 82 ms |
+| Cloudflare | ✅ Online | 57 ms | 64 ms |
+| Google | ✅ Online | 35 ms | 51 ms |
+| Microsoft | ✅ Online | 59 ms | 83 ms |
 
-**Speed test:** ↓ 270 Mbps  |  ping 12 ms  *(0s ago)*
+**Speed test:** ↓ 334 Mbps  |  ping 14 ms  *(0s ago)*
 
 ---
 
@@ -806,70 +805,70 @@ PROBLEMS
 ### Router
 
 **Status:** ❌ UNREACHABLE  |  **Latency:** —
-**CPU:** 6%  |  **Memory:** 42%  |  **Uptime:** 3d
+**CPU:** 10%  |  **Memory:** 37%  |  **Uptime:** 3d
 
 ### Groups
 
 #### WiFi Garage
 
-**Gateway `192.0.2.25`:** ✅ 5 ms
+**Gateway `192.0.2.25`:** ✅ 2 ms
 
 **Devices:** 4 / 4 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
 | Garage Door Controller | `192.0.2.100` | ✅ healthy | 4 ms |
-| Garage Light | `192.0.2.101` | ✅ healthy | 3 ms |
-| Utility Meter | `192.0.2.102` | ✅ healthy | 4 ms |
-| Workbench Plug | `192.0.2.103` | ✅ healthy | 2 ms |
+| Garage Light | `192.0.2.101` | ✅ healthy | 5 ms |
+| Utility Meter | `192.0.2.102` | ✅ healthy | 3 ms |
+| Workbench Plug | `192.0.2.103` | ✅ healthy | 4 ms |
 
 #### WiFi Main Floor
 
-**Gateway `192.0.2.21`:** ✅ 5 ms
+**Gateway `192.0.2.21`:** ✅ 4 ms
 
 **Devices:** 11 / 11 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
 | Entry Light | `192.0.2.110` | ✅ healthy | 2 ms |
-| Kitchen Ceiling Light | `192.0.2.111` | ✅ healthy | 2 ms |
-| Kitchen Counter Light | `192.0.2.112` | ✅ healthy | 1 ms |
-| Dining Room Light | `192.0.2.113` | ✅ healthy | 1 ms |
-| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 2 ms |
-| Living Room Light 2 | `192.0.2.115` | ✅ healthy | 3 ms |
-| Living Room Light 3 | `192.0.2.116` | ✅ healthy | 2 ms |
-| Hallway Light | `192.0.2.117` | ✅ healthy | 2 ms |
-| Porch Light | `192.0.2.118` | ✅ healthy | 4 ms |
-| Plant Light | `192.0.2.119` | ✅ healthy | 4 ms |
-| Coffee Maker | `192.0.2.120` | ✅ healthy | 1 ms |
+| Kitchen Ceiling Light | `192.0.2.111` | ✅ healthy | 5 ms |
+| Kitchen Counter Light | `192.0.2.112` | ✅ healthy | 5 ms |
+| Dining Room Light | `192.0.2.113` | ✅ healthy | 2 ms |
+| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 3 ms |
+| Living Room Light 2 | `192.0.2.115` | ✅ healthy | 2 ms |
+| Living Room Light 3 | `192.0.2.116` | ✅ healthy | 4 ms |
+| Hallway Light | `192.0.2.117` | ✅ healthy | 3 ms |
+| Porch Light | `192.0.2.118` | ✅ healthy | 5 ms |
+| Plant Light | `192.0.2.119` | ✅ healthy | 3 ms |
+| Coffee Maker | `192.0.2.120` | ✅ healthy | 3 ms |
 
 #### WiFi Upper Floor
 
-**Gateway `192.0.2.22`:** ✅ 4 ms
+**Gateway `192.0.2.22`:** ✅ 2 ms
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Bathroom LED | `192.0.2.130` | ✅ healthy | 1 ms |
-| Thermostat | `192.0.2.131` | ✅ healthy | 3 ms |
+| Bathroom LED | `192.0.2.130` | ✅ healthy | 4 ms |
+| Thermostat | `192.0.2.131` | ✅ healthy | 4 ms |
 
 #### WiFi Lower Floor
 
-**Gateway `192.0.2.23`:** ✅ 1 ms
+**Gateway `192.0.2.23`:** ✅ 5 ms
 
 **Devices:** 9 / 9 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Bedroom Light 1 | `192.0.2.140` | ✅ healthy | 4 ms |
+| Bedroom Light 1 | `192.0.2.140` | ✅ healthy | 3 ms |
 | Bedroom Light 2 | `192.0.2.141` | ✅ healthy | 5 ms |
-| Lower Bathroom Light | `192.0.2.142` | ✅ healthy | 5 ms |
+| Lower Bathroom Light | `192.0.2.142` | ✅ healthy | 1 ms |
 | Media Room Light | `192.0.2.143` | ✅ healthy | 3 ms |
-| Laundry Fan | `192.0.2.144` | ✅ healthy | 3 ms |
-| Laundry Room Light | `192.0.2.145` | ✅ healthy | 3 ms |
+| Laundry Fan | `192.0.2.144` | ✅ healthy | 1 ms |
+| Laundry Room Light | `192.0.2.145` | ✅ healthy | 5 ms |
 | Storage Room Light | `192.0.2.146` | ✅ healthy | 3 ms |
-| Patio Light | `192.0.2.147` | ✅ healthy | 2 ms |
+| Patio Light | `192.0.2.147` | ✅ healthy | 5 ms |
 | Patio Outlet | `192.0.2.148` | ✅ healthy | 3 ms |
 
 #### LAN Office
@@ -878,7 +877,7 @@ PROBLEMS
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Office Workstation | `192.0.2.132` | ✅ healthy | 2 ms |
+| Office Workstation | `192.0.2.132` | ✅ healthy | 3 ms |
 | Automation Server | `192.0.2.64` | ✅ healthy | 2 ms |
 
 #### LAN Media
@@ -891,7 +890,7 @@ PROBLEMS
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Network Controller | `192.0.2.151` | ✅ healthy | 2 ms |
+| Network Controller | `192.0.2.151` | ✅ healthy | 3 ms |
 
 
 ---
@@ -901,33 +900,33 @@ PROBLEMS
 | Device | IP | Group | Status | Latency |
 |--------|----|-------|--------|---------|
 | Garage Door Controller | `192.0.2.100` | WiFi Garage | ✅ healthy | 4 ms |
-| Garage Light | `192.0.2.101` | WiFi Garage | ✅ healthy | 3 ms |
-| Utility Meter | `192.0.2.102` | WiFi Garage | ✅ healthy | 4 ms |
-| Workbench Plug | `192.0.2.103` | WiFi Garage | ✅ healthy | 2 ms |
+| Garage Light | `192.0.2.101` | WiFi Garage | ✅ healthy | 5 ms |
+| Utility Meter | `192.0.2.102` | WiFi Garage | ✅ healthy | 3 ms |
+| Workbench Plug | `192.0.2.103` | WiFi Garage | ✅ healthy | 4 ms |
 | Entry Light | `192.0.2.110` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Kitchen Ceiling Light | `192.0.2.111` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Kitchen Counter Light | `192.0.2.112` | WiFi Main Floor | ✅ healthy | 1 ms |
-| Dining Room Light | `192.0.2.113` | WiFi Main Floor | ✅ healthy | 1 ms |
-| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Living Room Light 2 | `192.0.2.115` | WiFi Main Floor | ✅ healthy | 3 ms |
-| Living Room Light 3 | `192.0.2.116` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Hallway Light | `192.0.2.117` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Porch Light | `192.0.2.118` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Plant Light | `192.0.2.119` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Coffee Maker | `192.0.2.120` | WiFi Main Floor | ✅ healthy | 1 ms |
-| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 1 ms |
-| Thermostat | `192.0.2.131` | WiFi Upper Floor | ✅ healthy | 3 ms |
-| Office Workstation | `192.0.2.132` | LAN Office | ✅ healthy | 2 ms |
+| Kitchen Ceiling Light | `192.0.2.111` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Kitchen Counter Light | `192.0.2.112` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Dining Room Light | `192.0.2.113` | WiFi Main Floor | ✅ healthy | 2 ms |
+| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Living Room Light 2 | `192.0.2.115` | WiFi Main Floor | ✅ healthy | 2 ms |
+| Living Room Light 3 | `192.0.2.116` | WiFi Main Floor | ✅ healthy | 4 ms |
+| Hallway Light | `192.0.2.117` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Porch Light | `192.0.2.118` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Plant Light | `192.0.2.119` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Coffee Maker | `192.0.2.120` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 4 ms |
+| Thermostat | `192.0.2.131` | WiFi Upper Floor | ✅ healthy | 4 ms |
+| Office Workstation | `192.0.2.132` | LAN Office | ✅ healthy | 3 ms |
 | Automation Server | `192.0.2.64` | LAN Office | ✅ healthy | 2 ms |
-| Network Controller | `192.0.2.151` | LAN Router | ✅ healthy | 2 ms |
-| Bedroom Light 1 | `192.0.2.140` | WiFi Lower Floor | ✅ healthy | 4 ms |
+| Network Controller | `192.0.2.151` | LAN Router | ✅ healthy | 3 ms |
+| Bedroom Light 1 | `192.0.2.140` | WiFi Lower Floor | ✅ healthy | 3 ms |
 | Bedroom Light 2 | `192.0.2.141` | WiFi Lower Floor | ✅ healthy | 5 ms |
-| Lower Bathroom Light | `192.0.2.142` | WiFi Lower Floor | ✅ healthy | 5 ms |
+| Lower Bathroom Light | `192.0.2.142` | WiFi Lower Floor | ✅ healthy | 1 ms |
 | Media Room Light | `192.0.2.143` | WiFi Lower Floor | ✅ healthy | 3 ms |
-| Laundry Fan | `192.0.2.144` | WiFi Lower Floor | ✅ healthy | 3 ms |
-| Laundry Room Light | `192.0.2.145` | WiFi Lower Floor | ✅ healthy | 3 ms |
+| Laundry Fan | `192.0.2.144` | WiFi Lower Floor | ✅ healthy | 1 ms |
+| Laundry Room Light | `192.0.2.145` | WiFi Lower Floor | ✅ healthy | 5 ms |
 | Storage Room Light | `192.0.2.146` | WiFi Lower Floor | ✅ healthy | 3 ms |
-| Patio Light | `192.0.2.147` | WiFi Lower Floor | ✅ healthy | 2 ms |
+| Patio Light | `192.0.2.147` | WiFi Lower Floor | ✅ healthy | 5 ms |
 | Patio Outlet | `192.0.2.148` | WiFi Lower Floor | ✅ healthy | 3 ms |
 
 ---
@@ -960,18 +959,18 @@ One access point (Basement) is down. Its nine downstream devices are suppressed 
 
 ```text
 
-HEIMDALLUR  2026-06-19 17:56:57 UTC
+HEIMDALLUR  2026-06-19 17:59:43 UTC
 
-INTERNET  ✓ Online  44ms  excellent
+INTERNET  ✓ Online  38ms  excellent
   IP 3/3  ·  DNS 3/3  ·  HTTP 3/3
   All paths healthy
-  ↓ 191 Mbps  ·  ping 33 ms  (0s ago)
+  ↓ 360 Mbps  ·  ping 21 ms  (0s ago)
 
 HOME NETWORK
   ROUTER  ✓ Online  1ms
   ✓ Online  2ms  WiFi Garage
   ✓ Online  3ms  WiFi Main Floor
-  ✓ Online  4ms  WiFi Upper Floor
+  ✓ Online  1ms  WiFi Upper Floor
   ✗ Offline  timeout  WiFi Lower Floor
   LAN  LAN Office
   LAN  LAN Media
@@ -990,7 +989,7 @@ PROBLEMS
 
 # Heimdallur Network Status
 
-**Probed:** 2026-06-19 17:56:57 UTC  |  **Interval:** 30s
+**Probed:** 2026-06-19 17:59:43 UTC  |  **Interval:** 30s
 
 ## Summary
 
@@ -1002,33 +1001,33 @@ PROBLEMS
 
 ## Internet
 
-**Status:** ✅ HEALTHY  |  **Latency (ONT):** 52 ms avg (elevated)  |  **Loss:** 0%
+**Status:** ✅ HEALTHY  |  **Latency (ONT):** 51 ms avg (elevated)  |  **Loss:** 0%
 
 ### IP Reachability
 
 | Target | Status | Latency |
 |--------|--------|---------|
 | Cloudflare (1.1.1.1) | ✅ healthy | 19 ms |
-| Google (8.8.8.8) | ✅ healthy | 34 ms |
-| Quad9 (9.9.9.9) | ✅ healthy | 21 ms |
+| Google (8.8.8.8) | ✅ healthy | 32 ms |
+| Quad9 (9.9.9.9) | ✅ healthy | 14 ms |
 
 ### DNS
 
 | Resolver | Status | Lookup |
 |----------|--------|--------|
-| Cloudflare (cloudflare.com) | ✅ Online | 5 ms |
-| Google (google.com) | ✅ Online | 9 ms |
-| Quad9 (quad9.net) | ✅ Online | 3 ms |
+| Cloudflare (cloudflare.com) | ✅ Online | 13 ms |
+| Google (google.com) | ✅ Online | 6 ms |
+| Quad9 (quad9.net) | ✅ Online | 9 ms |
 
 ### HTTP
 
 | Endpoint | Status | TTFB | Total |
 |----------|--------|------|-------|
-| Cloudflare | ✅ Online | 45 ms | 65 ms |
-| Google | ✅ Online | 59 ms | 66 ms |
-| Microsoft | ✅ Online | 53 ms | 59 ms |
+| Cloudflare | ✅ Online | 49 ms | 64 ms |
+| Google | ✅ Online | 56 ms | 76 ms |
+| Microsoft | ✅ Online | 58 ms | 79 ms |
 
-**Speed test:** ↓ 183 Mbps  |  ping 24 ms  *(0s ago)*
+**Speed test:** ↓ 207 Mbps  |  ping 25 ms  *(0s ago)*
 
 ---
 
@@ -1036,8 +1035,8 @@ PROBLEMS
 
 ### Router
 
-**Status:** ✅ HEALTHY  |  **Latency:** 3 ms
-**CPU:** 21%  |  **Memory:** 51%  |  **Uptime:** 3d
+**Status:** ✅ HEALTHY  |  **Latency:** 1 ms
+**CPU:** 17%  |  **Memory:** 29%  |  **Uptime:** 3d
 
 ### Groups
 
@@ -1049,41 +1048,41 @@ PROBLEMS
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Garage Door Controller | `192.0.2.100` | ✅ healthy | 4 ms |
-| Garage Light | `192.0.2.101` | ✅ healthy | 3 ms |
-| Utility Meter | `192.0.2.102` | ✅ healthy | 2 ms |
-| Workbench Plug | `192.0.2.103` | ✅ healthy | 5 ms |
+| Garage Door Controller | `192.0.2.100` | ✅ healthy | 5 ms |
+| Garage Light | `192.0.2.101` | ✅ healthy | 4 ms |
+| Utility Meter | `192.0.2.102` | ✅ healthy | 5 ms |
+| Workbench Plug | `192.0.2.103` | ✅ healthy | 1 ms |
 
 #### WiFi Main Floor
 
-**Gateway `192.0.2.21`:** ✅ 3 ms
+**Gateway `192.0.2.21`:** ✅ 2 ms
 
 **Devices:** 11 / 11 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Entry Light | `192.0.2.110` | ✅ healthy | 3 ms |
-| Kitchen Ceiling Light | `192.0.2.111` | ✅ healthy | 4 ms |
+| Entry Light | `192.0.2.110` | ✅ healthy | 1 ms |
+| Kitchen Ceiling Light | `192.0.2.111` | ✅ healthy | 2 ms |
 | Kitchen Counter Light | `192.0.2.112` | ✅ healthy | 3 ms |
-| Dining Room Light | `192.0.2.113` | ✅ healthy | 2 ms |
-| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 4 ms |
-| Living Room Light 2 | `192.0.2.115` | ✅ healthy | 5 ms |
+| Dining Room Light | `192.0.2.113` | ✅ healthy | 5 ms |
+| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 5 ms |
+| Living Room Light 2 | `192.0.2.115` | ✅ healthy | 1 ms |
 | Living Room Light 3 | `192.0.2.116` | ✅ healthy | 2 ms |
-| Hallway Light | `192.0.2.117` | ✅ healthy | 1 ms |
+| Hallway Light | `192.0.2.117` | ✅ healthy | 2 ms |
 | Porch Light | `192.0.2.118` | ✅ healthy | 4 ms |
-| Plant Light | `192.0.2.119` | ✅ healthy | 3 ms |
-| Coffee Maker | `192.0.2.120` | ✅ healthy | 3 ms |
+| Plant Light | `192.0.2.119` | ✅ healthy | 4 ms |
+| Coffee Maker | `192.0.2.120` | ✅ healthy | 1 ms |
 
 #### WiFi Upper Floor
 
-**Gateway `192.0.2.22`:** ✅ 1 ms
+**Gateway `192.0.2.22`:** ✅ 3 ms
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Bathroom LED | `192.0.2.130` | ✅ healthy | 3 ms |
-| Thermostat | `192.0.2.131` | ✅ healthy | 2 ms |
+| Bathroom LED | `192.0.2.130` | ✅ healthy | 4 ms |
+| Thermostat | `192.0.2.131` | ✅ healthy | 5 ms |
 
 #### WiFi Lower Floor
 
@@ -1109,8 +1108,8 @@ PROBLEMS
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Office Workstation | `192.0.2.132` | ✅ healthy | 4 ms |
-| Automation Server | `192.0.2.64` | ✅ healthy | 2 ms |
+| Office Workstation | `192.0.2.132` | ✅ healthy | 1 ms |
+| Automation Server | `192.0.2.64` | ✅ healthy | 5 ms |
 
 #### LAN Media
 
@@ -1131,25 +1130,25 @@ PROBLEMS
 
 | Device | IP | Group | Status | Latency |
 |--------|----|-------|--------|---------|
-| Garage Door Controller | `192.0.2.100` | WiFi Garage | ✅ healthy | 4 ms |
-| Garage Light | `192.0.2.101` | WiFi Garage | ✅ healthy | 3 ms |
-| Utility Meter | `192.0.2.102` | WiFi Garage | ✅ healthy | 2 ms |
-| Workbench Plug | `192.0.2.103` | WiFi Garage | ✅ healthy | 5 ms |
-| Entry Light | `192.0.2.110` | WiFi Main Floor | ✅ healthy | 3 ms |
-| Kitchen Ceiling Light | `192.0.2.111` | WiFi Main Floor | ✅ healthy | 4 ms |
+| Garage Door Controller | `192.0.2.100` | WiFi Garage | ✅ healthy | 5 ms |
+| Garage Light | `192.0.2.101` | WiFi Garage | ✅ healthy | 4 ms |
+| Utility Meter | `192.0.2.102` | WiFi Garage | ✅ healthy | 5 ms |
+| Workbench Plug | `192.0.2.103` | WiFi Garage | ✅ healthy | 1 ms |
+| Entry Light | `192.0.2.110` | WiFi Main Floor | ✅ healthy | 1 ms |
+| Kitchen Ceiling Light | `192.0.2.111` | WiFi Main Floor | ✅ healthy | 2 ms |
 | Kitchen Counter Light | `192.0.2.112` | WiFi Main Floor | ✅ healthy | 3 ms |
-| Dining Room Light | `192.0.2.113` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Living Room Light 2 | `192.0.2.115` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Dining Room Light | `192.0.2.113` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Living Room Light 2 | `192.0.2.115` | WiFi Main Floor | ✅ healthy | 1 ms |
 | Living Room Light 3 | `192.0.2.116` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Hallway Light | `192.0.2.117` | WiFi Main Floor | ✅ healthy | 1 ms |
+| Hallway Light | `192.0.2.117` | WiFi Main Floor | ✅ healthy | 2 ms |
 | Porch Light | `192.0.2.118` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Plant Light | `192.0.2.119` | WiFi Main Floor | ✅ healthy | 3 ms |
-| Coffee Maker | `192.0.2.120` | WiFi Main Floor | ✅ healthy | 3 ms |
-| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 3 ms |
-| Thermostat | `192.0.2.131` | WiFi Upper Floor | ✅ healthy | 2 ms |
-| Office Workstation | `192.0.2.132` | LAN Office | ✅ healthy | 4 ms |
-| Automation Server | `192.0.2.64` | LAN Office | ✅ healthy | 2 ms |
+| Plant Light | `192.0.2.119` | WiFi Main Floor | ✅ healthy | 4 ms |
+| Coffee Maker | `192.0.2.120` | WiFi Main Floor | ✅ healthy | 1 ms |
+| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 4 ms |
+| Thermostat | `192.0.2.131` | WiFi Upper Floor | ✅ healthy | 5 ms |
+| Office Workstation | `192.0.2.132` | LAN Office | ✅ healthy | 1 ms |
+| Automation Server | `192.0.2.64` | LAN Office | ✅ healthy | 5 ms |
 | Network Controller | `192.0.2.151` | LAN Router | ✅ healthy | 4 ms |
 | Bedroom Light 1 | `192.0.2.140` | WiFi Lower Floor | ❓ unknown | — |
 | Bedroom Light 2 | `192.0.2.141` | WiFi Lower Floor | ❓ unknown | — |
@@ -1191,17 +1190,17 @@ A compound failure: an access point is offline, internet connectivity is degrade
 
 ```text
 
-HEIMDALLUR  2026-06-19 17:56:57 UTC
+HEIMDALLUR  2026-06-19 17:59:43 UTC
 
-INTERNET  ✓ Online  27ms  excellent
+INTERNET  ✓ Online  24ms  excellent
   IP 3/3  ·  DNS 3/3  ·  HTTP 3/3
   All paths healthy
-  ↓ 447 Mbps  ·  ping 20 ms  (0s ago)
+  ↓ 324 Mbps  ·  ping 9 ms  (0s ago)
 
 HOME NETWORK
   ROUTER  ✓ Online  3ms
-  ~ Degraded  98ms  WiFi Garage
-  ✓ Online  2ms  WiFi Main Floor
+  ✗ Offline  165ms  WiFi Garage
+  ✓ Online  1ms  WiFi Main Floor
   ✓ Online  3ms  WiFi Upper Floor
   ✗ Offline  timeout  WiFi Lower Floor
   LAN  LAN Office
@@ -1209,8 +1208,8 @@ HOME NETWORK
   LAN  LAN Router
 
 PROBLEMS
+  ✗  WiFi Garage WiFi access point offline — 4 devices affected
   ✗  WiFi Lower Floor WiFi access point offline — 9 devices affected
-  ✗  Coffee Maker unreachable
 
 33 monitored  ·  31 OK  ·  2 down
 ```
@@ -1222,47 +1221,46 @@ PROBLEMS
 
 # Heimdallur Network Status
 
-**Probed:** 2026-06-19 17:56:57 UTC  |  **Interval:** 30s
+**Probed:** 2026-06-19 17:59:43 UTC  |  **Interval:** 30s
 
 ## Summary
 
-⚠️  3 issue(s) detected — 30 / 33 devices online
+⚠️  2 issue(s) detected — 31 / 33 devices online
 
 - WiFi Garage WiFi access point offline — 4 devices affected
 - WiFi Lower Floor WiFi access point offline — 9 devices affected
-- Coffee Maker unreachable
 
 ---
 
 ## Internet
 
-**Status:** ✅ HEALTHY  |  **Latency (ONT):** 32 ms avg (excellent)  |  **Loss:** 0%
+**Status:** ✅ HEALTHY  |  **Latency (ONT):** 19 ms avg (excellent)  |  **Loss:** 0%
 
 ### IP Reachability
 
 | Target | Status | Latency |
 |--------|--------|---------|
-| Cloudflare (1.1.1.1) | ✅ healthy | 23 ms |
-| Google (8.8.8.8) | ✅ healthy | 25 ms |
-| Quad9 (9.9.9.9) | ✅ healthy | 14 ms |
+| Cloudflare (1.1.1.1) | ✅ healthy | 12 ms |
+| Google (8.8.8.8) | ✅ healthy | 21 ms |
+| Quad9 (9.9.9.9) | ✅ healthy | 17 ms |
 
 ### DNS
 
 | Resolver | Status | Lookup |
 |----------|--------|--------|
-| Cloudflare (cloudflare.com) | ✅ Online | 12 ms |
-| Google (google.com) | ✅ Online | 3 ms |
-| Quad9 (quad9.net) | ✅ Online | 12 ms |
+| Cloudflare (cloudflare.com) | ✅ Online | 14 ms |
+| Google (google.com) | ✅ Online | 17 ms |
+| Quad9 (quad9.net) | ✅ Online | 3 ms |
 
 ### HTTP
 
 | Endpoint | Status | TTFB | Total |
 |----------|--------|------|-------|
-| Cloudflare | ✅ Online | 43 ms | 53 ms |
-| Google | ✅ Online | 57 ms | 73 ms |
-| Microsoft | ✅ Online | 68 ms | 91 ms |
+| Cloudflare | ✅ Online | 67 ms | 89 ms |
+| Google | ✅ Online | 62 ms | 84 ms |
+| Microsoft | ✅ Online | 75 ms | 92 ms |
 
-**Speed test:** ↓ 456 Mbps  |  ping 16 ms  *(0s ago)*
+**Speed test:** ↓ 406 Mbps  |  ping 16 ms  *(0s ago)*
 
 ---
 
@@ -1270,14 +1268,14 @@ PROBLEMS
 
 ### Router
 
-**Status:** ✅ HEALTHY  |  **Latency:** 2 ms
-**CPU:** 18%  |  **Memory:** 37%  |  **Uptime:** 3d
+**Status:** ✅ HEALTHY  |  **Latency:** 1 ms
+**CPU:** 11%  |  **Memory:** 30%  |  **Uptime:** 3d
 
 ### Groups
 
 #### WiFi Garage
 
-**Gateway `192.0.2.25`:** ❌ 154 ms
+**Gateway `192.0.2.25`:** ❌ 107 ms
 
 **Devices:** 4 / 4 online
 
@@ -1290,33 +1288,33 @@ PROBLEMS
 
 #### WiFi Main Floor
 
-**Gateway `192.0.2.21`:** ✅ 3 ms
+**Gateway `192.0.2.21`:** ✅ 2 ms
 
-**Devices:** 10 / 11 online
+**Devices:** 11 / 11 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Entry Light | `192.0.2.110` | ✅ healthy | 5 ms |
-| Kitchen Ceiling Light | `192.0.2.111` | ✅ healthy | 2 ms |
+| Entry Light | `192.0.2.110` | ✅ healthy | 3 ms |
+| Kitchen Ceiling Light | `192.0.2.111` | ✅ healthy | 4 ms |
 | Kitchen Counter Light | `192.0.2.112` | ✅ healthy | 3 ms |
-| Dining Room Light | `192.0.2.113` | ✅ healthy | 4 ms |
-| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 1 ms |
-| Living Room Light 2 | `192.0.2.115` | ✅ healthy | 4 ms |
-| Living Room Light 3 | `192.0.2.116` | ✅ healthy | 5 ms |
+| Dining Room Light | `192.0.2.113` | ✅ healthy | 2 ms |
+| Living Room Light 1 | `192.0.2.114` | ✅ healthy | 4 ms |
+| Living Room Light 2 | `192.0.2.115` | ✅ healthy | 2 ms |
+| Living Room Light 3 | `192.0.2.116` | ✅ healthy | 2 ms |
 | Hallway Light | `192.0.2.117` | ✅ healthy | 3 ms |
-| Porch Light | `192.0.2.118` | ✅ healthy | 2 ms |
-| Plant Light | `192.0.2.119` | ✅ healthy | 4 ms |
-| Coffee Maker | `192.0.2.120` | ❌ unreachable | — |
+| Porch Light | `192.0.2.118` | ✅ healthy | 1 ms |
+| Plant Light | `192.0.2.119` | ✅ healthy | 3 ms |
+| Coffee Maker | `192.0.2.120` | ✅ healthy | 5 ms |
 
 #### WiFi Upper Floor
 
-**Gateway `192.0.2.22`:** ✅ 2 ms
+**Gateway `192.0.2.22`:** ✅ 3 ms
 
 **Devices:** 2 / 2 online
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Bathroom LED | `192.0.2.130` | ✅ healthy | 1 ms |
+| Bathroom LED | `192.0.2.130` | ✅ healthy | 3 ms |
 | Thermostat | `192.0.2.131` | ✅ healthy | 4 ms |
 
 #### WiFi Lower Floor
@@ -1343,8 +1341,8 @@ PROBLEMS
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Office Workstation | `192.0.2.132` | ✅ healthy | 2 ms |
-| Automation Server | `192.0.2.64` | ✅ healthy | 1 ms |
+| Office Workstation | `192.0.2.132` | ✅ healthy | 4 ms |
+| Automation Server | `192.0.2.64` | ✅ healthy | 5 ms |
 
 #### LAN Media
 
@@ -1356,7 +1354,7 @@ PROBLEMS
 
 | Device | IP | Status | Latency |
 |--------|----|--------|---------|
-| Network Controller | `192.0.2.151` | ✅ healthy | 5 ms |
+| Network Controller | `192.0.2.151` | ✅ healthy | 4 ms |
 
 
 ---
@@ -1369,22 +1367,22 @@ PROBLEMS
 | Garage Light | `192.0.2.101` | WiFi Garage | ❓ unknown | — |
 | Utility Meter | `192.0.2.102` | WiFi Garage | ❓ unknown | — |
 | Workbench Plug | `192.0.2.103` | WiFi Garage | ❓ unknown | — |
-| Entry Light | `192.0.2.110` | WiFi Main Floor | ✅ healthy | 5 ms |
-| Kitchen Ceiling Light | `192.0.2.111` | WiFi Main Floor | ✅ healthy | 2 ms |
+| Entry Light | `192.0.2.110` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Kitchen Ceiling Light | `192.0.2.111` | WiFi Main Floor | ✅ healthy | 4 ms |
 | Kitchen Counter Light | `192.0.2.112` | WiFi Main Floor | ✅ healthy | 3 ms |
-| Dining Room Light | `192.0.2.113` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 1 ms |
-| Living Room Light 2 | `192.0.2.115` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Living Room Light 3 | `192.0.2.116` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Dining Room Light | `192.0.2.113` | WiFi Main Floor | ✅ healthy | 2 ms |
+| Living Room Light 1 | `192.0.2.114` | WiFi Main Floor | ✅ healthy | 4 ms |
+| Living Room Light 2 | `192.0.2.115` | WiFi Main Floor | ✅ healthy | 2 ms |
+| Living Room Light 3 | `192.0.2.116` | WiFi Main Floor | ✅ healthy | 2 ms |
 | Hallway Light | `192.0.2.117` | WiFi Main Floor | ✅ healthy | 3 ms |
-| Porch Light | `192.0.2.118` | WiFi Main Floor | ✅ healthy | 2 ms |
-| Plant Light | `192.0.2.119` | WiFi Main Floor | ✅ healthy | 4 ms |
-| Coffee Maker | `192.0.2.120` | WiFi Main Floor | ❌ unreachable | — |
-| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 1 ms |
+| Porch Light | `192.0.2.118` | WiFi Main Floor | ✅ healthy | 1 ms |
+| Plant Light | `192.0.2.119` | WiFi Main Floor | ✅ healthy | 3 ms |
+| Coffee Maker | `192.0.2.120` | WiFi Main Floor | ✅ healthy | 5 ms |
+| Bathroom LED | `192.0.2.130` | WiFi Upper Floor | ✅ healthy | 3 ms |
 | Thermostat | `192.0.2.131` | WiFi Upper Floor | ✅ healthy | 4 ms |
-| Office Workstation | `192.0.2.132` | LAN Office | ✅ healthy | 2 ms |
-| Automation Server | `192.0.2.64` | LAN Office | ✅ healthy | 1 ms |
-| Network Controller | `192.0.2.151` | LAN Router | ✅ healthy | 5 ms |
+| Office Workstation | `192.0.2.132` | LAN Office | ✅ healthy | 4 ms |
+| Automation Server | `192.0.2.64` | LAN Office | ✅ healthy | 5 ms |
+| Network Controller | `192.0.2.151` | LAN Router | ✅ healthy | 4 ms |
 | Bedroom Light 1 | `192.0.2.140` | WiFi Lower Floor | ❓ unknown | — |
 | Bedroom Light 2 | `192.0.2.141` | WiFi Lower Floor | ❓ unknown | — |
 | Lower Bathroom Light | `192.0.2.142` | WiFi Lower Floor | ❓ unknown | — |
