@@ -760,8 +760,8 @@ class StatusPanel(Widget):
             lines = []
             for i in issues:
                 since = fault_started_at.get(i)
-                duration = f" [{UI_DIM}]for {_fmt_uptime(time.time() - since)}[/]" if since else ""
-                lines.append(f"[{_issue_color(i)}]{i}[/]{duration}")
+                duration = f"[{UI_DIM}]for {_fmt_uptime(time.time() - since)} · [/]" if since else ""
+                lines.append(f"{duration}[{_issue_color(i)}]{i}[/]")
             if contact_hint:
                 lines.append(f"[{UI_DIM}]{contact_hint}[/]")
         else:
