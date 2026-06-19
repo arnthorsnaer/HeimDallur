@@ -27,6 +27,22 @@ from heimdallur.tui.formatting import (
 from heimdallur.tui.chrome import FooterBar, HeaderBar, NavButton, SectionToggle
 
 
+def _fmt_fault_duration(seconds: float) -> str:
+    seconds = max(0, int(seconds))
+    if seconds < 60:
+        return f"{seconds}s"
+    minutes = seconds // 60
+    if minutes < 60:
+        return f"{minutes}m"
+    hours = minutes // 60
+    rem_minutes = minutes % 60
+    if hours < 24:
+        return f"{hours}h" if rem_minutes == 0 else f"{hours}h{rem_minutes:02d}m"
+    days = hours // 24
+    rem_hours = hours % 24
+    return f"{days}d" if rem_hours == 0 else f"{days}d{rem_hours}h"
+
+
 # ── Internet panel ─────────────────────────────────────────────
 class InternetPanel(Widget):
     DEFAULT_CSS = f"""
@@ -760,7 +776,7 @@ class StatusPanel(Widget):
             lines = []
             for i in issues:
                 since = fault_started_at.get(i)
-                duration = f"[{UI_DIM}]for {_fmt_uptime(time.time() - since)} · [/]" if since else ""
+                duration = f"[{UI_DIM}]{_fmt_fault_duration(time.time() - since)} · [/]" if since else ""
                 lines.append(f"{duration}[{_issue_color(i)}]{i}[/]")
             if contact_hint:
                 lines.append(f"[{UI_DIM}]{contact_hint}[/]")
