@@ -16,7 +16,7 @@ from heimdallur.config.loader import load_config
 from heimdallur.core.store import Store
 from heimdallur.core.topology import (
     NetworkConfig, NetworkState, Group,
-    RouterStats, GatewayEnrichment, SpeedResult, InternetQuality,
+    RouterStats, GatewayEnrichment, SpeedResult, InternetQuality, ProbeStatus,
 )
 
 _HIST = 40
@@ -30,6 +30,7 @@ class EnrichedState:
     speed_result: SpeedResult | None
     internet_quality: InternetQuality | None
     doctor_checks: list[dict] = field(default_factory=list)
+    fault_started_at: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -133,6 +134,7 @@ class HeimdallurApp(App):
         self._last_enriched: EnrichedState | None = None
         self._doctor_checks: list[dict] = []
         self._last_doctor_at: float = 0.0
+        self._fault_started_at: dict[str, float] = {}
 
     def compose(self) -> ComposeResult:
         return iter([])
@@ -312,6 +314,7 @@ class HeimdallurApp(App):
                 internet_quality=iq,
                 doctor_checks=self._doctor_checks,
             )
+            enriched.fault_started_at = self._update_fault_started_at(enriched)
             snapshot = self._accumulate(state, enriched)
             self.post_message(ProbeComplete(enriched, snapshot))
             asyncio.get_event_loop().run_in_executor(
@@ -367,6 +370,30 @@ class HeimdallurApp(App):
         if reason == "stale" or self._viewer_warning != reason:
             self._viewer_warning = reason
             self.post_message(ViewerStateWarning(reason, age_seconds))
+
+    def _active_faults(self, enriched: EnrichedState) -> list[str]:
+        from heimdallur.tui.formatting import _internet_diagnosis
+        from heimdallur.tui.theme import S_OK
+
+        state = enriched.network
+        issues = state.problems(self._config)
+
+        ont_up = not (state.ont_result and state.ont_result.status == ProbeStatus.UNREACHABLE)
+        rtr_up = not (state.router_result and state.router_result.status == ProbeStatus.UNREACHABLE)
+        if enriched.internet_quality is not None and ont_up and rtr_up:
+            diag_c, diag_msg = _internet_diagnosis(enriched.internet_quality)
+            if diag_c != S_OK:
+                issues = [diag_msg] + issues
+        return issues
+
+    def _update_fault_started_at(self, enriched: EnrichedState) -> dict[str, float]:
+        active = set(self._active_faults(enriched))
+        now = enriched.network.timestamp or time.time()
+        self._fault_started_at = {
+            fault: self._fault_started_at.get(fault, now)
+            for fault in active
+        }
+        return dict(self._fault_started_at)
 
     def _run_doctor_checks(self) -> list[dict]:
         script = os.path.join(os.getcwd(), "scripts", "pi-doctor.py")

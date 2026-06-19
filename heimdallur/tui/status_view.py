@@ -702,9 +702,11 @@ class StatusPanel(Widget):
 
     def update(self, state: NetworkState, config: NetworkConfig,
                iq: "InternetQuality | None" = None,
-               doctor_checks: list[dict] | None = None) -> None:
+               doctor_checks: list[dict] | None = None,
+               fault_started_at: dict[str, float] | None = None) -> None:
         issues = state.problems(config)
         doctor_checks = doctor_checks or []
+        fault_started_at = fault_started_at or {}
         doctor_failures = [c for c in doctor_checks if c.get("status") == "fail"]
         doctor_warnings = [c for c in doctor_checks if c.get("status") == "warn"]
         admin = config.contacts.network_admin
@@ -755,7 +757,11 @@ class StatusPanel(Widget):
         self.query_one("#st-msg",  Label).update(f"[{c}]{summary}[/]")
 
         if issues:
-            lines = [f"[{_issue_color(i)}]{i}[/]" for i in issues]
+            lines = []
+            for i in issues:
+                since = fault_started_at.get(i)
+                duration = f" [{UI_DIM}]for {_fmt_uptime(time.time() - since)}[/]" if since else ""
+                lines.append(f"[{_issue_color(i)}]{i}[/]{duration}")
             if contact_hint:
                 lines.append(f"[{UI_DIM}]{contact_hint}[/]")
         else:
@@ -807,7 +813,10 @@ class StatusScreen(Screen):
     def update_state(self, enriched, snapshot) -> None:
         s = enriched.network
         c = self._config
-        self.query_one(StatusPanel).update(s, c, enriched.internet_quality, enriched.doctor_checks)
+        self.query_one(StatusPanel).update(
+            s, c, enriched.internet_quality, enriched.doctor_checks,
+            enriched.fault_started_at,
+        )
         self.query_one(InternetPanel).update(
             s, c, snapshot.ont_lat, snapshot.ont_loss,
             enriched.speed_result, enriched.internet_quality, snapshot,

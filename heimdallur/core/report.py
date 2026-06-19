@@ -116,8 +116,11 @@ def render_markdown(
     else:
         lines.append(f"⚠️  {len(problems)} issue(s) detected — {ok} / {total} devices online")
         lines.append("")
+        fault_started_at = getattr(enriched, "fault_started_at", {}) or {}
         for p in problems:
-            lines.append(f"- {p}")
+            since = fault_started_at.get(p)
+            duration = f" _(for {_uptime_str(time.time() - since)})_" if since else ""
+            lines.append(f"- {p}{duration}")
     doctor_checks = getattr(enriched, "doctor_checks", [])
     if doctor_checks:
         failures = sum(1 for c in doctor_checks if c.get("status") == "fail")

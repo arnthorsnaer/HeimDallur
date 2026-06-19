@@ -102,6 +102,7 @@ def write_live_state(enriched: EnrichedState, snapshot: HistorySnapshot, path: P
             "speed_result": asdict(enriched.speed_result) if enriched.speed_result else None,
             "internet_quality": _internet_quality_to_dict(enriched.internet_quality),
             "doctor_checks": enriched.doctor_checks,
+            "fault_started_at": enriched.fault_started_at,
         },
         "snapshot": asdict(snapshot),
     }
@@ -127,6 +128,7 @@ def read_live_state(path: Path | None = None) -> tuple[EnrichedState, HistorySna
         speed_result=SpeedResult(**enriched_data["speed_result"]) if enriched_data.get("speed_result") else None,
         internet_quality=_internet_quality_from_dict(enriched_data.get("internet_quality")),
         doctor_checks=enriched_data.get("doctor_checks", []),
+        fault_started_at=enriched_data.get("fault_started_at", {}),
     )
     snapshot = HistorySnapshot(**payload["snapshot"])
     return enriched, snapshot
