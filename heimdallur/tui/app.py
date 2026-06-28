@@ -85,6 +85,7 @@ class HeimdallurApp(App):
                 ),
                 gmail_notification=_dc.replace(
                     self._config.gmail_notification,
+                    enabled=True,
                     sender_email=os.getenv("NETWATCH_DEMO_SENDER_EMAIL", "alerts@gmail.com"),
                     app_password="demo",
                 ),

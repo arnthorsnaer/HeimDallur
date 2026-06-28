@@ -85,7 +85,7 @@ class IncidentNotifier:
 
     def _send(self, subsystem: str, duration: float) -> None:
         cfg = self._config.gmail_notification
-        if not cfg.sender_email or not cfg.app_password:
+        if not cfg.enabled or not cfg.sender_email or not cfg.app_password:
             return
         recipient = self._config.contacts.home_network_admin_email
         if not recipient:

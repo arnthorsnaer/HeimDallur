@@ -111,6 +111,7 @@ class Contacts:
 
 @dataclass
 class GmailNotificationConfig:
+    enabled: bool = False
     sender_email: str = ""
     app_password: str = ""
 

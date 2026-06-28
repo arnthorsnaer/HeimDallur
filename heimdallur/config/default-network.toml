@@ -3,12 +3,10 @@ network_admin       = "Network Admin"
 home_network_admin_email = ""   # recipient address for incident report emails
 isp_name            = "Demo ISP"
 
-# Gmail account used to send incident report emails.
-# Use a dedicated Gmail app password (Google Account -> Security -> App passwords).
-# Leave both fields empty to disable email notifications.
-[notification_email_gmail]
-sender_email = ""   # e.g. "heimdallur.alerts@example.com"
-app_password = ""   # 16-character Gmail app password
+# Email notifications are disabled unless this flag is true and the Gmail
+# sender/app-password environment variables are present.
+[notifications]
+enabled = false
 
 [network]
 ont_check_host              = "8.8.8.8"

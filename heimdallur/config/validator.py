@@ -61,6 +61,12 @@ def validate_config(path: Path) -> ValidationResult:
             if key in net and not isinstance(net[key], int):
                 result.errors.append(f"[network].{key} must be an integer, got {type(net[key]).__name__}")
 
+    notifications = data.get("notifications", {})
+    if not isinstance(notifications, dict):
+        result.errors.append("[notifications] must be a table when present")
+    elif "enabled" in notifications and not isinstance(notifications["enabled"], bool):
+        result.errors.append("[notifications].enabled must be a boolean")
+
     groups = data.get("groups", [])
     if not isinstance(groups, list):
         result.errors.append("'groups' must be an array")
