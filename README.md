@@ -59,12 +59,22 @@ changes are needed — the same app runs both on the Pi display and in the
 browser.
 
 ```bash
-# On the Pi — serves on all interfaces at port 8080
-make web          # production (real probes)
+# Private by default — serves on 127.0.0.1:8080
+make web          # production viewer mode
 make web-mock     # mock mode  (no real pings)
 ```
 
-Open `http://heimdallur.local:8080` from any device on the local network.
+Open `http://127.0.0.1:8080` on the same machine. To expose the browser UI to
+other devices, pass an explicit host, for example:
+
+```bash
+uv run python scripts/web_serve.py --host heimdallur.local --port 8080
+```
+
+The web UI and `/status.md` endpoint can reveal device names, IP addresses, and
+network health. Only expose them on trusted networks, preferably behind a
+reverse proxy with authentication.
+
 All keyboard shortcuts (`i`, `r`, `n`, `h`, `d`, `q`) work in the browser.
 
 > **Note:** textual-serve renders a terminal in the browser, not a native
