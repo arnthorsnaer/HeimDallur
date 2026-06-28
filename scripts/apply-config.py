@@ -4,8 +4,8 @@
 Run this on the target host after copying a candidate TOML there.
 
 Examples:
-    python scripts/apply-config.py /tmp/user-network.toml --dry-run
-    python scripts/apply-config.py /tmp/user-network.toml --yes \
+    python scripts/apply-config.py /tmp/network.toml --dry-run
+    python scripts/apply-config.py /tmp/network.toml --yes \
         --restart-command 'sudo systemctl restart getty@tty1.service' \
         --restart-command 'sudo systemctl restart heimdallur-web.service' \
         --verify
@@ -21,7 +21,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from heimdallur.config.loader import resolve_config_path
+from heimdallur.config.loader import default_config_path, user_config_path
 from heimdallur.config.validator import format_validation_result, validate_config
 
 _DEFAULT_BACKUP_DIR = Path.home() / ".local" / "share" / "heimdallur" / "config-backups"
@@ -90,12 +90,12 @@ def _verify_status_fresh(status_path: Path, started_at: float, timeout: int) -> 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("candidate", type=Path, help="candidate user-network.toml to apply")
+    parser.add_argument("candidate", type=Path, help="candidate network TOML to apply")
     parser.add_argument(
         "--dest",
         type=Path,
         default=None,
-        help="destination config path (default: resolved Heimdallur config path)",
+        help=f"destination config path (default: {user_config_path()})",
     )
     parser.add_argument(
         "--backup-dir",
@@ -122,7 +122,17 @@ def main() -> None:
     args = parser.parse_args()
 
     candidate = args.candidate.expanduser().resolve()
-    dest = (args.dest.expanduser() if args.dest else resolve_config_path()).resolve()
+    dest_was_explicit = args.dest is not None
+    dest = (args.dest.expanduser() if dest_was_explicit else user_config_path()).resolve()
+    default_dest = default_config_path().resolve()
+
+    if dest == default_dest and not dest_was_explicit:
+        print(
+            f"ERROR: refusing to apply config to packaged demo config: {default_dest}",
+            file=sys.stderr,
+        )
+        print("Pass --dest explicitly only if you really intend to target that file.", file=sys.stderr)
+        raise SystemExit(2)
 
     print(f"Candidate:   {candidate}")
     print(f"Destination: {dest}")
@@ -148,6 +158,9 @@ def main() -> None:
     backup = _backup_current(dest, args.backup_dir.expanduser())
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(candidate, dest)
+    if dest == user_config_path().resolve():
+        dest.parent.chmod(0o700)
+        dest.chmod(0o600)
     print(f"Applied config: {candidate} -> {dest}")
 
     try:
