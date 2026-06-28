@@ -5,8 +5,10 @@ Usage:
     python scripts/web_serve.py [--host HOST] [--port PORT]
 
 Serves the TUI at http://<host>:<port>/ using xterm.js in the browser.
-By default this starts Heimdallur in shared-state viewer mode, so the web UI
-reuses the tty app's latest probe results instead of running a second prober.
+By default this binds to localhost and starts Heimdallur in shared-state viewer
+mode, so the web UI reuses the tty app's latest probe results instead of
+running a second prober. Pass --host explicitly when exposing the service beyond
+the local machine, ideally behind network controls or a reverse proxy with auth.
 Use --standalone to run a full probing app in the browser process.
 Environment variables (HEIMDALLUR_CONFIG, HEIMDALLUR_STATE_FILE, etc.) are
 forwarded to the app subprocess automatically.
@@ -60,7 +62,6 @@ class HeimdallurWebServer(Server):
             headers={
                 "Cache-Control": "no-store",
                 "X-Heimdallur-Status-Age-Seconds": str(age),
-                "X-Heimdallur-Status-Path": str(path),
             },
         )
 
@@ -68,7 +69,7 @@ class HeimdallurWebServer(Server):
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument(
         "--standalone",
