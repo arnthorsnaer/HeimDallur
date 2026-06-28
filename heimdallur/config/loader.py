@@ -5,7 +5,18 @@ from heimdallur.core.topology import Contacts, Device, GmailNotificationConfig, 
 
 _CONFIG_DIR = Path(__file__).parent
 _DEFAULT_PATH = _CONFIG_DIR / "default-network.toml"
-_USER_PATH = _CONFIG_DIR / "user-network.toml"
+_XDG_CONFIG_HOME = Path(os.getenv("XDG_CONFIG_HOME", str(Path.home() / ".config"))).expanduser()
+_USER_PATH = _XDG_CONFIG_HOME / "heimdallur" / "network.toml"
+
+
+def user_config_path() -> Path:
+    """Return the default writable user configuration path."""
+    return _USER_PATH
+
+
+def default_config_path() -> Path:
+    """Return the packaged demo/default configuration path."""
+    return _DEFAULT_PATH
 
 
 def resolve_config_path(path: Path | None = None) -> Path:
