@@ -138,14 +138,15 @@ ssh pi@heimdallur.local "cd /opt/heimdallur && git log -1 --oneline"
 
 ## 3. Setting / Updating Device Configuration
 
-All monitored devices and network groups are defined in:
+All monitored devices and network groups are defined in the user config:
 
 ```
-/opt/heimdallur/heimdallur/config/user-network.toml
+~/.config/heimdallur/network.toml
 ```
 
-If `user-network.toml` does not exist, Heimdallur falls back to the tracked
-demo config at `/opt/heimdallur/heimdallur/config/default-network.toml`.
+Set `HEIMDALLUR_CONFIG=/path/to/network.toml` to use an explicit path. If no
+user config exists, Heimdallur falls back to the tracked demo config at
+`/opt/heimdallur/heimdallur/config/default-network.toml`.
 
 ### Schema
 
@@ -182,7 +183,7 @@ type  = "generic"               # generic | light | sensor | smart_plug | smart_
 
 **Step 1 — Read current config:**
 ```bash
-ssh pi@heimdallur.local "cat /opt/heimdallur/heimdallur/config/user-network.toml"
+ssh pi@heimdallur.local "cat ~/.config/heimdallur/network.toml"
 ```
 
 **Step 2 — Write new config to a temp file and dry-run the safe apply helper:**
@@ -217,7 +218,7 @@ network going offline then back online). Emails are sent on recovery — not
 during the outage — so a full internet outage will still produce a report once
 connectivity is restored.
 
-### Configure in `user-network.toml`
+### Configure in `~/.config/heimdallur/network.toml`
 
 Add or update these two sections:
 
@@ -236,7 +237,7 @@ Generate one named "Heimdallur" and copy the 16-character code.
 
 **Step 2 — Edit and dry-run:**
 ```bash
-ssh pi@heimdallur.local "cat /opt/heimdallur/heimdallur/config/user-network.toml"
+ssh pi@heimdallur.local "cat ~/.config/heimdallur/network.toml"
 # Edit locally, then:
 scp network.toml pi@heimdallur.local:/tmp/network-new.toml
 ssh pi@heimdallur.local "cd /opt/heimdallur && python scripts/apply-config.py /tmp/network-new.toml --dry-run"

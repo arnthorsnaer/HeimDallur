@@ -73,17 +73,19 @@ All keyboard shortcuts (`i`, `r`, `n`, `h`, `d`, `q`) work in the browser.
 ## Configuration
 
 The tracked demo topology lives in `heimdallur/config/default-network.toml`.
-For a real local network, copy it to `heimdallur/config/user-network.toml`
-and edit that file instead:
+Keep that package-owned file read-only. For a real local network, copy it to
+the user config path and edit that file instead:
 
 ```bash
-cp heimdallur/config/default-network.toml heimdallur/config/user-network.toml
-python scripts/validate-config.py heimdallur/config/user-network.toml
+mkdir -p ~/.config/heimdallur
+cp heimdallur/config/default-network.toml ~/.config/heimdallur/network.toml
+python scripts/validate-config.py ~/.config/heimdallur/network.toml
 ```
 
-`user-network.toml` is gitignored. When it exists, normal Heimdallur runs use
-it automatically. Screenshot generation always forces `default-network.toml`
-so docs and release images keep using the demo dataset.
+Normal Heimdallur runs use `~/.config/heimdallur/network.toml` automatically
+when it exists. Set `HEIMDALLUR_CONFIG=/path/to/network.toml` to use an
+explicit config path. Screenshot generation always forces
+`default-network.toml` so docs and release images keep using the demo dataset.
 
 ## Notifications
 
