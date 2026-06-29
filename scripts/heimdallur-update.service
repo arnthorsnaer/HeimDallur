@@ -1,11 +1,16 @@
 [Unit]
-Description=Heimdallur auto-update
+Description=Heimdallur release auto-update
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=oneshot
 User=root
+Environment=APP_DIR=/opt/heimdallur
+Environment=SERVICE=heimdallur
+Environment=REMOTE=origin
+Environment=TAG_PATTERN=v[0-9]*
+Environment=UPDATE_CONFIG=/home/pi/.config/heimdallur/network.toml
 ExecStart=/opt/heimdallur/scripts/auto-update.sh
 StandardOutput=journal
 StandardError=journal

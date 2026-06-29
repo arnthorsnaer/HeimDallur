@@ -99,8 +99,17 @@ installing it if the deployment uses a different account or `uv` path.
 
 ## 2. Setting Up Automatic Updates
 
-The auto-update mechanism is a systemd timer that checks `origin/main` once
-per hour and applies updates if the local commit is behind.
+The auto-update mechanism is a systemd timer that checks the configured update
+channel once per hour. Configure it in the network TOML:
+
+```toml
+[updates]
+channel = "release"  # "off" | "release" | "edge"
+```
+
+Use `release` for normal appliance installs, `edge` for lab units that should
+follow `origin/main`, and `off` to disable auto-updates without disabling the
+timer.
 
 ```bash
 # Install the timer and its companion service unit
@@ -113,12 +122,13 @@ ssh pi@heimdallur.local "systemctl list-timers heimdallur-update.timer"
 ```
 
 **What happens on each run** (`scripts/auto-update.sh`):
-1. `git fetch origin main`
-2. Compare local HEAD to remote — exit early if already up to date
-3. `git pull --ff-only origin main`
-4. `uv sync --no-dev`
-5. `systemctl restart heimdallur`
-6. Log everything via `logger -t heimdallur-update`
+1. Read `[updates].channel` from the configured network TOML
+2. Exit immediately for `off`
+3. For `release`, fetch tags, select the latest `vX.Y.Z` release tag or `TARGET_TAG`, check out that tag, and verify `pyproject.toml`
+4. For `edge`, fetch `origin/main` and fast-forward the local `main` branch
+5. Run `uv sync --no-dev --frozen`
+6. Restart `heimdallur`
+7. Log everything via `logger -t heimdallur-update`
 
 **Trigger an immediate update:**
 ```bash
@@ -365,9 +375,9 @@ ssh pi@heimdallur.local "journalctl -t heimdallur-update -n 20 --no-pager"
 
 If the timer is not listed, re-run the install steps in section 2.
 If the update script errors, the most common cause is git credential or
-network access — verify the Pi can reach GitHub:
+network access — verify the Pi can reach GitHub and see release tags:
 ```bash
-ssh pi@heimdallur.local "curl -s https://api.github.com/repos/arnthorsnaer/HeimDallur/commits/main | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d[\"sha\"][:7], d[\"commit\"][\"message\"].splitlines()[0])'"
+ssh pi@heimdallur.local "cd /opt/heimdallur && git fetch origin --tags && git tag --list 'v[0-9]*' --sort=-version:refname | head -5"
 ```
 
 ### Main systemd service

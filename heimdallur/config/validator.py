@@ -8,6 +8,7 @@ from typing import Any
 
 _REQUIRED_GROUP_TYPES = {"wifi", "lan"}
 _REQUIRED_DEVICE_TYPES = {"generic", "light", "sensor", "smart_plug", "smart_switch", "server", "ap"}
+_UPDATE_CHANNELS = {"off", "release", "edge"}
 
 
 @dataclass
@@ -66,6 +67,16 @@ def validate_config(path: Path) -> ValidationResult:
         result.errors.append("[notifications] must be a table when present")
     elif "enabled" in notifications and not isinstance(notifications["enabled"], bool):
         result.errors.append("[notifications].enabled must be a boolean")
+
+    updates = data.get("updates", {})
+    if not isinstance(updates, dict):
+        result.errors.append("[updates] must be a table when present")
+    else:
+        channel = updates.get("channel", "release")
+        if not isinstance(channel, str):
+            result.errors.append("[updates].channel must be a string")
+        elif channel not in _UPDATE_CHANNELS:
+            result.errors.append(f"[updates].channel must be one of {sorted(_UPDATE_CHANNELS)}, got {channel!r}")
 
     groups = data.get("groups", [])
     if not isinstance(groups, list):
