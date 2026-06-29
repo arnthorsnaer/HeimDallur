@@ -1,6 +1,6 @@
 [project]
 name = "heimdallur"
-version = "0.6.0"
+version = "0.7.0"
 description = "Home network health monitor for Raspberry Pi"
 requires-python = ">=3.12"
 dependencies = [
