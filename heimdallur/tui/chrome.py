@@ -130,10 +130,14 @@ class FooterBar(Widget):
     def on_mount(self) -> None:
         gm  = self._config.gmail_notification
         rcpt = self._config.contacts.home_network_admin_email
-        enabled = bool(gm.sender_email and gm.app_password and rcpt)
-        if enabled:
+        configured = bool(gm.enabled and gm.sender_email and gm.app_password and rcpt)
+        if configured:
             self.query_one("#ftr-email", Label).update(
                 f"[{UI_DIM}]✉[/] [{UI_FG}]{rcpt}[/]"
+            )
+        elif not gm.enabled:
+            self.query_one("#ftr-email", Label).update(
+                f"[{UI_DIM}]✉  notifications off[/]"
             )
         else:
             self.query_one("#ftr-email", Label).update(

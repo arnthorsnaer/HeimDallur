@@ -220,16 +220,27 @@ connectivity is restored.
 
 ### Configure in `~/.config/heimdallur/network.toml`
 
-Add or update these two sections:
+Add or update these sections:
 
 ```toml
+[notifications]
+enabled = true
+
 [contacts]
 home_network_admin_email = "you@example.com"   # recipient
-
-[notification_email_gmail]
-sender_email = "heimdallur.alerts@gmail.com"   # Gmail address to send from
-app_password = "xxxx xxxx xxxx xxxx"           # 16-char Gmail app password
 ```
+
+Set Gmail credentials through the service environment:
+
+```bash
+export HEIMDALLUR_GMAIL_SENDER_EMAIL="heimdallur.alerts@gmail.com"
+export HEIMDALLUR_GMAIL_APP_PASSWORD="xxxx xxxx xxxx xxxx"
+```
+
+Notifications are sent only when `[notifications].enabled` is true and both
+Gmail environment variables plus `home_network_admin_email` are present. To
+disable notifications, set `enabled = false` without changing any environment
+variables.
 
 **Step 1 — Create a Gmail app password:**
 Google Account → Security → 2-Step Verification → App passwords.
@@ -250,12 +261,14 @@ ssh pi@heimdallur.local "cd /opt/heimdallur && python scripts/apply-config.py /t
 
 **Step 4 — Verify:**
 The footer indicator confirms the state — `✉ you@example.com` means notifications
-are active; `✉  no email configured` means one or more fields are missing.
+are active; `✉  notifications off` means disabled in config; `✉  no email
+configured` means enabled but one or more email settings are missing.
 
-To test without waiting for a real outage, temporarily set `app_password` to a
-valid value and bounce the service — the notifier fires on the OFFLINE→ONLINE
-transition, so toggling the ONT or router off/on in mock mode is not required;
-simply disconnecting and reconnecting your broadband will trigger it.
+To test without waiting for a real outage, temporarily set
+`HEIMDALLUR_GMAIL_APP_PASSWORD` to a valid value and bounce the service — the
+notifier fires on the OFFLINE→ONLINE transition, so toggling the ONT or router
+off/on in mock mode is not required; simply disconnecting and reconnecting your
+broadband will trigger it.
 
 ---
 

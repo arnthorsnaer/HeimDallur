@@ -99,20 +99,31 @@ explicit config path. Screenshot generation always forces
 
 ## Notifications
 
-When an outage ends — internet or home network going from offline back to online — Heimdallur can automatically email an incident report to the home network admin. Add the following to your network TOML:
+When an outage ends — internet or home network going from offline back to online — Heimdallur can automatically email an incident report to the home network admin. Enable notifications and add the recipient to your network TOML:
 
 ```toml
+[notifications]
+enabled = true
+
 [contacts]
 home_network_admin_email = "you@example.com"   # who receives the report
-
-[notification_email_gmail]
-sender_email = "heimdallur.alerts@gmail.com"   # Gmail address to send from
-app_password = "xxxx xxxx xxxx xxxx"           # 16-char Gmail app password
 ```
+
+Set Gmail credentials through the environment instead of storing them in TOML:
+
+```bash
+export HEIMDALLUR_GMAIL_SENDER_EMAIL="heimdallur.alerts@gmail.com"
+export HEIMDALLUR_GMAIL_APP_PASSWORD="xxxx xxxx xxxx xxxx"
+```
+
+Notifications are sent only when `[notifications].enabled` is true and both
+Gmail environment variables plus `home_network_admin_email` are present. To
+disable notifications, set `enabled = false` without changing any environment
+variables.
 
 To generate a Gmail app password: **Google Account → Security → 2-Step Verification → App passwords**.
 
-The footer shows whether notifications are configured — `✉ you@example.com` when active, `✉  no email configured` when not. Emails fire on recovery, not during the outage, so a full internet outage will still trigger a report once connectivity is restored.
+The footer shows whether notifications are active — `✉ you@example.com` when active, `✉  notifications off` when disabled, or `✉  no email configured` when enabled but missing required email settings. Emails fire on recovery, not during the outage, so a full internet outage will still trigger a report once connectivity is restored.
 
 ![Heimdallur — email notifications configured](docs/snapshots/01b-status-email-configured.png)
 

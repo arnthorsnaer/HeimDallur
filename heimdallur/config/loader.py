@@ -41,10 +41,11 @@ def load_config(path: Path | None = None) -> NetworkConfig:
         isp_name=ct.get("isp_name", "ISP"),
     )
 
-    gm = data.get("notification_email_gmail", {})
+    notifications = data.get("notifications", {})
     gmail_notification = GmailNotificationConfig(
-        sender_email=gm.get("sender_email", ""),
-        app_password=gm.get("app_password", ""),
+        enabled=bool(notifications.get("enabled", False)),
+        sender_email=os.getenv("HEIMDALLUR_GMAIL_SENDER_EMAIL", ""),
+        app_password=os.getenv("HEIMDALLUR_GMAIL_APP_PASSWORD", ""),
     )
     net = data["network"]
     groups = [
