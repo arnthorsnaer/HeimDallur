@@ -38,7 +38,7 @@ CAPTURES: list[dict] = [
      "scenario": "all_healthy.toml"},
     {"slug": "01b-status-email-configured", "title": "Status — email notifications configured",
      "scenario": "all_healthy.toml",
-     "env": {"NETWATCH_DEMO_EMAIL": "network-admin@example.com"}},
+     "env": {"HEIMDALLUR_DEMO_EMAIL": "network-admin@example.com"}},
     {"slug": "02-status-internet-degraded", "title": "Status — internet degraded",
      "scenario": "internet_degraded.toml"},
     {"slug": "03-status-internet-offline",  "title": "Status — internet offline",
@@ -115,9 +115,9 @@ async def _capture_svg(scenario_path: Path, keys: list[str], svg_path: Path,
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         tmp_db = f.name
 
-    os.environ["NETWATCH_MOCK"] = "1"
-    os.environ["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
-    os.environ["NETWATCH_SNAPSHOT_DB"] = tmp_db
+    os.environ["HEIMDALLUR_MOCK"] = "1"
+    os.environ["HEIMDALLUR_MOCK_SCENARIO"] = str(scenario_path)
+    os.environ["HEIMDALLUR_SNAPSHOT_DB"] = tmp_db
     os.environ["HEIMDALLUR_CONFIG"] = str(_DEFAULT_CONFIG)
     if extra_env:
         os.environ.update(extra_env)
@@ -182,8 +182,8 @@ def _capture_web_snapshot(
 ) -> None:
     """Start textual-serve for the given scenario, take a browser snapshot, stop."""
     env = os.environ.copy()
-    env["NETWATCH_MOCK"] = "1"
-    env["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
+    env["HEIMDALLUR_MOCK"] = "1"
+    env["HEIMDALLUR_MOCK_SCENARIO"] = str(scenario_path)
     env["HEIMDALLUR_CONFIG"] = str(_DEFAULT_CONFIG)
     if extra_env:
         env.update(extra_env)
@@ -244,8 +244,8 @@ async def _capture_status_text(scenario_path: Path,
     import importlib
     from rich.console import Console as RichConsole
 
-    os.environ["NETWATCH_MOCK"] = "1"
-    os.environ["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
+    os.environ["HEIMDALLUR_MOCK"] = "1"
+    os.environ["HEIMDALLUR_MOCK_SCENARIO"] = str(scenario_path)
     os.environ["HEIMDALLUR_CONFIG"] = str(_DEFAULT_CONFIG)
     if extra_env:
         os.environ.update(extra_env)
@@ -272,8 +272,8 @@ async def _capture_report_md(scenario_path: Path,
                               extra_env: dict[str, str] | None = None) -> str:
     import importlib
 
-    os.environ["NETWATCH_MOCK"] = "1"
-    os.environ["NETWATCH_MOCK_SCENARIO"] = str(scenario_path)
+    os.environ["HEIMDALLUR_MOCK"] = "1"
+    os.environ["HEIMDALLUR_MOCK_SCENARIO"] = str(scenario_path)
     os.environ["HEIMDALLUR_CONFIG"] = str(_DEFAULT_CONFIG)
     if extra_env:
         os.environ.update(extra_env)

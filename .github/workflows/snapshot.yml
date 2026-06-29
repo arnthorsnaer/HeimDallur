@@ -60,7 +60,7 @@ jobs:
       - name: Generate all snapshots
         run: python scripts/capture_all.py --output-dir docs/snapshots --no-web
         env:
-          NETWATCH_MOCK: "1"
+          HEIMDALLUR_MOCK: "1"
 
       - name: Commit snapshots to PR branch
         run: |

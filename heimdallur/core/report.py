@@ -298,9 +298,9 @@ async def run_report(output_path: Path = _DEFAULT_REPORT) -> str:
 
     config = load_config()
 
-    if os.getenv("NETWATCH_MOCK"):
+    if os.getenv("HEIMDALLUR_MOCK"):
         from heimdallur.mock.network import MockProber
-        scenario = os.getenv("NETWATCH_MOCK_SCENARIO")
+        scenario = os.getenv("HEIMDALLUR_MOCK_SCENARIO")
         prober = MockProber(config, scenario_path=Path(scenario) if scenario else None)
         state = await prober.probe_all()
         iq = prober.mock_internet_quality()

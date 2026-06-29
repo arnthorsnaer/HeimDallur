@@ -82,13 +82,13 @@ class Doctor:
             ))
 
     def check_runtime_env(self) -> None:
-        if os.getenv("NETWATCH_MOCK"):
+        if os.getenv("HEIMDALLUR_MOCK"):
             self.add(Check(
                 "mock mode",
                 WARN,
-                "NETWATCH_MOCK is set in this process",
+                "HEIMDALLUR_MOCK is set in this process",
                 why="Production should normally probe the real network, not mock data.",
-                next_steps=["Check the service environment or tty startup file for NETWATCH_MOCK."],
+                next_steps=["Check the service environment or tty startup file for HEIMDALLUR_MOCK."],
             ))
         else:
             self.add(Check("mock mode", OK, "off"))

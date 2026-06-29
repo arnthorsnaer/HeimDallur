@@ -85,7 +85,7 @@ HeimdallurApp (tui/app.py)
 
 ### Mock mode
 
-Set `NETWATCH_MOCK=1` to use `MockProber` instead of real pings. Set `NETWATCH_MOCK_SCENARIO` to a TOML file path to inject specific failures:
+Set `HEIMDALLUR_MOCK=1` to use `MockProber` instead of real pings. Set `HEIMDALLUR_MOCK_SCENARIO` to a TOML file path to inject specific failures:
 
 ```
 heimdallur/mock/scenarios/
@@ -99,7 +99,7 @@ heimdallur/mock/scenarios/
 
 Failure modes per IP or alias (`"ont"`, `"router"`): `"down"` | `"slow"` | `"intermittent"`.
 
-`NETWATCH_SNAPSHOT_DB` sets a custom SQLite path, used by the snapshot scripts to avoid lock contention between sequential runs.
+`HEIMDALLUR_SNAPSHOT_DB` sets a custom SQLite path, used by the snapshot scripts to avoid lock contention between sequential runs.
 
 `HEIMDALLUR_CONFIG` can point at an explicit network TOML. Without it, normal runs use `heimdallur/config/user-network.toml` when present, otherwise `heimdallur/config/default-network.toml`. Snapshot scripts force `HEIMDALLUR_CONFIG` to the default config so private local topology does not affect generated docs.
 

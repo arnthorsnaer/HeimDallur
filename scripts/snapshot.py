@@ -11,8 +11,8 @@ Usage:
                     (e.g. "i" to expand the internet panel, "h" for history)
 
 Environment:
-    NETWATCH_MOCK=1            always set by this script
-    NETWATCH_MOCK_SCENARIO     path forwarded to MockProber (set via --scenario)
+    HEIMDALLUR_MOCK=1            always set by this script
+    HEIMDALLUR_MOCK_SCENARIO     path forwarded to MockProber (set via --scenario)
     HEIMDALLUR_CONFIG          forced to the tracked default config
 """
 from __future__ import annotations
@@ -102,8 +102,8 @@ def main() -> None:
     svg_path = output.with_suffix(".svg") if want_png else output
     keys     = [k for k in args.keys.split(",") if k]
 
-    os.environ["NETWATCH_MOCK"] = "1"
-    os.environ["NETWATCH_MOCK_SCENARIO"] = args.scenario
+    os.environ["HEIMDALLUR_MOCK"] = "1"
+    os.environ["HEIMDALLUR_MOCK_SCENARIO"] = args.scenario
     os.environ["HEIMDALLUR_CONFIG"] = str(_DEFAULT_CONFIG)
 
     asyncio.run(_capture(svg_path, keys))

@@ -74,8 +74,8 @@ class HeimdallurApp(App):
         self._config: NetworkConfig = load_config()
 
         # Allow snapshot/demo scripts to inject a recipient email without
-        # editing the network TOML — set NETWATCH_DEMO_EMAIL to any address.
-        if _demo_email := os.getenv("NETWATCH_DEMO_EMAIL"):
+        # editing the network TOML — set HEIMDALLUR_DEMO_EMAIL to any address.
+        if _demo_email := os.getenv("HEIMDALLUR_DEMO_EMAIL"):
             import dataclasses as _dc
             self._config = _dc.replace(
                 self._config,
@@ -86,22 +86,22 @@ class HeimdallurApp(App):
                 gmail_notification=_dc.replace(
                     self._config.gmail_notification,
                     enabled=True,
-                    sender_email=os.getenv("NETWATCH_DEMO_SENDER_EMAIL", "alerts@gmail.com"),
+                    sender_email=os.getenv("HEIMDALLUR_DEMO_SENDER_EMAIL", "alerts@gmail.com"),
                     app_password="demo",
                 ),
             )
         from pathlib import Path as _Path
-        _db = os.getenv("NETWATCH_SNAPSHOT_DB")
+        _db = os.getenv("HEIMDALLUR_SNAPSHOT_DB")
         self._store = None if viewer else (Store(_Path(_db)) if _db else Store())
         self._start_time = time.time()
         self._state_mtime: float | None = None
         self._viewer_warning: str | None = None
 
         if not viewer:
-            if os.getenv("NETWATCH_MOCK"):
+            if os.getenv("HEIMDALLUR_MOCK"):
                 from heimdallur.mock.network import MockProber
                 from pathlib import Path as _Path
-                _scenario = os.getenv("NETWATCH_MOCK_SCENARIO")
+                _scenario = os.getenv("HEIMDALLUR_MOCK_SCENARIO")
                 self._prober = MockProber(
                     self._config,
                     scenario_path=_Path(_scenario) if _scenario else None,

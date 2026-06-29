@@ -2,15 +2,15 @@
 
 # Development — live reload on Python/TOML changes via watchfiles
 dev:
-	NETWATCH_MOCK=1 uv run watchfiles "python -m heimdallur --mode tui" heimdallur/
+	HEIMDALLUR_MOCK=1 uv run watchfiles "python -m heimdallur --mode tui" heimdallur/
 
 # Simple one-shot run in mock mode (no reload)
 mock:
-	NETWATCH_MOCK=1 uv run python -m heimdallur --mode tui
+	HEIMDALLUR_MOCK=1 uv run python -m heimdallur --mode tui
 
 # Single-pass rich status render (no TUI)
 status-render:
-	NETWATCH_MOCK=1 uv run python -m heimdallur --mode status
+	HEIMDALLUR_MOCK=1 uv run python -m heimdallur --mode status
 
 # Serve the TUI in a browser via xterm.js (http://localhost:8080)
 web:
@@ -18,7 +18,7 @@ web:
 
 # Mock mode web server (no real pings)
 web-mock:
-	NETWATCH_MOCK=1 uv run python scripts/web_serve.py
+	HEIMDALLUR_MOCK=1 uv run python scripts/web_serve.py
 
 install:
 	uv sync

@@ -127,6 +127,23 @@ The footer shows whether notifications are active — `✉ you@example.com` when
 
 ![Heimdallur — email notifications configured](docs/snapshots/01b-status-email-configured.png)
 
+## Environment variables
+
+Public runtime environment variables use the `HEIMDALLUR_` prefix:
+
+| Variable | Purpose |
+|---|---|
+| `HEIMDALLUR_CONFIG` | Explicit network TOML path |
+| `HEIMDALLUR_STATE_FILE` | Shared live-state JSON path |
+| `HEIMDALLUR_STATUS_FILE` | Markdown status file path for web/status tooling |
+| `HEIMDALLUR_GMAIL_SENDER_EMAIL` | Gmail sender address for notifications |
+| `HEIMDALLUR_GMAIL_APP_PASSWORD` | Gmail app password for notifications |
+| `HEIMDALLUR_MOCK` | Use mock probes instead of real network probes |
+| `HEIMDALLUR_MOCK_SCENARIO` | Mock scenario TOML path |
+| `HEIMDALLUR_SNAPSHOT_DB` | SQLite DB path used by snapshot tooling |
+| `HEIMDALLUR_DEMO_EMAIL` | Demo recipient used by snapshot tooling |
+| `HEIMDALLUR_DEMO_SENDER_EMAIL` | Demo sender used by snapshot tooling |
+
 ## Deploying to a Raspberry Pi
 
 ```bash
