@@ -1,0 +1,26 @@
+[Unit]
+Description=Heimdallur network monitor
+Documentation=https://github.com/arnthorsnaer/HeimDallur
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/opt/heimdallur
+Environment=TERM=xterm-256color
+ExecStart=/home/pi/.local/bin/uv run --directory /opt/heimdallur python -m heimdallur --mode tui
+Restart=on-failure
+RestartSec=10
+
+# Render the TUI on the attached Linux console.
+StandardInput=tty
+StandardOutput=tty
+StandardError=journal
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+
+[Install]
+WantedBy=multi-user.target
