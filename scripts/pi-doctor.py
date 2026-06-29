@@ -199,16 +199,20 @@ class Doctor:
             self.add(Check("git", WARN, f"not a git checkout: {self.app_dir}"))
             return
         branch = _git(self.app_dir, "branch", "--show-current")
+        tag = _git(self.app_dir, "describe", "--tags", "--exact-match", "HEAD")
         commit = _git(self.app_dir, "log", "-1", "--oneline")
         dirty = _git(self.app_dir, "status", "--short")
-        status = OK if branch == "main" and not dirty else WARN
-        summary = f"{branch or '?'} · {commit or '?'}" + (" · dirty" if dirty else "")
+        release_tag = tag.startswith("v") if tag else False
+        checkout_ok = (branch == "main" or release_tag) and not dirty
+        status = OK if checkout_ok else WARN
+        ref = branch or tag or "?"
+        summary = f"{ref} · {commit or '?'}" + (" · dirty" if dirty else "")
         self.add(Check(
             "git checkout",
             status,
             summary,
-            why="Auto-update expects a clean checkout on the deployment branch." if status == WARN else "",
-            next_steps=["cd /opt/heimdallur && git status --short && git branch --show-current"] if status == WARN else [],
+            why="Auto-update expects a clean checkout on main or an exact release tag." if status == WARN else "",
+            next_steps=["cd /opt/heimdallur && git status --short && git branch --show-current && git describe --tags --exact-match HEAD"] if status == WARN else [],
         ))
         bad_git_files = _root_owned_git_files(self.app_dir)
         if bad_git_files:

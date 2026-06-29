@@ -8,6 +8,10 @@ isp_name            = "Demo ISP"
 [notifications]
 enabled = false
 
+# Auto-update channel: "off", "release" (tagged releases), or "edge" (origin/main).
+[updates]
+channel = "release"
+
 [network]
 ont_check_host              = "8.8.8.8"
 router_ip                   = "192.0.2.1"

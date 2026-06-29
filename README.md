@@ -229,7 +229,18 @@ The `terminus-font` package must be installed (`sudo apt install terminus-font`)
 
 ### Keeping the application up to date
 
-Heimdallur ships a systemd timer that checks the public GitHub repo for updates once an hour and applies them automatically. Install it once after the initial deploy:
+Heimdallur ships a systemd timer that checks the configured update channel once an hour and applies updates automatically. The default channel is tagged releases:
+
+```toml
+[updates]
+channel = "release"  # "off" | "release" | "edge"
+```
+
+Use `release` for normal appliance installs. Use `edge` only for lab units that
+should follow `origin/main`; use `off` to disable automatic updates without
+disabling the systemd timer.
+
+Install the timer once after the initial deploy:
 
 ```bash
 # On the Pi
@@ -239,10 +250,19 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now heimdallur-update.timer
 ```
 
-When a new commit lands on `main` the timer will:
-1. `git pull --ff-only`
-2. `uv sync --no-dev`
-3. `systemctl restart heimdallur`
+On the `release` channel, when a new `vX.Y.Z` release tag is published, the timer will:
+1. fetch tags from GitHub;
+2. choose the latest matching release tag;
+3. check out that tag in a clean detached checkout;
+4. verify `pyproject.toml` matches the tag version;
+5. run `uv sync --no-dev --frozen`;
+6. restart `heimdallur`.
+
+On the `edge` channel, the timer fetches `origin/main`, fast-forwards the local
+`main` branch, syncs dependencies, and restarts `heimdallur`.
+
+Set `TARGET_TAG=vX.Y.Z` in the update service environment to pin a specific
+release while using the `release` channel.
 
 All activity is logged to the systemd journal under the `heimdallur-update` identifier:
 
