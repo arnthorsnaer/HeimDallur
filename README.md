@@ -146,6 +146,34 @@ Public runtime environment variables use the `HEIMDALLUR_` prefix:
 
 ## Deploying to a Raspberry Pi
 
+A minimal appliance install is:
+
+```bash
+sudo git clone https://github.com/arnthorsnaer/HeimDallur /opt/heimdallur
+sudo chown -R "$USER:$(id -gn)" /opt/heimdallur
+cd /opt/heimdallur
+uv sync --no-dev
+mkdir -p ~/.config/heimdallur
+cp heimdallur/config/default-network.toml ~/.config/heimdallur/network.toml
+python scripts/validate-config.py ~/.config/heimdallur/network.toml
+```
+
+Install the main TUI service after editing `scripts/heimdallur.service` if your
+runtime user is not `pi` or `uv` is installed somewhere other than
+`/home/pi/.local/bin/uv`:
+
+```bash
+sudo cp /opt/heimdallur/scripts/heimdallur.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now heimdallur
+systemctl status heimdallur --no-pager -l
+```
+
+The bundled unit renders Heimdallur on `/dev/tty1`. For browser access, run
+`scripts/web_serve.py` separately or install a deployment-specific web service.
+
+The current Makefile also contains maintainer-oriented Pi helpers:
+
 ```bash
 make deploy   # rsyncs to pi@heimdallur.local and restarts the systemd service
 make logs     # tail the service log

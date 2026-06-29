@@ -74,8 +74,9 @@ All three must return version strings before proceeding.
 ## 1. Installing on the Device
 
 ```bash
-# Clone the repo
+# Clone the repo and make the runtime user own the checkout
 ssh pi@heimdallur.local "sudo git clone https://github.com/arnthorsnaer/HeimDallur /opt/heimdallur"
+ssh pi@heimdallur.local "sudo chown -R \$USER:\$(id -gn) /opt/heimdallur"
 
 # Install Python dependencies
 ssh pi@heimdallur.local "cd /opt/heimdallur && uv sync --no-dev"
@@ -90,9 +91,9 @@ ssh pi@heimdallur.local "systemctl is-active heimdallur"
 
 Expected output of the last command: `active`
 
-**Note:** The service file at `scripts/heimdallur.service` runs the TUI on the
-Pi's attached display. If the file does not exist yet, create it — see the
-Troubleshooting section for a minimal unit template.
+**Note:** The service file at `scripts/heimdallur.service` runs the TUI on
+`/dev/tty1` using the `pi` user by default. Edit `User=` and `ExecStart=` before
+installing it if the deployment uses a different account or `uv` path.
 
 ---
 
@@ -369,30 +370,15 @@ network access — verify the Pi can reach GitHub:
 ssh pi@heimdallur.local "curl -s https://api.github.com/repos/arnthorsnaer/HeimDallur/commits/main | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d[\"sha\"][:7], d[\"commit\"][\"message\"].splitlines()[0])'"
 ```
 
-### Minimal systemd service unit template
+### Main systemd service
 
-If `scripts/heimdallur.service` is missing from an older install, create it:
+The main service unit is tracked at `scripts/heimdallur.service`. It renders the
+TUI on `/dev/tty1` and assumes the runtime user is `pi`. For non-default
+installations, edit `User=` and the `/home/pi/.local/bin/uv` path before copying
+it to `/etc/systemd/system/heimdallur.service`.
 
-```ini
-[Unit]
-Description=Heimdallur network monitor
-After=network-online.target
-Wants=network-online.target
+After changing or installing the unit:
 
-[Service]
-Type=simple
-User=pi
-WorkingDirectory=/opt/heimdallur
-ExecStart=/home/pi/.local/bin/uv run python -m heimdallur --mode tui
-Restart=on-failure
-RestartSec=10
-Environment=TERM=xterm-256color
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Write to `/etc/systemd/system/heimdallur.service`, then:
 ```bash
 ssh pi@heimdallur.local "sudo systemctl daemon-reload && sudo systemctl enable --now heimdallur"
 ```
