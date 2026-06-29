@@ -12,7 +12,13 @@ BRANCH="${BRANCH:-main}"
 TAG_PATTERN="${TAG_PATTERN:-v[0-9]*}"
 TARGET_TAG="${TARGET_TAG:-}"
 UPDATE_CONFIG="${UPDATE_CONFIG:-${HEIMDALLUR_CONFIG:-}}"
+UPDATE_HEALTH_CHECK="${UPDATE_HEALTH_CHECK:-1}"
+HEALTH_CHECK_DELAY="${HEALTH_CHECK_DELAY:-5}"
+HEALTH_CHECK_CMD="${HEALTH_CHECK_CMD:-}"
+UPDATE_FORCE="${UPDATE_FORCE:-0}"
 LOG_TAG="heimdallur-update"
+PREVIOUS_COMMIT=""
+PREVIOUS_BRANCH=""
 
 log() { logger -t "$LOG_TAG" "$*"; echo "$(date -Iseconds) $*"; }
 die() { log "ERROR: $*"; exit 1; }
@@ -68,12 +74,77 @@ require_clean_checkout() {
     fi
 }
 
-sync_and_restart() {
+capture_previous_checkout() {
+    PREVIOUS_COMMIT="$(git rev-parse HEAD)"
+    PREVIOUS_BRANCH="$(git branch --show-current)"
+}
+
+restore_previous_checkout() {
+    [[ -n "$PREVIOUS_COMMIT" ]] || die "No previous commit captured; cannot roll back."
+
+    log "Rolling back to ${PREVIOUS_BRANCH:-detached} at $PREVIOUS_COMMIT..."
+    if [[ -n "$PREVIOUS_BRANCH" ]]; then
+        git checkout "$PREVIOUS_BRANCH" --quiet
+        git reset --hard "$PREVIOUS_COMMIT" --quiet
+    else
+        git checkout --detach "$PREVIOUS_COMMIT" --quiet
+    fi
+}
+
+run_health_check() {
+    local phase="${1:-Post-update}"
+    [[ "$UPDATE_HEALTH_CHECK" == "1" ]] || { log "$phase health check disabled."; return 0; }
+
+    log "Waiting ${HEALTH_CHECK_DELAY}s before $phase health check..."
+    sleep "$HEALTH_CHECK_DELAY"
+
+    if [[ -n "$HEALTH_CHECK_CMD" ]]; then
+        log "Running $phase custom health check: $HEALTH_CHECK_CMD"
+        eval "$HEALTH_CHECK_CMD"
+    else
+        log "Running $phase default health check: scripts/pi-doctor.py"
+        uv run python scripts/pi-doctor.py --app-dir "$APP_DIR"
+    fi
+}
+
+require_healthy_baseline() {
+    if [[ "$UPDATE_FORCE" == "1" ]]; then
+        log "Pre-update health check bypassed by UPDATE_FORCE=1."
+        return 0
+    fi
+
+    if run_health_check "pre-update"; then
+        log "Pre-update health check passed."
+        return 0
+    fi
+
+    die "Pre-update health check failed; refusing to update. Set UPDATE_FORCE=1 to override."
+}
+
+sync_restart_and_verify() {
     uv sync --no-dev --frozen --quiet
     log "Dependencies synced."
 
     systemctl restart "$SERVICE"
-    log "Service restarted. Update complete."
+    log "Service restarted."
+
+    if run_health_check "post-update"; then
+        log "Post-update health check passed. Update complete."
+        return 0
+    fi
+
+    log "Post-update health check failed."
+    restore_previous_checkout
+    uv sync --no-dev --frozen --quiet
+    log "Rollback dependencies synced."
+    systemctl restart "$SERVICE"
+    log "Rollback service restarted."
+
+    if run_health_check "rollback"; then
+        die "Update rolled back to $PREVIOUS_COMMIT after failed health check."
+    fi
+
+    die "Rollback to $PREVIOUS_COMMIT completed, but health check is still failing. Manual intervention required."
 }
 
 update_release() {
@@ -99,6 +170,8 @@ update_release() {
     fi
 
     log "Update available: ${current_tag:-$local_commit} -> $TARGET_TAG ($target_commit)"
+    require_healthy_baseline
+    capture_previous_checkout
 
     git checkout --detach "$TARGET_TAG" --quiet
     log "Checked out $TARGET_TAG."
@@ -109,7 +182,7 @@ update_release() {
     fi
     log "Verified release version $project_version."
 
-    sync_and_restart
+    sync_restart_and_verify
 }
 
 update_edge() {
@@ -126,6 +199,9 @@ update_edge() {
     fi
 
     log "Edge update available: $local_commit -> $target_commit"
+    require_healthy_baseline
+    capture_previous_checkout
+
     if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
         git checkout "$BRANCH" --quiet
         git merge --ff-only "$REMOTE/$BRANCH" --quiet
@@ -134,7 +210,7 @@ update_edge() {
     fi
     log "Checked out $REMOTE/$BRANCH."
 
-    sync_and_restart
+    sync_restart_and_verify
 }
 
 cd "$APP_DIR"

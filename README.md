@@ -261,8 +261,17 @@ On the `release` channel, when a new `vX.Y.Z` release tag is published, the time
 On the `edge` channel, the timer fetches `origin/main`, fast-forwards the local
 `main` branch, syncs dependencies, and restarts `heimdallur`.
 
+Before changing anything, the script runs `scripts/pi-doctor.py` as a pre-update
+health check. If the current deployment is already unhealthy, the update aborts
+without changing the checkout unless `UPDATE_FORCE=1` is set. After any update,
+the script runs the health check again. If the post-update check fails, it rolls
+the checkout back to the previous commit, syncs dependencies again, restarts the
+service, and reports failure for operator follow-up.
+
 Set `TARGET_TAG=vX.Y.Z` in the update service environment to pin a specific
-release while using the `release` channel.
+release while using the `release` channel. Set `HEALTH_CHECK_CMD` to override
+the default doctor check, `UPDATE_HEALTH_CHECK=0` to disable health checks, or
+`UPDATE_FORCE=1` to bypass a failing pre-update check.
 
 All activity is logged to the systemd journal under the `heimdallur-update` identifier:
 

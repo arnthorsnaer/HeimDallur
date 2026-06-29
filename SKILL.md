@@ -126,9 +126,12 @@ ssh pi@heimdallur.local "systemctl list-timers heimdallur-update.timer"
 2. Exit immediately for `off`
 3. For `release`, fetch tags, select the latest `vX.Y.Z` release tag or `TARGET_TAG`, check out that tag, and verify `pyproject.toml`
 4. For `edge`, fetch `origin/main` and fast-forward the local `main` branch
-5. Run `uv sync --no-dev --frozen`
-6. Restart `heimdallur`
-7. Log everything via `logger -t heimdallur-update`
+5. Run a pre-update health check with `scripts/pi-doctor.py` and abort if it fails, unless `UPDATE_FORCE=1`
+6. Run `uv sync --no-dev --frozen`
+7. Restart `heimdallur`
+8. Run a post-update health check with `scripts/pi-doctor.py`
+9. Roll back to the previous commit and restart if the post-update health check fails
+10. Log everything via `logger -t heimdallur-update`
 
 **Trigger an immediate update:**
 ```bash

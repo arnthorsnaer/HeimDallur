@@ -11,6 +11,9 @@ Environment=SERVICE=heimdallur
 Environment=REMOTE=origin
 Environment=TAG_PATTERN=v[0-9]*
 Environment=UPDATE_CONFIG=/home/pi/.config/heimdallur/network.toml
+Environment=UPDATE_HEALTH_CHECK=1
+Environment=HEALTH_CHECK_DELAY=5
+Environment=UPDATE_FORCE=0
 ExecStart=/opt/heimdallur/scripts/auto-update.sh
 StandardOutput=journal
 StandardError=journal
