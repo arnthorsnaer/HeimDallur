@@ -395,11 +395,13 @@ ssh pi@heimdallur.local "cd /opt/heimdallur && sudo git fetch origin main && sud
 
 | Task | Command |
 |------|---------|
+| Deployment status | `make pi-status PI_USER=pi PI_HOST=heimdallur.local` |
+| Trigger updater | `make pi-update PI_USER=pi PI_HOST=heimdallur.local` |
+| Sync config only | `make pi-sync-config PI_USER=pi PI_HOST=heimdallur.local PI_CONFIG_SRC=~/.config/heimdallur/network.toml` |
+| Web status | `make pi-web-status PI_USER=pi PI_HOST=heimdallur.local` |
 | Read network status | `ssh pi@heimdallur.local "cat ~/.local/share/heimdallur/status.md"` |
 | Force fresh probe | `ssh pi@heimdallur.local "cd /opt/heimdallur && uv run python -m heimdallur --mode report"` |
 | Dry-run config apply | `ssh pi@heimdallur.local "cd /opt/heimdallur && python scripts/apply-config.py /tmp/devices-new.toml --dry-run"` |
 | Apply config + restart | `ssh pi@heimdallur.local "cd /opt/heimdallur && python scripts/apply-config.py /tmp/devices-new.toml --yes --restart-command 'sudo systemctl restart heimdallur' --verify"` |
-| Trigger immediate update | `ssh pi@heimdallur.local "sudo systemctl start heimdallur-update"` |
-| Check running version | `ssh pi@heimdallur.local "cd /opt/heimdallur && git log -1 --oneline"` |
 | View service logs | `ssh pi@heimdallur.local "journalctl -u heimdallur -n 50 --no-pager"` |
 | Restart service | `ssh pi@heimdallur.local "sudo systemctl restart heimdallur"` |
