@@ -172,11 +172,24 @@ systemctl status heimdallur --no-pager -l
 The bundled unit renders Heimdallur on `/dev/tty1`. For browser access, run
 `scripts/web_serve.py` separately or install a deployment-specific web service.
 
-The current Makefile also contains maintainer-oriented Pi helpers:
+The current Makefile also contains maintainer-oriented Pi helpers. Defaults are
+safe to override from the command line or environment:
 
 ```bash
-make deploy   # rsyncs to pi@heimdallur.local and restarts the systemd service
-make logs     # tail the service log
+make pi-status      # show commit, version, doctor output
+make pi-update      # trigger heimdallur-update.service now
+make pi-sync-config # sync one config file, then restart configured services
+make pi-web-status  # show web service/listener status
+make deploy         # rsync code, sync deps, then restart configured services
+make logs           # tail the main service log
+```
+
+Common overrides:
+
+```bash
+make pi-status PI_USER=pi PI_HOST=heimdallur.local PI_APP_DIR=/opt/heimdallur
+make pi-sync-config PI_CONFIG_SRC=~/.config/heimdallur/network.toml
+make deploy PI_RESTART_DISPLAY='sudo systemctl restart heimdallur' PI_RESTART_WEB=
 ```
 
 ### Console font size
